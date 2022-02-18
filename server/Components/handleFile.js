@@ -4,14 +4,23 @@ const fs = require('fs');
 const ytdl = require('ytdl-core');
 // const youtube_stream = require("youtube-audio-stream");
 
+const songSaveFolder = "../Songs";
+
+if (!fs.existsSync(path.join(__dirname, songSaveFolder))) {
+  fs.mkdir(path.join(__dirname, songSaveFolder), (err) => {
+    if (err) { return console.error(err); }
+    console.log('Songs directory created successfully!');
+  });
+};
+
 function saveLocation(songs, songId, container) {
   if (!songs[songId]) {
-    return path.join(__dirname, `../Songs/${songId}.${container}`);
+    return path.join(__dirname, songSaveFolder, `/${songId}.${container}`);
   }
   if (Array.isArray(songs[songId])) {
-    return path.join(__dirname, `../Songs/${songs[songId][0].file}`);
+    return path.join(__dirname, songSaveFolder, `/${songs[songId][0].file}`);
   }
-  return path.join(__dirname, `../Songs/${songs[songId].file}`);
+  return path.join(__dirname, songSaveFolder,`/${songs[songId].file}`);
 }
 
 function checkFileExists(filepath) {
