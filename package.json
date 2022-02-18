@@ -1,0 +1,23 @@
+{
+  "name": "Kimchord",
+  "author": "",
+  "version": "1.0.0",
+  "description": "A simple Discord music bot",
+  "main": "index.js",
+  "scripts": {
+    "live": "node .",
+    "server": "node ./server/index.js"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/voice": "^0.6.0",
+    "discord.js": "^13.1.0",
+    "express": "^4.17.1",
+    "get-video-duration": "^4.0.0",
+    "node-fetch": "^3.2.0",
+    "youtube-audio-stream": "^0.3.46",
+    "ytdl-core": "^4.10.1",
+    "ytsr": "^3.6.0"
+  }
+}
