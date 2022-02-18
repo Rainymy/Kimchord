@@ -39,7 +39,7 @@ function deleteFile(filePath) {
 }
 
 function readdirectory(dirPath) {
-  return fs.readdirSync(dirPath);
+  return fs.readdirSync(path.join(__dirname, dirPath));
 }
 
 function makeReadStream(filePath) {

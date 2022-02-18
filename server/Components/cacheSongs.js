@@ -3,7 +3,7 @@ const { readdirectory } = require('./handleFile.js');
 
 function parseLocalFolder() {
   const accum = {};
-  const localFiles = readdirectory("./server/Songs");
+  const localFiles = readdirectory("../Songs");
   for (let file of localFiles) {
     const extension = path.extname(file); 
     const basename = path.basename(file, extension);

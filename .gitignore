@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Custom ignore
-server/Songs/*
+server/Songs/
 config.json
 
 # Runtime data
