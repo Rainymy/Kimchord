@@ -1,23 +1,15 @@
+"use strict";
 const ytsr = require('ytsr');
+const ytpl = require('ytpl');
 const ytdl = require('ytdl-core');
 const { getVideoDurationInSeconds } = require("get-video-duration");
 const fetch = (...args) => import('node-fetch')
 .then(({default: fetch}) => fetch(...args));
 
 function YouTube() {
-  function isValidURL(value) {
-    let expression = 
-    /[-a-zA-Z0-9@:%_\+.~#?&//=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&//=]*)?/gi;
-    let regexp = new RegExp(expression);
-    return regexp.test(value);
-  }
-  
-  function isYoutubeLink(url) {
-    const youtubeHost = /^(https?\:\/\/)?(www\.)?(\.youtube\.com|youtu\.?be).+$/gm;
-    let temp = new URL(url);
-    let isYoutube = youtubeHost.test(temp.hostname);
-    
-    return !isYoutube;
+  function removeExtraImgQuery(url) {
+    const parseURL = new URL(url);
+    return parseURL.origin + parseURL.pathname;
   }
   
   async function getBasicInfo(videoUrl) {
@@ -28,7 +20,12 @@ function YouTube() {
     
     // if try fails then video is not available.
     try { data = await res.json(); } 
-    catch (e) { data = { title: await clone.text() } }
+    catch (e) {
+      const textString = await clone.text();
+      if (textString === "Not Found") { return; }
+      if (textString === "Bad Request") { return; }
+      data = { title: textString }
+    }
     
     return data;
   }
@@ -58,29 +55,33 @@ function YouTube() {
     let format = ytdl.chooseFormat(info.formats, { filter: 'audioonly' });
     
     const seconds = format.approxDurationMs / 1000;
-    return [ seconds, format.container ];
+    return [ seconds, format ];
   }
   
   this.getYoutubeData = async function (input) {
     let video;
     try {
       video = await this.getVideo(input);
+      if (!video) {
+        video = await this.getPlaylist(input);
+      }
       // console.log("video", video);
     } catch (e) {
       try {
         let videos = await this.searchVideos(input);
         video = await this.getVideoByID(videos[0]?.id);
-        // console.log(video);
+        console.log(video);
       } catch (err) {
         console.error(err);
       }
     }
+    
     return video ?? [];
   }
   
   this.getVideo = async function (content) {
-    let url = new URLSearchParams(new URL(content).search);
-    let videoId = url.get("v");
+    const url = new URLSearchParams(new URL(content).search);
+    const videoId = url.get("v");
     
     return await parseYTDLBasicInfo(videoId);
   }
@@ -99,8 +100,39 @@ function YouTube() {
     return searchResults.items;
   }
   
-  this.getPlaylist = function () {
-    return;
+  this.getPlaylist = async function (content) {
+    const parseSearchURL = new URL(content);
+    
+    if (parseSearchURL.pathname !== "/playlist") { return; }
+    
+    const url = new URLSearchParams(parseSearchURL.search);
+    const playListId = url.get("list");
+    
+    const response = await ytpl(playListId);
+    
+    for (let item of response.items) {
+      delete item.index;
+      delete item.shortUrl;
+      delete item.thumbnails;
+      delete item.isLive;
+      delete item.isPlayable;
+      
+      item.thumbnail = removeExtraImgQuery(item.bestThumbnail.url)
+      delete item.bestThumbnail;
+      
+      item.duration = item.durationSec;
+      delete item.durationSec;
+    }
+    
+    return {
+      type: "playlist",
+      title: response.title,
+      thumbnail: response.bestThumbnail.url,
+      itemCount: response.estimatedItemCount,
+      views: response.views,
+      playlistURL: response.url,
+      playlist: response.items
+    }
   }
 }
 

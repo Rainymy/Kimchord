@@ -1,44 +1,26 @@
 const request = require('../Components/request.js');
+const { parseSearchString } = require('../Components/parseSearchString.js');
 
 async function deleteSong(message, basicInfo, searchString, queue) {
   const baseUrl = basicInfo.serverURL;
   
-  let options = {
-    username: message.author.username,
-    userId: message.author.id,
-    inputQuery: searchString
+  const [param,, failed] = await parseSearchString(message, baseUrl, searchString);
+  if (failed) {
+    return message.channel.send("🆘 I could not obtain any search results. 🆘");
   }
   
-  let param = {
-    method: "POST",
-    headers: {
-      "Content-type": "application/json"
-    },
-    body: JSON.stringify(options)
+  const data = await request(`${baseUrl}/remove`, param);
+  
+  if (!data.error) {
+    return message.channel.send(data.comment);
   }
   
-  let video = await request(`${baseUrl}/parseSearchString`, param);
-  if (!video) {
-    return message.channel.send("🆘 I could not obtain any search results.");
+  if (data.comment.errno === (-4058)) {
+    return message.channel.send("Doesn't exist");
   }
   
-  options.videoData = video;
-  param.body = JSON.stringify(options);
-  
-  let data = await request(`${baseUrl}/remove`, param);
-  
-  if (data.error) {
-    if (data.comment.errno === (-4058)) {
-      message.channel.send("Doesn't exist");
-      return;
-    }
-    message.channel.send(`ERROR CODE: ${data.comment.errno.toString()}`);
-    return;
-  }
-  
-  message.channel.send(data.comment);
-  
-  return
+  console.log(data);
+  return message.channel.send(`ERROR CODE: ${data.comment.errno.toString()}`);
 }
 
 module.exports = { name: "Delete", aliases: "delete", main: deleteSong }

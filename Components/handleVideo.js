@@ -3,7 +3,7 @@ const { addEventListener } = require('./eventListener.js');
 const { player } = require('../Components/player.js');
 
 function handleVideo(args) {
-  const { video, voiceChannel, audioPlayer, queue, stream, guild } = args;
+  const { video, voiceChannel, audioPlayer, queue, guild } = args;
   const serverQueue = queue.get(guild.channel.guild.id);
   
   let song = {
@@ -18,7 +18,7 @@ function handleVideo(args) {
       start: null,
       pause: null
     },
-    stream: stream
+    stream: video.stream
   }
   
   if (serverQueue) {

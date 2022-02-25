@@ -2,7 +2,6 @@
 const path = require("path");
 const fs = require('fs');
 const ytdl = require('ytdl-core');
-// const youtube_stream = require("youtube-audio-stream");
 
 const songSaveFolder = "../Songs";
 
@@ -17,10 +16,7 @@ function saveLocation(songs, songId, container) {
   if (!songs[songId]) {
     return path.join(__dirname, songSaveFolder, `/${songId}.${container}`);
   }
-  if (Array.isArray(songs[songId])) {
-    return path.join(__dirname, songSaveFolder, `/${songs[songId][0].file}`);
-  }
-  return path.join(__dirname, songSaveFolder,`/${songs[songId].file}`);
+  return path.join(__dirname, songSaveFolder, `/${songs[songId][0].file}`);
 }
 
 function checkFileExists(filepath) {
@@ -30,11 +26,8 @@ function checkFileExists(filepath) {
 }
 
 function deleteFile(filePath) {
-  return new Promise(function(resolve, reject) {
-    fs.unlink( filePath, (err) => {
-      if (err) { return resolve(err); }
-      return resolve();
-    });
+  return new Promise((resolve, reject) => {
+    fs.unlink(filePath, (err) => resolve(err));
   });
 }
 
@@ -81,12 +74,12 @@ function makeWriteStream(filePath) {
 async function makeYTDLStream(url, cb) {
   const streamURL = await ytdl(url, {
     filter: "audioonly",
-    highWaterMark: 1024 * 1024 * 4
+    highWaterMark: 1024 * 1024 * 16
   });
   
   streamURL.on("error", (error) => {
     console.log("error from YTDL", error);
-    cb({ success: false, error: error });
+    cb && cb({ error: true, comment: error });
   });
   
   streamURL.on("data", (data) => {
@@ -94,8 +87,8 @@ async function makeYTDLStream(url, cb) {
   });
   
   streamURL.on("finish", () => {
-    console.log("FINISHED DOWNLOAD");
-    cb({ success: true, error: false });
+    console.log("FINISHED Reading Audio from YTDL");
+    cb && cb({ error: false, comment: null });
   });
   
   return streamURL;
