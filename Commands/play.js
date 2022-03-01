@@ -18,9 +18,7 @@ async function main(message, basicInfo, searchString, queue) {
   }
   
   /*---------------------- Check for permissions --------------------*/
-  let neededPermissions = checkPermissions(
-    voiceChannel, message, PRESETS.music
-  );
+  const neededPermissions = checkPermissions(voiceChannel, message, PRESETS.music);
   
   for (let [ index, neededPermission ] of neededPermissions.entries()) {
     message.channel.send(
@@ -35,21 +33,20 @@ async function main(message, basicInfo, searchString, queue) {
   const [param,, failed] = await parseSearchString(message, baseUrl, searchString);
   
   if (failed) {
-    message.channel.send('Video unavailable OR');
-    return message.channel.send('🆘 I could not obtain any search results. 🆘');
+    return message.channel.send(
+      "🆘 Video unavailable OR I could not obtain any search results. 🆘"
+    );
   }
   
   /*--------------------- Get streamable response -------------------*/
   let sentMsg;
   
   const requested = await request(`${baseUrl}/request`, param);
-  const requested_1 = await request(`${baseUrl}/request`, param);
-  
-  // console.log(requested?.playlist);
+  const requestClone = JSON.parse(JSON.stringify(requested));
   
   const isPlaylist = requested.type === "playlist";
-  const playListDownload = requested?.playlist?.every(current => current.isFile);
   
+  const playListDownload = requested?.playlist?.every(current => current.isFile);
   const isList = requested.every && requested.every(current => !current.isFile);
   
   const songs = requested.type === "playlist" ? requested.playlist : requested;
@@ -58,6 +55,7 @@ async function main(message, basicInfo, searchString, queue) {
     sentMsg = await message.channel.send("Downloading.... [0s -> 5s]");
     
     const paramCopy = Object.assign({}, param);
+    const skippedSongs = [];
     
     for (let i = 0; i < songs.length; i++) {
       if (songs[i].isFile) { continue; }
@@ -67,20 +65,24 @@ async function main(message, basicInfo, searchString, queue) {
       
       const { error, comment } = await request(`${baseUrl}/download`, paramCopy);
       
-      if (error) {
-        message.channel.send(
-          `\`\`\`Skipping Download: [${songs[i].title}] : ${comment}\`\`\``
-        );
+      if (error && isPlaylist) {
+        skippedSongs.push(`Skipping Download: [${songs[i].title}] : ${comment}`);
         songs.splice(i, 1);
-        requested_1.playlist.splice(i, 1);
         i--;
       }
+      if (error && !isPlaylist) {
+        return sentMsg.edit(`Download Failed: [${songs[i].title}] : ${comment}`);
+      }
     }
-  
+    
+    if (skippedSongs.length) {
+      message.channel.send(`\`\`\`js\n${skippedSongs.join("\n")}\`\`\``);
+    }
+    
     sentMsg.edit("💚 Download finish 💚");
   }
   
-  const songLoading = await message.channel.send("Song Loading... Wait a few");
+  const songLoading = await message.channel.send("Song Loading... Wait a moment");
   
   for (let i = 0; i < songs.length; i++) {
     const temp = JSON.parse(param.body);
@@ -91,25 +93,27 @@ async function main(message, basicInfo, searchString, queue) {
     
     songs[i].stream = streams.body;
     
-    if (!streams.ok) {
-      return songLoading.edit(`Service is not available or ERROR! : Index ${i}`);
+    if (streams.error) {
+      const sentingTexts = [
+        `Service is not available or ERROR! : Index ${i}`,
+        streams.comment
+      ];
+      return songLoading.edit(sentingTexts.join("\n"));
     }
   }
   
   songLoading.delete();
   
-  const songMetadata = await message.channel.send("Metadata... Wait a few");
-  
-  const temp_1 = JSON.parse(param.body);
-  temp_1.videoData = requested_1;
-  param.body = JSON.stringify(temp_1);
-  
-  const durations = await request(`${baseUrl}/getDuration`, param);
-  
-  songMetadata.delete();
-  
-  for (let i = 0; i < requested.length; i++) {
-    requested[i].duration = durations[i];
+  if (!isPlaylist) {
+    const temp_1 = JSON.parse(param.body);
+    temp_1.videoData = requestClone;
+    param.body = JSON.stringify(temp_1);
+    
+    const durations = await request(`${baseUrl}/getDuration`, param);
+    
+    for (let i = 0; i < requested.length; i++) {
+      requested[i].duration = durations[i];
+    }
   }
   
   /*-----------------------------------------------------------------*/
@@ -130,7 +134,7 @@ async function main(message, basicInfo, searchString, queue) {
     
     const [ addedSong, songQueue ] = handleVideo(args);
     
-    if (requested.type !== "playlist" && addedSong) {
+    if (!isPlaylist && addedSong) {
       addedSong.description = "✅ has been added to the queue! ✅";
       let [container, embed] = formatToEmbed(addedSong, message, false, songQueue);
       
@@ -138,7 +142,7 @@ async function main(message, basicInfo, searchString, queue) {
     }
   }
   
-  if (requested.type === "playlist") {
+  if (isPlaylist) {
     const addPlayList = {
       title: `Playlist: ${requested.title}`,
       description: "🔀 has been added to the queue 🔀",

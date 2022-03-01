@@ -1,13 +1,14 @@
-const { readdirSync } = require('fs');
+const { readdirSync, existsSync, mkdir } = require('fs');
 const path = require('path');
 
 function commands() {
-  let commandPath = path.join(__dirname, "../Commands");
+  const commandPath = path.join(__dirname, "../Commands");
   const files = readdirSync(commandPath);
   
-  let commmand = {};
-  let status = {}
+  const commmand = {};
+  const status = {}
   let lastIndex = -1;
+  let commandFunction;
   
   for (let [ index, file ] of files.entries()) {
     if (path.extname(file) !== ".js") {
@@ -15,7 +16,7 @@ function commands() {
       continue;
     }
     
-    let commandFunction = require(path.join(commandPath, file));
+    commandFunction = require(path.join(commandPath, file));
     
     if (Array.isArray(commandFunction.aliases)) {
       for (let alias of commandFunction.aliases) {
@@ -38,4 +39,24 @@ function commands() {
   return [ commmand, status ];
 }
 
-module.exports = { commands }
+function Start() {
+  this.commands = commands;
+  this.essentialFolders = [ "../playlistFolder" ];
+  this.init = () => {
+    let pathToFolder;
+    for (let folder of this.essentialFolders) {
+      pathToFolder = path.join(__dirname, folder);
+      
+      if (!existsSync(pathToFolder)) {
+        mkdir(pathToFolder, (err) => {
+          if (err) { return console.error(err); }
+          console.log(pathToFolder, 'directory created successfully!');
+        });
+      };
+    }
+    
+    return this;
+  }
+}
+
+module.exports = new Start();

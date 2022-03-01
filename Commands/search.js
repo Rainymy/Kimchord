@@ -3,16 +3,15 @@ const { parseSearchString } = require('../Components/parseSearchString.js');
 
 async function searchVideo(message, basicInfo, searchString, queue) {
   const baseUrl = basicInfo.serverURL;
-  const [ , video, ] = await parseSearchString(message, baseUrl, searchString);
-  if (!video) {
+  const [, video, failed] = await parseSearchString(message, baseUrl, searchString);
+  if (failed) {
     return message.channel.send("🆘 I could not obtain any search results. 🆘")
   }
   
-  const [ container, embed ] = formatToEmbed(video, message, true);
+  const [ container, embed ] = formatToEmbed(video[0], message, true);
   embed.description = "🔎 Found video 🔍";
   
-  message.channel.send(container);
-  return;
+  return message.channel.send(container);
 }
 
 module.exports = {

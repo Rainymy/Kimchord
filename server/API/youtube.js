@@ -1,10 +1,9 @@
 "use strict";
+const https = require('https');
 const ytsr = require('ytsr');
 const ytpl = require('ytpl');
 const ytdl = require('ytdl-core');
 const { getVideoDurationInSeconds } = require("get-video-duration");
-const fetch = (...args) => import('node-fetch')
-.then(({default: fetch}) => fetch(...args));
 
 function YouTube() {
   function removeExtraImgQuery(url) {
@@ -12,22 +11,32 @@ function YouTube() {
     return parseURL.origin + parseURL.pathname;
   }
   
+  function tryParseToJsonElseToText(data) {
+    try { return JSON.parse(data); } 
+    catch (e) { return data; }
+  }
+  
   async function getBasicInfo(videoUrl) {
-    const baseURL = `https://www.youtube.com/oembed?url=${videoUrl}&format=json`;
-    const res = await fetch(baseURL);
-    const clone = res.clone();
-    let data;
-    
-    // if try fails then video is not available.
-    try { data = await res.json(); } 
-    catch (e) {
-      const textString = await clone.text();
-      if (textString === "Not Found") { return; }
-      if (textString === "Bad Request") { return; }
-      data = { title: textString }
-    }
-    
-    return data;
+    return new Promise(function(resolve, reject) {
+      const baseUrl = `https://www.youtube.com/oembed?url=${videoUrl}&format=json`;
+      const nativeHttps = https.get(baseUrl, (res) => {
+        let data = "";
+        
+        res.on("data", (chunk) => { return data += chunk; });
+        res.on("end", () => {
+          const info = tryParseToJsonElseToText(data);
+          const response = typeof info === "string" ? { title: info } : info;
+          
+          if (typeof info !== "string") { return resolve(response); }
+          if (info === "Not Found") { return resolve(); }
+          if (info === "Bad Request") { return resolve(); }
+          
+          return resolve({ title: info });
+        });
+      });
+      
+      nativeHttps.on("error", (err) => reject(err));
+    });
   }
   
   async function parseYTDLBasicInfo(videoId) {
@@ -62,18 +71,15 @@ function YouTube() {
     let video;
     try {
       video = await this.getVideo(input);
-      if (!video) {
-        video = await this.getPlaylist(input);
-      }
+      if (!video) { video = await this.getPlaylist(input); }
       // console.log("video", video);
     } catch (e) {
       try {
         let videos = await this.searchVideos(input);
         video = await this.getVideoByID(videos[0]?.id);
         console.log(video);
-      } catch (err) {
-        console.error(err);
-      }
+      } 
+      catch (err) { console.error(err); }
     }
     
     return video ?? [];

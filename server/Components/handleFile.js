@@ -3,10 +3,8 @@ const path = require("path");
 const fs = require('fs');
 const ytdl = require('ytdl-core');
 
-const songSaveFolder = "../Songs";
-
-if (!fs.existsSync(path.join(__dirname, songSaveFolder))) {
-  fs.mkdir(path.join(__dirname, songSaveFolder), (err) => {
+if (!fs.existsSync(path.join(__dirname, "../Songs"))) {
+  fs.mkdir(path.join(__dirname, "../Songs"), (err) => {
     if (err) { return console.error(err); }
     console.log('Songs directory created successfully!');
   });
@@ -14,9 +12,9 @@ if (!fs.existsSync(path.join(__dirname, songSaveFolder))) {
 
 function saveLocation(songs, songId, container) {
   if (!songs[songId]) {
-    return path.join(__dirname, songSaveFolder, `/${songId}.${container}`);
+    return path.join(__dirname, `../Songs/${songId}.${container}`);
   }
-  return path.join(__dirname, songSaveFolder, `/${songs[songId][0].file}`);
+  return path.join(__dirname, `../Songs/${songs[songId][0].file}`);
 }
 
 function checkFileExists(filepath) {

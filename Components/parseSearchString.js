@@ -22,6 +22,8 @@ async function parseSearchString(message, baseUrl, searchString) {
   }
   
   const response = await request(`${baseUrl}/parseSearchString`, param);
+  if (response.error) { return [ null, null, true ]; }
+  
   let video;
   
   if (response.type === "playlist" || response.length) {

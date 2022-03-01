@@ -1,39 +1,8 @@
-function createEmbed(songs, start, perPages=8) {
-  const page = songs.slice(start, start + perPages);
-  
-  const embed = {
-    title: "Song Queue",
-    color: 0x0099ff,
-    description: "Current Song: " + songs[0].title,
-    thumbnail: { url: songs[0].thumbnail },
-    fields: []
-  }
-  
-  for (let [ index, item ] of page.entries()) {
-    if (index + start === 0) { continue; }
-    embed.fields.push({
-      name: "\u200B",
-      value: `${index + start} - ${item.title}`,
-    });
-  }
-  
-  return embed;
-}
-
-function createButton(label, id, disabled, emoji) {
-  return {
-    type: "BUTTON",
-    label: label,
-    custom_id: id,
-    style: "SECONDARY",
-    disabled: disabled,
-    emoji: {
-      animated: false,
-      id: null,
-      name: emoji
-    }
-  }
-}
+const {
+  createSongListEmbed,
+  createButton,
+  createPageIndicator
+} = require('../Components/discordComponents.js');
 
 async function queue(message, basicInfo, arg, queue) {
   let serverQueue = queue.get(message.guild.id);
@@ -43,47 +12,62 @@ async function queue(message, basicInfo, arg, queue) {
   const backButton = createButton("Back", "back_button", false, "◀️");
   const nextButton = createButton("Next", "next_button", false, "▶️");
   
-  let currentIndex = 0;
-  let itemsPerPage = 5;
+  let index = 0;
+  const itemsPerPage = 5;
+  const songQueue = serverQueue.songs;
   
-  const embed = createEmbed(serverQueue.songs, currentIndex, itemsPerPage);
+  const embed = createSongListEmbed(songQueue, index, itemsPerPage);
   
-  if (serverQueue.songs.length < itemsPerPage) {
+  if (songQueue.length <= itemsPerPage) {
     return message.channel.send({ embeds: [ embed ] });
   }
   
   const embedMessage = await message.channel.send({
-    embeds: [embed], components: [
+    embeds: [ embed ], components: [
       {
         type: "ACTION_ROW",
-        components: [ nextButton ]
+        components: [
+          nextButton,
+          ...createPageIndicator(songQueue.length, index, itemsPerPage)
+        ]
       }
     ]
   });
   
-  const collector = embedMessage.createMessageComponentCollector();
+  const collector = embedMessage.createMessageComponentCollector({
+    time: 60 * 60 * 1000
+  });
   
   collector.on("collect", async interaction => {
-    interaction.customId === "back_button" ?
-    (currentIndex -= itemsPerPage) : (currentIndex += itemsPerPage);
+    index -= interaction.customId === "back_button" ? itemsPerPage : -itemsPerPage;
+    
+    const newEmbed = createSongListEmbed(songQueue, index, itemsPerPage);
+    
+    if (songQueue.length <= itemsPerPage) {
+      return interaction.update({ embeds: [ newEmbed ] });
+    }
     
     interaction.update({
-      embeds: [ createEmbed(serverQueue.songs, currentIndex, itemsPerPage) ],
+      embeds: [ newEmbed ],
       components: [
         {
           type: "ACTION_ROW",
           components: [
-            ...(currentIndex ? [backButton] : []),
+            ...(index ? [backButton] : []),
             ...(
-              (currentIndex + itemsPerPage) < serverQueue.songs.length 
-              ? [nextButton] : []
-            )
+              (index + itemsPerPage) < songQueue.length ? [nextButton] : []
+            ),
+            ...createPageIndicator(songQueue.length, index, itemsPerPage)
           ]
         }
       ]
     });
     
     return;
+  });
+  
+  collector.on('end', collected => {
+    embedMessage.edit("Song queue timer run out");
   });
   
   return;

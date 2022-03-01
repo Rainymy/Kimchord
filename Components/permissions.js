@@ -2,9 +2,7 @@ function compareListsTo(userPermissions, requiredPermissions) {
   let misssingPermissions = [];
   
   for (let requiredPermission of requiredPermissions) {
-    if (userPermissions.has(requiredPermission)) {
-      continue; 
-    }
+    if (userPermissions.has(requiredPermission)) { continue; }
     misssingPermissions.push(requiredPermission);
   }
   

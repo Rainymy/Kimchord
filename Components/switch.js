@@ -1,9 +1,9 @@
 const init = require('./init.js');
-const [ commands, status ] = init.commands();
+const [ commands, status ] = init.init().commands();
 console.table(status);
 
 function exec_command(message, basicInfo, arg, serverQueue, commandCall, client) {
-  let command = commandCall.toLowerCase();
+  const command = commandCall.toLowerCase();
   
   if (typeof commands[command]?.main !== "function" ) {
     return message.channel.send("Command not found...");

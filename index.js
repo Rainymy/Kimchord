@@ -57,6 +57,8 @@ client.on("messageCreate", async (message) => {
     let command = args[0].substring(prefix.length);
     let basic_data = {
       prefix: prefix,
+      serverHost: server.location,
+      serverPort: server.port,
       serverURL: `${server.location}:${server.port}`,
       isDev: devs_id.includes(message.author.id)
     }
