@@ -52,7 +52,7 @@ async function playPlayList(searchString, userId) {
   
   let playlistId;
   
-  if (data.titles[searchString]?.id) {
+  if (data?.titles?.[searchString]?.id) {
     playlistId = data.titles[searchString].id;
   }
   else {
@@ -86,7 +86,7 @@ async function removePlayList(searchString, userId) {
   
   let playlistId;
   
-  if (data.titles[searchString]?.id) {
+  if (data?.titles?.[searchString]?.id) {
     playlistId = data.titles[searchString].id;
   }
   else {
