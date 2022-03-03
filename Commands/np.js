@@ -2,7 +2,7 @@
 const { formatToEmbed } = require('../Components/formatToEmbed.js');
 const { progressBar, makeTextBar } = require('../Components/textProgressBar.js');
 
-function np(message, basicInfo, arg, queue) {
+async function np(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
   
   if (!serverQueue) {
@@ -11,6 +11,14 @@ function np(message, basicInfo, arg, queue) {
   
   if (!serverQueue.playing) {
     return message.channel.send('Music is Paused!');
+  }
+  
+  if (serverQueue.songs[0].type === "radio") {
+    const stationId = serverQueue.songs[0].fmStationID;
+    // console.log(serverQueue.songs[0]);
+    const updatedInfo = await serverQueue.songs[0].updateInfo(stationId);
+    console.log(updatedInfo);
+    Object.assign(serverQueue.songs[0], updatedInfo);
   }
   
   const timeNow = Date.now();

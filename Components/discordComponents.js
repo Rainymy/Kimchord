@@ -1,19 +1,32 @@
 const { durationToString } = require('../Components/formatToEmbed.js');
 
 function createSongListEmbed(songs, start, perPages=8) {
-  const offset = start === 0 ? 1 : 0;
+  const offset = start === 0 ? 1 : 1;
   const page = songs.slice(start + offset, start + offset + perPages);
   const separatorLine = "".padStart(60, "-");
   
   const queuePlayLength = songs.reduce((acc, curr) => acc + curr.duration, 0);
   
-  const embed = {
-    title: `Song Queue: ${durationToString(queuePlayLength)}`,
-    color: 0x0099ff,
-    description: "Current Song: " + songs[0].title,
-    thumbnail: { url: songs[0].thumbnail },
-    fields: []
+  let embed;
+  if (songs[0].type === "radio") {
+    embed = {
+      title: `📻🎶 Currently jaming to FM Radio 📻🎶`,
+      color: 0x0099ff,
+      description: songs[0].title,
+      thumbnail: { url: songs[0].thumbnail },
+      fields: []
+    }
   }
+  else {
+    embed = {
+      title: `Song Queue: ${durationToString(queuePlayLength)}`,
+      color: 0x0099ff,
+      description: "Current Song: " + songs[0].title,
+      thumbnail: { url: songs[0].thumbnail },
+      fields: []
+    }
+  }
+  
   
   for (let [ index, item ] of page.entries()) {
     embed.fields.push({

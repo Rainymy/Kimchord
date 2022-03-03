@@ -7,8 +7,14 @@ function durationToString(durationInSeconds) {
 }
 
 function formatToEmbed(video, requestedBy, noFields=false, songQueue) {
-  const image_placeholder = "attachment://placeholder.png";
-  const path_placeholder = "./resources/placeholder.png";
+  const placeholder_image = "attachment://placeholder.png";
+  const placeholder_path = "./resources/placeholder.png";
+  
+  const radio_image = "attachment://radio.png";
+  const radio_path = "./resources/radio.png";
+  
+  const default_image = video.type === "radio" ? radio_image: placeholder_image;
+  const default_path = video.type === "radio" ? radio_path: placeholder_path;
   
   const embed = {
   	color: 0x0099ff,
@@ -16,7 +22,7 @@ function formatToEmbed(video, requestedBy, noFields=false, songQueue) {
   	url: video.url,
   	description: video.description,
   	thumbnail: {
-  		url: video.thumbnail ?? image_placeholder,
+  		url: video.thumbnail ?? default_image,
   	},
     fields: [],
   	timestamp: new Date(),
@@ -47,7 +53,7 @@ function formatToEmbed(video, requestedBy, noFields=false, songQueue) {
   
   if (video.thumbnail) { return [ { embeds: [ embed ] }, embed ] }
   
-  return [ { embeds: [ embed ], files: [ path_placeholder ] }, embed ];
+  return [ { embeds: [ embed ], files: [ default_path ] }, embed ];
 }
 
 module.exports = { formatToEmbed, durationToString: durationToString }

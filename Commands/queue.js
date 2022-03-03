@@ -18,12 +18,24 @@ async function queue(message, basicInfo, arg, queue) {
   
   const embed = createSongListEmbed(songQueue, index, itemsPerPage);
   
-  if (songQueue.length <= itemsPerPage) {
-    return message.channel.send({ embeds: [ embed ] });
+  const radio_image = "attachment://radio.png";
+  const radio_path = "./resources/radio.png";
+  let default_path = [];
+  
+  if (songQueue[0].type === "radio" && !songQueue[0].thumbnail) {
+    default_path  = [ radio_path ];
+  }
+  
+  if (!embed.thumbnail.url) { embed.thumbnail.url = radio_image; }
+  
+  if (songQueue.length - 1 <= itemsPerPage) {
+    return message.channel.send({
+      files: [ ...default_path ], embeds: [ embed ]
+    });
   }
   
   const embedMessage = await message.channel.send({
-    embeds: [ embed ], components: [
+    files: [ ...default_path ], embeds: [ embed ], components: [
       {
         type: "ACTION_ROW",
         components: [
@@ -41,15 +53,26 @@ async function queue(message, basicInfo, arg, queue) {
   collector.on("collect", async interaction => {
     index -= interaction.customId === "back_button" ? itemsPerPage : -itemsPerPage;
     
-    const newEmbed = createSongListEmbed(songQueue, index, itemsPerPage);
+    let newEmbed = createSongListEmbed(songQueue, index, itemsPerPage);
     
-    if (songQueue.length <= itemsPerPage) {
-      return interaction.update({ embeds: [ newEmbed ] });
+    if (!newEmbed.fields.length) {
+      index -= itemsPerPage;
+      newEmbed = createSongListEmbed(songQueue, index, itemsPerPage);
+    }
+    
+    if (songQueue[0].type === "radio" && !newEmbed.thumbnail.url) {
+      newEmbed.thumbnail.url = radio_image;
+      default_path = [ radio_path ];
+    }
+    
+    if (songQueue.length - 1 <= itemsPerPage) {
+      return interaction.update({
+        files: [ ...default_path ], embeds: [ newEmbed ], components: []
+      });
     }
     
     interaction.update({
-      embeds: [ newEmbed ],
-      components: [
+      files: [ ...default_path ], embeds: [ newEmbed ], components: [
         {
           type: "ACTION_ROW",
           components: [

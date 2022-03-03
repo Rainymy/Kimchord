@@ -1,5 +1,6 @@
 const http = require('http');
-const { Readable } = require('stream');
+const https = require('https');
+const { PassThrough } = require('stream');
 
 // const fetch = (...args) => import('node-fetch')
 // .then(({default: fetch}) => fetch(...args));
@@ -24,10 +25,21 @@ const { Readable } = require('stream');
 //   return result[0];
 // }
 
+function isValidPassthrough(headers) {
+  if (headers["transfer-encoding"] === "chunked" && 
+      !headers["content-type"]?.includes("application/json")) {
+    return true;
+  }
+  if (headers["content-type"] === "audio/mpeg") { return true; }
+  if (headers["content-type"] === "audio/aacp") { return true; }
+  
+  return false;
+}
+
 function custom_request(urlPath, params) {
   const serverMeta = new URL(urlPath);
   
-  const requestBody = params.body;
+  const requestBody = params?.body ?? "";
   
   const httpOption = {
     host: serverMeta.hostname,
@@ -39,23 +51,44 @@ function custom_request(urlPath, params) {
   
   delete httpOption.body;
   
+  let communication;
+  if (serverMeta.protocol === "https:") { communication = https; }
+  if (serverMeta.protocol === "http:") { communication = http; }
+  if (!communication) {
+    return Promise.resolve({ error: true, comment: "Invalid protocol!" });
+  }
+  
   return new Promise(function(resolve, reject) {
-    const httpRequest = http.request(httpOption, (res) => {
-      let chunks = [];
+    const httpRequest = communication.request(httpOption, (res) => {
+      if (isValidPassthrough(res.headers)) {
+        const streamResponse = new PassThrough();
+        res.pipe(streamResponse);
+        return resolve({ body: streamResponse });
+      }
       
-      res.on("data", (chunk) => chunks.push(chunk));
+      let chunks = [];
+      let bytes = 0;
+      
+      res.on("data", (chunk) => {
+        bytes += chunk.length / 1024;
+        chunks.push(chunk);
+        if (bytes > 512) {
+          console.log("Request Chunk getting bigger. Look for: ", urlPath);
+        }
+      });
+      
       res.on("end", () => {
         let bufferData = Buffer.concat(chunks);
-        
+      
         try { resolve(JSON.parse(bufferData)); }
         catch (e) {
-          const readable = new Readable();
-          readable.push(bufferData);
-          readable.push(null);
-          responseData = readable;
-          resolve({ body: responseData });
+          resolve({
+            error: true,
+            body: responseData,
+            comment: responseData.toString()
+          });
         }
-        
+      
       });
     });
     

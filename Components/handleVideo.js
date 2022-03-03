@@ -8,6 +8,7 @@ function handleVideo(args) {
   
   let song = {
     id: video.id,
+    type: video.type,
     title: video.title,
     url: video.url,
     duration: video.duration,
@@ -18,7 +19,8 @@ function handleVideo(args) {
       start: null,
       pause: null
     },
-    stream: video.stream
+    stream: video.stream,
+    ...video
   }
   
   if (serverQueue) {
