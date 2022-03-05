@@ -22,10 +22,14 @@ function remove(message, basicInfo, searchString, queue) {
     return message.channel.send(`Please select number between 1-${ maxIndex }`);
   }
   
-  const title = serverQueue.songs[number].title;
-  serverQueue.songs.splice( number , 1 );
-  message.channel.send(`😩 Remove: ***${title}***`);
+  const removed = serverQueue.songs.splice( number , 1 )[0];
+  message.channel.send(`😩 Remove: ***${removed.title}***`);
   return;
 }
 
-module.exports = { name: "Remove", aliases: "remove", main: remove }
+module.exports = {
+  name: "Remove",
+  aliases: "remove",
+  category: "music",
+  main: remove
+}

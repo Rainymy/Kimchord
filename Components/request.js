@@ -63,7 +63,7 @@ function custom_request(urlPath, params) {
       if (isValidPassthrough(res.headers)) {
         const streamResponse = new PassThrough();
         res.pipe(streamResponse);
-        return resolve({ body: streamResponse });
+        return resolve(streamResponse);
       }
       
       let chunks = [];

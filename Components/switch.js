@@ -10,11 +10,10 @@ function exec_command(message, basicInfo, arg, serverQueue, commandCall, client)
   }
   
   if (command === "help") {
-    return commands[command].main(message, basicInfo, arg, commands);
+    return commands[command].main(message, basicInfo, arg, status);
   }
   
-  commands[command].main(message, basicInfo, arg, serverQueue, client);
-  return;
+  return commands[command].main(message, basicInfo, arg, serverQueue, client);
 }
 
 module.exports = { exec_command }

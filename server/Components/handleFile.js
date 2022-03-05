@@ -10,6 +10,11 @@ if (!fs.existsSync(path.join(__dirname, "../Songs"))) {
   });
 };
 
+function isError(e) {
+  return e && e.stack && e.message && 
+         typeof e.stack === 'string' && typeof e.message === 'string';
+}
+
 function saveLocation(songs, songId, container) {
   if (!songs[songId]) {
     return path.join(__dirname, `../Songs/${songId}.${container}`);
@@ -24,9 +29,7 @@ function checkFileExists(filepath) {
 }
 
 function deleteFile(filePath) {
-  return new Promise((resolve, reject) => {
-    fs.unlink(filePath, (err) => resolve(err));
-  });
+  return new Promise((resolve, reject) => fs.unlink(filePath, resolve));
 }
 
 function readdirectory(dirPath) {
@@ -37,10 +40,7 @@ function makeReadStream(filePath) {
   return new Promise(function(resolve, reject) {
     const readFile = fs.createReadStream(filePath, { autoClose: true });
     
-    readFile.on('error', (error) => {
-      console.log('ERROR: ', error);
-      reject(error);
-    });
+    readFile.on('error', (error) => resolve(error));
     
     readFile.on('close', () => {
       console.log('Read stream closed');
@@ -59,9 +59,7 @@ function makeWriteStream(filePath) {
     const streamToFile = fs.createWriteStream(filePath);
     
     streamToFile.on("finish", (err) => {
-      if (err) {
-        return console.error(err);
-      }
+      if (err) { return console.error(err); }
       return console.log("Finished Writing to a FILE");
     });
     
@@ -99,5 +97,6 @@ module.exports = {
   readdirectory: readdirectory,
   makeReadStream: makeReadStream,
   makeWriteStream: makeWriteStream,
-  makeYTDLStream: makeYTDLStream
+  makeYTDLStream: makeYTDLStream,
+  isError: isError
 }

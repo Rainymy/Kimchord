@@ -15,4 +15,9 @@ function skip(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = { name: "Skip", aliases: "skip", main: skip };
+module.exports = {
+  name: "Skip",
+  aliases: "skip",
+  category: "music",
+  main: skip
+};

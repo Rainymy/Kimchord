@@ -1,7 +1,7 @@
 {
   "name": "Kimchord",
   "author": "",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A simple Discord music bot",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
     "get-video-duration": "^4.0.0",
     "libsodium-wrappers": "^0.7.9",
     "node-fetch": "^3.2.0",
-    "ytdl-core": "^4.10.1",
+    "ytdl-core": "^4.11.0",
     "ytpl": "^2.2.3",
     "ytsr": "^3.6.0"
   }

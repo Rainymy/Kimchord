@@ -16,4 +16,9 @@ function stop(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = { name: "Stop", aliases: ["stop"], main: stop };
+module.exports = {
+  name: "Stop",
+  aliases: ["stop"],
+  category: "music",
+  main: stop
+};

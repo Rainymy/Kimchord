@@ -164,5 +164,6 @@ async function playlist(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Playlist",
   aliases: ["playlist"],
+  category: "music",
   main: playlist
 }

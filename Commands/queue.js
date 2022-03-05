@@ -96,4 +96,9 @@ async function queue(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = { name: "Queue", aliases: ["q", "queue"], main: queue }
+module.exports = {
+  name: "Queue",
+  aliases: ["q", "queue"],
+  category: "music",
+  main: queue
+}

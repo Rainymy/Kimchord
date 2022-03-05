@@ -22,5 +22,8 @@ function leaveServer(message, basicInfo, arg, queue, client) {
 }
 
 module.exports = {
-  name: "leaveServer", aliases: "leaveServer", main: leaveServer
+  name: "leaveServer",
+  aliases: "leaveServer",
+  category: "moderation",
+  main: leaveServer
 }

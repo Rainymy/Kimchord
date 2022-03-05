@@ -1,7 +1,6 @@
-const request = require('./request');
+const request = require('./request.js');
 
 function RadioStations() {
-  
   const options = {
     method: "GET", 
     headers: {
@@ -13,7 +12,6 @@ function RadioStations() {
     let stations = await request("https://app.khz.se/api/v2/channel/", options);
     
     for (let station of stations) {
-      
       this.cache[station.name.toLowerCase()] = station;
       
       let temp = [];
@@ -36,8 +34,7 @@ function RadioStations() {
   }
   
   this.stream = async (urlString) => {
-    let station = await request(urlString, options);
-    return station;
+    return request(urlString, options);
   }
   
   this.thumbnail = (img) => {

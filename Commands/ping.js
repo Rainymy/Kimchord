@@ -34,6 +34,7 @@ async function ping(message, basicInfo, searchString, queue, client) {
 
 module.exports = {
   name: "Ping",
-  aliases: [ "check", "ping"], 
+  aliases: [ "check", "ping"],
+  category: "general",
   main: ping
 }

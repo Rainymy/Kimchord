@@ -17,5 +17,6 @@ async function searchVideo(message, basicInfo, searchString, queue) {
 module.exports = {
   name: "Search",
   aliases: ["search"],
+  category: "music",
   main: searchVideo
 }

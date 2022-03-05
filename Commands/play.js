@@ -88,18 +88,10 @@ async function main(message, basicInfo, searchString, queue) {
     const temp = JSON.parse(param.body);
     temp.videoData = songs[i];
     param.body = JSON.stringify(temp);
-  
-    const streams = await request(`${baseUrl}/songs`, param);
     
-    songs[i].stream = streams.body;
+    const streams = request(`${baseUrl}/songs`, param);
     
-    if (streams.error) {
-      const sentingTexts = [
-        `Service is not available or ERROR! : Index ${i}`,
-        streams.comment
-      ];
-      return songLoading.edit(sentingTexts.join("\n"));
-    }
+    songs[i].stream = streams;
   }
   
   songLoading.delete();
@@ -161,4 +153,9 @@ async function main(message, basicInfo, searchString, queue) {
   return;
 }
 
-module.exports = { name: "Play", aliases: ["play", "music", "p"], main: main }
+module.exports = {
+  name: "Play",
+  aliases: ["play", "music", "p"],
+  category: "music",
+  main: main
+}

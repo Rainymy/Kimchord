@@ -22,5 +22,6 @@ function resume(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Resume",
   aliases: ["resume", "continue"],
+  category: "music",
   main: resume
 }

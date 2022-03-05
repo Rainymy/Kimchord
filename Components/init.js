@@ -24,6 +24,7 @@ function commands() {
         
         if (index + 1 !== lastIndex) {
           status[alias] = { ...commandFunction, index: index + 1 };
+          delete status[alias].main;
         }
         
         lastIndex = index + 1;
@@ -34,6 +35,7 @@ function commands() {
     commmand[commandFunction.aliases] = commandFunction;
     
     status[commandFunction.aliases] = { ...commandFunction, index: index + 1 };
+    delete status[commandFunction.aliases].main;
   }
   
   return [ commmand, status ];

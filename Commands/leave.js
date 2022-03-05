@@ -19,4 +19,9 @@ function leave(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = { name: "Leave", aliases: ["leave"], main: leave };
+module.exports = {
+  name: "Leave",
+  aliases: ["leave"],
+  category: "music",
+  main: leave
+};

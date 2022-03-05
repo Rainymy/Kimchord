@@ -18,5 +18,6 @@ function pause(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Pause",
   aliases: ["pause", "hold"],
+  category: "music",
   main: pause
 }

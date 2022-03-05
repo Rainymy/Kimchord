@@ -15,11 +15,12 @@ const {
   deleteFile,
   makeReadStream,
   makeWriteStream,
-  makeYTDLStream
+  makeYTDLStream,
+  isError
 } = require("./Components/handleFile.js");
 
 const songs = cacheSongs.parseLocalFolder();
-const maxHours = 3;
+const maxHours = 5;
 
 app.use(express.json());
 
@@ -134,7 +135,12 @@ app.post('/songs', async (req, res) => {
   
   const filePath = saveLocation(songs, videoData.id);
   
-  return (await makeReadStream(filePath)).pipe(res);
+  const reading = await makeReadStream(filePath);
+  if (isError(reading)) {
+    return res.send({ error: true, comment: reading });
+  }
+  
+  return reading.pipe(res);
 });
 
 app.post("/parseSearchString", async (req, res) => {

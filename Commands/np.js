@@ -40,7 +40,8 @@ async function np(message, basicInfo, arg, queue) {
 }
 
 module.exports = {
-  name: "NP",
+  name: "Now Playing",
   aliases: ["np", "current", "now", "progress"],
+  category: "music",
   main: np
 }
