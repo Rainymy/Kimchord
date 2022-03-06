@@ -1,7 +1,6 @@
 function leaveServer(message, basicInfo, arg, queue, client) {
   if (!basicInfo.isDev) {
-    message.channel.send("Creator Command Only!");
-    return;
+    return message.channel.send("Creator Command Only!");
   }
   
   if (arg.length < 1) {
@@ -23,7 +22,8 @@ function leaveServer(message, basicInfo, arg, queue, client) {
 
 module.exports = {
   name: "leaveServer",
-  aliases: "leaveServer",
+  aliases: "leaveserver",
   category: "moderation",
-  main: leaveServer
+  main: leaveServer,
+  isHidden: true
 }

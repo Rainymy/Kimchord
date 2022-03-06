@@ -17,12 +17,12 @@ const categories = {
     value: "music",
     default: false
   },
-  moderation: {
-    label: "Moderation",
-    description: "All moderation Commands",
-    value: "moderation",
-    default: false
-  },
+  // moderation: {
+  //   label: "Moderation",
+  //   description: "All moderation Commands",
+  //   value: "moderation",
+  //   default: false
+  // },
   general: {
     label: "General",
     description: "All general Commands",
@@ -86,6 +86,7 @@ async function help(message, basicInfo, arg, commands) {
     let index = 1;
     let valueText;
     for (let command in commands) {
+      if (commands[command].isHidden) { continue; }
       if (commands[command].category === interaction.values[0]) {
         valueText = `${commands[command].name}: <${commands[command].aliases}>`
         newEmbed.fields.push({
