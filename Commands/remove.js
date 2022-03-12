@@ -1,9 +1,12 @@
 "use strict";
+
+const messageInfo = require('../Components/messageInfo.js');
+
 function remove(message, basicInfo, searchString, queue) {
   const serverQueue = queue.get(message.guild.id);
   
   if (!serverQueue?.songs.length) {
-    return message.channel.send(`There is nothing playing 😂`);
+    return message.channel.send(messageInfo.nothingPlaying);
   }
   
   const number = parseInt(searchString);
@@ -15,7 +18,7 @@ function remove(message, basicInfo, searchString, queue) {
   const isOverMax = searchString <= maxIndex;
   
   if ( minIndex === maxIndex) {
-    return message.channel.send("Queue is Empty");
+    return message.channel.send(messageInfo.queueIsEmpty);
   }
   
   if (!isNumber || (!isOverMin || !isOverMax)) {

@@ -30,15 +30,13 @@ function isValidPassthrough(headers) {
       !headers["content-type"]?.includes("application/json")) {
     return true;
   }
-  if (headers["content-type"] === "audio/mpeg") { return true; }
-  if (headers["content-type"] === "audio/aacp") { return true; }
+  if (headers["content-type"].startsWith("audio/")) { return true; }
   
   return false;
 }
 
 function custom_request(urlPath, params) {
   const serverMeta = new URL(urlPath);
-  
   const requestBody = params?.body ?? "";
   
   const httpOption = {
@@ -83,9 +81,7 @@ function custom_request(urlPath, params) {
         try { resolve(JSON.parse(bufferData)); }
         catch (e) {
           resolve({
-            error: true,
-            body: responseData,
-            comment: responseData.toString()
+            error: true, body: responseData, comment: responseData.toString()
           });
         }
       

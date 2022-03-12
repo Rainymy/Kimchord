@@ -1,3 +1,5 @@
+const { codeBlock } = require('./markup.js');
+
 function compareListsTo(userPermissions, requiredPermissions) {
   let misssingPermissions = [];
   
@@ -9,13 +11,46 @@ function compareListsTo(userPermissions, requiredPermissions) {
   return misssingPermissions;
 }
 
-function checkPermissions(voiceChannel, message, requiredPermissions) {
-  let Bot_permissions = voiceChannel.permissionsFor(message.client.user.id);
-  return compareListsTo(Bot_permissions, requiredPermissions);
+function checkPermissions(channel, user_id, requiredPermissions) {
+  const bot_permissions = channel.permissionsFor(user_id);
+  return compareListsTo(bot_permissions, requiredPermissions);
+}
+
+function validatePermissions(channel, id, requiredPermissions) {
+  const neededPermissions = checkPermissions(channel, id, requiredPermissions);
+  
+  const batch = [];
+  
+  for (let neededPermission of neededPermissions) {
+    if (neededPermission === "SEND_MESSAGES") {
+      return { error: true, comment: null, stop: true };
+    }
+    
+    batch.push(
+      `I need permission for "${neededPermission.split("_").join(" ")}".`
+    );
+  }
+  
+  if (batch.length > 0) {
+    return {
+      error: true,
+      comment: codeBlock(
+        `${batch.join("\n")}\n - make sure I have the proper permissions!`, "js"
+      )
+    };
+  }
+  
+  return { error: false, comment: null }
 }
 
 const PRESETS = {
-  music: [ "CONNECT", "SPEAK" ]
+  music: [ "CONNECT", "SPEAK" ],
+  channel: [ "SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "ATTACH_FILES" ]
 }
 
-module.exports = { checkPermissions, compareListsTo, PRESETS }
+module.exports = {
+  checkPermissions,
+  validatePermissions,
+  compareListsTo,
+  PRESETS
+}

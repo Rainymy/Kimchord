@@ -4,10 +4,12 @@ const {
   createPageIndicator
 } = require('../Components/discordComponents.js');
 
+const messageInfo = require('../Components/messageInfo.js');
+
 async function queue(message, basicInfo, arg, queue) {
   let serverQueue = queue.get(message.guild.id);
   
-  if (!serverQueue) return message.channel.send('There is nothing playing.');
+  if (!serverQueue) { return message.channel.send(messageInfo.nothingPlaying); }
   
   const backButton = createButton("Back", "back_button", false, "◀️");
   const nextButton = createButton("Next", "next_button", false, "▶️");

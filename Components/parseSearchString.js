@@ -15,7 +15,7 @@ async function parseSearchString(message, baseUrl, searchString) {
   
   // 1024 * 1024 * 124 => 124 MB
   const param = {
-    highWaterMark: 1024 * 1024 * 124,
+    // highWaterMark: 1024 * 1024 * 124,
     method: "POST",
     headers: { "Content-type": "application/json" },
     body: JSON.stringify(request_object)
@@ -26,15 +26,10 @@ async function parseSearchString(message, baseUrl, searchString) {
   
   let video;
   
-  if (response.type === "playlist" || response.length) {
-    video = response;
-  }
+  if (response.type === "playlist") { video = response; }
+  else if (isObject(response)) { video = [ response ]; }
   
-  if (isObject(response)) {
-    video = response.type === "playlist" ? response : [ response ];
-  }
-  
-  if ((video.length === 0) || !video) {
+  if (!video || (!isObject(video) && !video?.length)) {
     return [ null, null, true ];
   }
   request_object.videoData = video;

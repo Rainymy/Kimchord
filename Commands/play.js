@@ -4,26 +4,26 @@ const { createAudioPlayer } = require('@discordjs/voice');
 const request = require('../Components/request.js');
 const { checkPermissions, PRESETS } = require('../Components/permissions.js');
 const { parseSearchString } = require('../Components/parseSearchString.js');
+const { codeBlock } = require('../Components/markup.js');
+const messageInfo = require('../Components/messageInfo.js');
 
-async function main(message, basicInfo, searchString, queue) {
+async function main(message, basicInfo, searchString, queue, client) {
   if (!searchString.length) {
     return message.channel.send("`<Search text>` or `<Youtube Link>`");
   }
   
   const voiceChannel = message.member.voice.channel;
   if (!voiceChannel) {
-    return message.channel.send(
-      "I'm sorry but you need to be in a voice channel to play music!"
-    );
+    return message.channel.send(messageInfo.notInVoiceChannel);
   }
   
   /*---------------------- Check for permissions --------------------*/
-  const neededPermissions = checkPermissions(voiceChannel, message, PRESETS.music);
+  const neededPermissions = checkPermissions(
+    voiceChannel, client.user.id, PRESETS.music
+  );
   
   for (let [ index, neededPermission ] of neededPermissions.entries()) {
-    message.channel.send(
-      `I cannot *${neededPermission}*, make sure I have the proper permissions!`
-    );
+    message.channel.send(messageInfo.permissionNeeded(neededPermission));
     if (index === neededPermissions.length - 1) { return; }
   }
   
@@ -33,9 +33,7 @@ async function main(message, basicInfo, searchString, queue) {
   const [param,, failed] = await parseSearchString(message, baseUrl, searchString);
   
   if (failed) {
-    return message.channel.send(
-      "🆘 Video unavailable OR I could not obtain any search results. 🆘"
-    );
+    return message.channel.send(messageInfo.videoNotFoundOrAvailable);
   }
   
   /*--------------------- Get streamable response -------------------*/
@@ -52,7 +50,7 @@ async function main(message, basicInfo, searchString, queue) {
   const songs = requested.type === "playlist" ? requested.playlist : requested;
   
   if ((isPlaylist && !playListDownload) || isList ) {
-    sentMsg = await message.channel.send("Downloading.... [0s -> 5s]");
+    sentMsg = await message.channel.send(messageInfo.videoDownloading);
     
     const paramCopy = Object.assign({}, param);
     const skippedSongs = [];
@@ -66,23 +64,23 @@ async function main(message, basicInfo, searchString, queue) {
       const { error, comment } = await request(`${baseUrl}/download`, paramCopy);
       
       if (error && isPlaylist) {
-        skippedSongs.push(`Skipping Download: [${songs[i].title}] : ${comment}`);
+        skippedSongs.push(messageInfo.skippingDownload(songs[i].title, comment));
         songs.splice(i, 1);
         i--;
       }
       if (error && !isPlaylist) {
-        return sentMsg.edit(`Download Failed: [${songs[i].title}] : ${comment}`);
+        return sentMsg.edit(messageInfo.downloadFailed(songs[i].title ,comment));
       }
     }
     
     if (skippedSongs.length) {
-      message.channel.send(`\`\`\`js\n${skippedSongs.join("\n")}\`\`\``);
+      message.channel.send(codeBlock(skippedSongs.join("\n")));
     }
     
     sentMsg.edit("💚 Download finish 💚");
   }
   
-  const songLoading = await message.channel.send("Song Loading... Wait a moment");
+  const songLoading = await message.channel.send(messageInfo.songLoading);
   
   for (let i = 0; i < songs.length; i++) {
     const temp = JSON.parse(param.body);
@@ -127,7 +125,7 @@ async function main(message, basicInfo, searchString, queue) {
     const [ addedSong, songQueue ] = handleVideo(args);
     
     if (!isPlaylist && addedSong) {
-      addedSong.description = "✅ has been added to the queue! ✅";
+      addedSong.description = messageInfo.songAddedToQueue;
       let [container, embed] = formatToEmbed(addedSong, message, false, songQueue);
       
       message.channel.send(container);
@@ -137,7 +135,7 @@ async function main(message, basicInfo, searchString, queue) {
   if (isPlaylist) {
     const addPlayList = {
       title: `Playlist: ${requested.title}`,
-      description: "🔀 has been added to the queue 🔀",
+      description: messageInfo.playlistAddedToQueue,
       url: requested.playlistURL,
       thumbnail: requested.thumbnail,
       duration: requested.playlist.reduce((acc, curr) => acc + curr.duration, 0)

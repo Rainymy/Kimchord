@@ -4,6 +4,11 @@ async function ping(message, basicInfo, searchString, queue, client) {
   const text = 'Ping is being appreciated... :bar_chart:';
   const resmessage = await message.channel.send(text);
   
+  if (!resmessage) {
+    console.log({ resmessage });
+    return message.channel.send("Something went Wrong");
+  }
+  
   const messageSentTime = Math.floor(message.createdTimestamp);
   const messageEditedTime = Math.floor(resmessage.createdTimestamp);
   
@@ -12,7 +17,7 @@ async function ping(message, basicInfo, searchString, queue, client) {
     headers: { "Content-type": "application/json" }
   }
   
-  const baseUrl = basicInfo.serverURL
+  const baseUrl = basicInfo.serverURL;
   
   const sendTime = Date.now();
   const response = await request(`${baseUrl}/ping?time=${sendTime}`, options);
@@ -27,9 +32,7 @@ async function ping(message, basicInfo, searchString, queue, client) {
     `Response time: **${responseTime}ms**`
   ];
   
-  resmessage.edit(messages.join("\n"));
-  
-  return;
+  return resmessage.edit(messages.join("\n"));
 }
 
 module.exports = {

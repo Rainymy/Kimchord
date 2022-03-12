@@ -1,9 +1,10 @@
 function stop(message, basicInfo, arg, queue) {
-  let serverQueue = queue.get(message.guild.id);
+  const serverQueue = queue.get(message.guild.id);
   
   if (!message.member.voice.channel) {
     return message.channel.send('You are not in a voice channel!');
   }
+  
   if (!serverQueue) {
     return message.channel.send(
       'There is nothing playing that I could stop for you.'
@@ -18,7 +19,7 @@ function stop(message, basicInfo, arg, queue) {
 
 module.exports = {
   name: "Stop",
-  aliases: ["stop"],
+  aliases: ["stop", "leave"],
   category: "music",
   main: stop
 };

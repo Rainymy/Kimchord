@@ -1,23 +1,18 @@
 "use strict";
 const { formatToEmbed } = require('../Components/formatToEmbed.js');
 const { progressBar, makeTextBar } = require('../Components/textProgressBar.js');
+const messageInfo = require('../Components/messageInfo.js');
 
 async function np(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
   
-  if (!serverQueue) {
-    return message.channel.send('There is nothing playing.');
-  }
-  
-  if (!serverQueue.playing) {
-    return message.channel.send('Music is Paused!');
-  }
+  if (!serverQueue) { return message.channel.send(messageInfo.nothingPlaying); }
+  if (!serverQueue.playing) { return message.channel.send(messageInfo.songPaused); }
   
   if (serverQueue.songs[0].type === "radio") {
     const stationId = serverQueue.songs[0].fmStationID;
-    // console.log(serverQueue.songs[0]);
+    
     const updatedInfo = await serverQueue.songs[0].updateInfo(stationId);
-    console.log(updatedInfo);
     Object.assign(serverQueue.songs[0], updatedInfo);
   }
   
@@ -41,7 +36,7 @@ async function np(message, basicInfo, arg, queue) {
 
 module.exports = {
   name: "Now Playing",
-  aliases: ["np", "current", "now", "progress"],
+  aliases: ["np", "now", "progress"],
   category: "music",
   main: np
 }

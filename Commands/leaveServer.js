@@ -1,23 +1,23 @@
+const { codeBlock } = require('../Components/markup.js');
+
 function leaveServer(message, basicInfo, arg, queue, client) {
   if (!basicInfo.isDev) {
     return message.channel.send("Creator Command Only!");
   }
   
   if (arg.length < 1) {
-    message.channel.send("Require Guild ID");
-    return;
+    return message.channel.send("Require Guild ID");
   }
   
   let guildRef = client.guilds.cache.get(arg);
   if (!guildRef) {
-    message.channel.send(`No Guild has id of \`${arg}\``);
-    return;
+    return message.channel.send(`No Guild has id of \`${arg}\``);
   }
   
   guildRef.leave();
-  message.channel.send(`
-    \`\`\`Left: [${guildRef.name}] (ID: ${guildRef.id}) 🤯\`\`\``);
-  return;
+  return message.channel.send(
+    codeBlock(`Left: [${guildRef.name}] (ID: ${guildRef.id}) 🤯`)
+  );
 }
 
 module.exports = {

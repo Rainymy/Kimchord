@@ -101,8 +101,6 @@ async function removePlayList(searchString, userId) {
     delete data.titles[data[playlistId].title];
     delete data[playlistId];
     
-    // return { error: false, comment: "TEsting Mode" }
-    
     const hasError = await customWriteStream(userFile, data);
     if (hasError) { return { error: true, comment: hasError } }
     
@@ -126,7 +124,7 @@ const commands = {
   rename: { main: renamePlayList },
 }
 
-async function playlist(message, basicInfo, arg, queue) {
+async function playlist(message, basicInfo, arg, queue, client) {
   let serverQueue = queue.get(message.guild.id);
   
   const command = arg.split(" ");
@@ -145,7 +143,7 @@ async function playlist(message, basicInfo, arg, queue) {
   }
   
   if (result.playURL) {
-    return playMusic(message, basicInfo, result.playURL, queue);
+    return playMusic(message, basicInfo, result.playURL, queue, client);
   }
   
   if (result.list) {

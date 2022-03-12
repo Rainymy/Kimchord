@@ -1,5 +1,4 @@
 const { formatToEmbed } = require('./formatToEmbed.js');
-const { getVoiceConnection } = require('../Components/handleConnection.js');
 
 const music_status = {
   paused: "⏸ Paused the music for you! ⏸",
@@ -21,11 +20,11 @@ function addEventListener(serverQueue, queue, musicPlayer) {
   serverQueue.audioPlayer.on("idle", async () => {
     // console.log("Idle Run after skip", serverQueue.songs);
     serverQueue.songs.shift();
-    let guild_id = serverQueue.textChannel.guild.id;
+    const guild_id = serverQueue.textChannel.guild.id;
     
-    let currentSong = await musicPlayer(guild_id, serverQueue.songs[0], queue);
+    const currentSong = await musicPlayer(guild_id, serverQueue.songs[0], queue);
     if (!currentSong) {
-      getVoiceConnection(guild_id).disconnect();
+      serverQueue.connection.destroy();
       queue.delete(guild_id);
       console.log("No songs in the queue");
       serverQueue.textChannel.send("No songs in the queue");

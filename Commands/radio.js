@@ -83,8 +83,8 @@ async function radio(message, basicInfo, searchString, queue) {
       'Defaulting to `Lugna Favoriter`',
       [
         `type ${basicInfo.prefix}`,
-        `${(this.aliases.join && this.aliases.join("|")) ?? this.aliases} `,
-        "to se available stations"
+        `\`${(this.aliases.join && this.aliases.join("|"))?? this.aliases} list\``,
+        " to se available stations"
       ].join("")
     ].join("\n"));
     stationName = "lugna favoriter";
@@ -116,6 +116,7 @@ async function radio(message, basicInfo, searchString, queue) {
     }
   }
   
+  console.log("User listening to radio");
   const [ addedSong, songQueue ] = handleVideo(args);
   
   if (addedSong) {
