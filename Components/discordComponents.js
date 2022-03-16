@@ -39,6 +39,22 @@ function createSongListEmbed(songs, start, perPages=8) {
   return embed;
 }
 
+function createDropdown(options) {
+  return {
+    type: "ACTION_ROW",
+    components: [
+      {
+        type: "SELECT_MENU",
+        customId: "select_menu",
+        placeholder: "Choose a category",
+        min_values: 1,
+        max_values: 1,
+        options: options
+      }
+    ]
+  }
+}
+
 function createButton(label, id, disabled, emoji, buttonStyle) {
   return {
     type: "BUTTON",
@@ -66,7 +82,8 @@ function createPageIndicator(songCount, current, perPage) {
 }
 
 module.exports = {
-  createSongListEmbed,
-  createButton,
-  createPageIndicator
+  createSongListEmbed: createSongListEmbed,
+  createButton: createButton,
+  createPageIndicator: createPageIndicator,
+  createDropdown: createDropdown
 }

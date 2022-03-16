@@ -31,9 +31,7 @@ async function queue(message, basicInfo, arg, queue) {
   if (!embed.thumbnail.url) { embed.thumbnail.url = radio_image; }
   
   if (songQueue.length - 1 <= itemsPerPage) {
-    return message.channel.send({
-      files: [ ...default_path ], embeds: [ embed ]
-    });
+    return message.channel.send({ files: [...default_path], embeds: [embed] });
   }
   
   const embedMessage = await message.channel.send({
@@ -91,15 +89,16 @@ async function queue(message, basicInfo, arg, queue) {
     return;
   });
   
-  collector.on('end', collected => {
-    embedMessage.edit("Song queue timer run out");
+  collector.on('end', async collected => {
+    try { await embedMessage.edit("Song queue timer run out"); } 
+    catch (e) { console.log("Message deleted before collector timeout."); }
   });
   
   return;
 }
 
 module.exports = {
-  name: "Queue",
+  name: "Song queue",
   aliases: ["q", "queue"],
   category: "music",
   main: queue

@@ -1,7 +1,5 @@
 const {
-  createSongListEmbed,
-  createButton,
-  createPageIndicator
+  createSongListEmbed, createButton, createPageIndicator, createDropdown
 } = require('../Components/discordComponents.js');
 
 const categories = {
@@ -51,19 +49,9 @@ function createEmbed(selected_id, message) {
   }
 }
 
-function createDropdown(options) {
+function makeEmbed(newEmbed, options) {
   return {
-    type: "ACTION_ROW",
-    components: [
-      {
-        type: "SELECT_MENU",
-        customId: "select_menu",
-        placeholder: "Choose a category",
-        min_values: 1,
-        max_values: 1,
-        options: options
-      }
-    ]
+    embeds: [ newEmbed ], components: [ createDropdown(options) ]
   }
 }
 
@@ -73,12 +61,11 @@ async function help(message, basicInfo, arg, commands) {
   const options = [];
   for (let category in categories) { options.push(categories[category]); }
   
-  const sentMessage = await message.channel.send({
-    embeds: [ embed ], components: [ createDropdown(options) ]
-  });
+  const sentMessage = await message.channel.send(makeEmbed(embed, options));
   
-  const time = 5 * 60 * 1000;
-  const collector = sentMessage.createMessageComponentCollector({ time: time });
+  const collector = sentMessage.createMessageComponentCollector({
+    time: 5 * 60 * 1000
+  });
   
   collector.on("collect", async interaction => {
     const newEmbed = createEmbed(interaction.values[0], message);
@@ -100,13 +87,12 @@ async function help(message, basicInfo, arg, commands) {
       option.default = option.value === interaction.values[0];
     }
     
-    interaction.update({
-      embeds: [ newEmbed ], components: [ createDropdown(options) ]
-    });
+    interaction.update(makeEmbed(newEmbed, options));
   });
   
-  collector.on('end', collected => {
-    sentMessage.edit("Time out");
+  collector.on('end', async collected => {
+    try { await sentMessage.edit("Time out"); } 
+    catch (e) { console.log("Message deleted before collector timeout."); }
   });
 }
 
