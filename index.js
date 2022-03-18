@@ -1,23 +1,11 @@
 "use strict";
 
-const intents = [
-  "GUILDS",
-  "GUILD_VOICE_STATES",
-  "GUILD_MESSAGES",
-  "GUILD_MESSAGE_REACTIONS",
-  "DIRECT_MESSAGES",
-]
-
-const { Client, DiscordAPIError, Constants } = require('discord.js');
-const client = new Client({ intents: intents });
-
-const { exec_command } = require('./Components/switch.js');
 const { validatePermissions, PRESETS } = require('./Components/permissions.js');
+const { exec_command } = require('./Components/switch.js');
 const { prefix, credential, server, devs_ids } = require("./config.json");
 
-// process.on('unhandledRejection', error => {
-//   console.error('Uncaught Promise Rejection', error);
-// });
+const { Client, DiscordAPIError, Constants } = require('discord.js');
+const client = new Client({ intents: PRESETS.intents });
 
 if (!credential?.token) {
   console.error(`Discord token is missing`);
@@ -29,8 +17,10 @@ client.login(credential.token);
 
 const queue = new Map();
 const devs_id_list = devs_ids ?? [];
+const showServerCount = true;
 
 function updateActivity(client) {
+  if (!showServerCount) { return client.user.setActivity( `${prefix}help` ); }
   return client.user.setActivity(
     `${prefix}help [Serving ${client.guilds.cache.size} servers]`
   );
@@ -71,7 +61,8 @@ client.on("messageCreate", async (message) => {
       await exec_command(
         message, basic_data, searchString, queue, command, client
       );
-    } catch (e) {
+    }
+    catch (e) {
       if (e.code === Constants.APIErrors.MISSING_PERMISSIONS) {
         return console.log("Has Timeout or MISSING_PERMISSIONS");
       }

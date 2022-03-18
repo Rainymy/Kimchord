@@ -1,12 +1,14 @@
+const messageInfo = require('../Components/messageInfo.js');
+
 function pause(message, basicInfo, arg, queue) {
-  let serverQueue = queue.get(message.guild.id);
+  const serverQueue = queue.get(message.guild.id);
   
   if (!serverQueue || !serverQueue.songs.length) {
-    return message.channel.send('There is nothing playing.');
+    return message.channel.send(messageInfo.nothingPlaying);
   }
   
   if (!serverQueue.playing) {
-    return message.channel.send('Music already paused!');
+    return message.channel.send(messageInfo.songAlreadyPaused);
   }
   
   serverQueue.playing = false;

@@ -1,9 +1,5 @@
 const request = require('./request.js');
-
-function isObject(objValue) {
-  return objValue && typeof objValue === 'object' 
-                  && objValue.constructor === Object;
-}
+const { isObject } = require('./util.js');
 
 async function parseSearchString(message, baseUrl, searchString) {
   const request_object = {
@@ -13,9 +9,7 @@ async function parseSearchString(message, baseUrl, searchString) {
     videoData: undefined
   }
   
-  // 1024 * 1024 * 124 => 124 MB
   const param = {
-    // highWaterMark: 1024 * 1024 * 124,
     method: "POST",
     headers: { "Content-type": "application/json" },
     body: JSON.stringify(request_object)

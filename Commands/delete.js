@@ -1,32 +1,29 @@
 const request = require('../Components/request.js');
 const { parseSearchString } = require('../Components/parseSearchString.js');
+const messageInfo = require('../Components/messageInfo.js');
 
 async function deleteSong(message, basicInfo, searchString, queue) {
   const baseUrl = basicInfo.serverURL;
   
   if (!basicInfo.isDev) {
-    return message.channel.send(
-      "Sorry this command is not working correctly. (disabled)"
-    );
+    return message.channel.send(messageInfo.commandDisabled);
   }
   
   const [param,, failed] = await parseSearchString(message, baseUrl, searchString);
-  if (failed) {
-    return message.channel.send("🆘 I could not obtain any search results. 🆘");
-  }
+  if (failed) { return message.channel.send(messageInfo.foundNoSearchResults); }
   
   const data = await request(`${baseUrl}/remove`, param);
   
-  if (!data.error) {
-    return message.channel.send(data.comment);
-  }
+  if (!data.error) { return message.channel.send(data.comment); }
   
   if (data.comment.errno === (-4058)) {
-    return message.channel.send("Doesn't exist");
+    return message.channel.send(messageInfo.doesNotExist);
   }
   
   console.log(data);
-  return message.channel.send(`ERROR CODE: ${data.comment.errno.toString()}`);
+  return message.channel.send(
+    messageInfo.ERROR_CODE(data.comment.errno.toString())
+  );
 }
 
 module.exports = {

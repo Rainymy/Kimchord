@@ -1,15 +1,11 @@
 const request = require('./request.js');
 
 function RadioStations() {
-  const options = {
-    method: "GET", 
-    headers: {
-      "Content-type": "application/json"
-    }
-  }
+  const options = { method: "GET", headers: { "Content-type": "application/json" } }
+  const base = "https://cdn.khz.se";
   
   this.getAllRadioStations = async () => {
-    let stations = await request("https://app.khz.se/api/v2/channel/", options);
+    let stations = await request(`${base}/api/v2/channel/`, options);
     
     for (let station of stations) {
       this.cache[station.name.toLowerCase()] = station;
@@ -24,22 +20,14 @@ function RadioStations() {
     this.isCached = true;
     return this;
   }
-  this.save = (data) => {
-    
-  }
   
-  this.get = async (id) => {
-    let station = await request(`https://app.khz.se/api/v2/channel/${id}`, options);
-    return station;
-  }
+  this.save = (data) => { return; }
   
-  this.stream = async (urlString) => {
-    return request(urlString, options);
-  }
+  this.get = async (id) => await request(`${base}/api/v2/channel/${id}`, options);
   
-  this.thumbnail = (img) => {
-    return `https://cdn.khz.se/images/250x250/${img}`;
-  }
+  this.stream = async (urlString) => { return request(urlString, options); }
+  
+  this.thumbnail = (img) => { return `${base}/images/250x250/${img}`; }
   
   this.update = async (id) => {
     const currnet_info = await this.get(id);

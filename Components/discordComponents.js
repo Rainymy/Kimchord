@@ -1,4 +1,4 @@
-const { durationToString } = require('../Components/formatToEmbed.js');
+const { durationToString } = require('./util.js');
 
 function createSongListEmbed(songs, start, perPages=8) {
   const offset = start === 0 ? 1 : 1;

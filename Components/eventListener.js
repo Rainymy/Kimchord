@@ -8,17 +8,15 @@ const music_status = {
 
 function formatEmbed(songQueue, status, author) {
   const currentSong = songQueue[0];
-  const [ container, embed ] = formatToEmbed(
-    currentSong, { author: author }, false, songQueue
-  );
+  const [ container, embed ] = formatToEmbed(currentSong, false, songQueue);
   embed.description = music_status[status];
   
   return container;
 }
 
 function addEventListener(serverQueue, queue, musicPlayer) {
+  // Events: idle, autopaused, buffering, paused, playing, error
   serverQueue.audioPlayer.on("idle", async () => {
-    // console.log("Idle Run after skip", serverQueue.songs);
     serverQueue.songs.shift();
     const guild_id = serverQueue.textChannel.guild.id;
     
@@ -30,9 +28,6 @@ function addEventListener(serverQueue, queue, musicPlayer) {
       serverQueue.textChannel.send("No songs in the queue");
     }
   });
-  
-  serverQueue.audioPlayer.on("autopaused", (event) => { return; });
-  serverQueue.audioPlayer.on("buffering", (event) => { return });
   
   serverQueue.audioPlayer.on("paused", () => {
     const author = serverQueue.songs[0].requestedBy;
@@ -46,14 +41,11 @@ function addEventListener(serverQueue, queue, musicPlayer) {
     const author = serverQueue.songs[0].requestedBy;
     
     const embed = formatEmbed(serverQueue.songs, status , author);
-    
     serverQueue.textChannel.send(embed);
   });
   
   serverQueue.audioPlayer.on('error', (error) => {
-    serverQueue.textChannel.send(
-      `Error: ${error.message} with resource ${error.resource.metadata?.title}`
-    );
+    serverQueue.textChannel.send(`Error from player: ${error.message}`);
   });
 }
 

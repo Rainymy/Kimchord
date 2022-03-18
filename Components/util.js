@@ -1,3 +1,7 @@
+function isObject(objVal) {
+  return objVal && typeof objVal === 'object' && objVal.constructor === Object;
+}
+
 function measureText(str, fontSize = 10) {
   const widths = [
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.2796875,
@@ -21,4 +25,37 @@ function measureText(str, fontSize = 10) {
     .reduce((cur, acc) => acc + cur) * fontSize;
 }
 
-module.exports = measureText;
+async function count_performance(tries = 100, cb) {
+  let totalRuns = [];
+  let timer;
+  for (let i = 0; i < tries; i++) {
+    timer = performance.now();
+    await cb();
+    totalRuns.push(performance.now() - timer);
+  }
+  
+  const sortedArray = totalRuns.sort((a, b) => { return b - a; });
+  const totalTime = sortedArray.reduce((acc, curr) => { return acc + curr; }, 0);
+  
+  return {
+    max: sortedArray[0], 
+    min: sortedArray[sortedArray.length - 1],
+    avg: totalTime / sortedArray.length,
+    data: sortedArray 
+  };
+}
+
+function durationToString(durationInSeconds) {
+  const hours = Math.floor(durationInSeconds / 60 / 60).toString().padStart(2, 0);
+  const minutes = Math.floor((durationInSeconds/60) % 60).toString().padStart(2, 0);
+  const seconds = Math.round(durationInSeconds % 60).toString().padStart(2, 0);
+  
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+module.exports = {
+  isObject: isObject,
+  measureText: measureText,
+  count_performance: count_performance,
+  durationToString: durationToString
+}

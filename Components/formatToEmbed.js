@@ -1,12 +1,6 @@
-function durationToString(durationInSeconds) {
-  const hours = Math.floor(durationInSeconds / 60 / 60).toString().padStart(2, 0);
-  const minutes = Math.floor((durationInSeconds/60) % 60).toString().padStart(2, 0);
-  const seconds = Math.round(durationInSeconds % 60).toString().padStart(2, 0);
-  
-  return `${hours}:${minutes}:${seconds}`;
-}
+const { durationToString } = require('./util.js');
 
-function formatToEmbed(video, requestedBy, noFields=false, songQueue) {
+function formatToEmbed(video, noFields=false, songQueue) {
   const placeholder_image = "attachment://placeholder.png";
   const placeholder_path = "./resources/placeholder.png";
   
@@ -21,14 +15,12 @@ function formatToEmbed(video, requestedBy, noFields=false, songQueue) {
   	title: video.title,
   	url: video.url,
   	description: video.description,
-  	thumbnail: {
-  		url: video.thumbnail ?? default_image,
-  	},
+  	thumbnail: { url: video.thumbnail ?? default_image },
     fields: [],
   	timestamp: new Date(),
   	footer: {
-  		text: `Requested by: ${requestedBy.author.username}`,
-  		icon_url: requestedBy.author.displayAvatarURL({ dynamic: true }),
+  		text: `Requested by: ${video.requestedBy.username}`,
+  		icon_url: video.requestedBy.displayAvatarURL({ dynamic: true }),
   	},
   }
   
@@ -41,9 +33,7 @@ function formatToEmbed(video, requestedBy, noFields=false, songQueue) {
   }
   
   if (songQueue) {
-    const totalQueueLength = songQueue.reduce((acc, curr) => {
-      return acc + curr.duration;
-    }, 0);
+    const totalQueueLength = songQueue.reduce((acc, cur) => acc + cur.duration, 0);
     embed.fields.push({
       name: "Queue",
       value: durationToString(totalQueueLength),
@@ -56,4 +46,4 @@ function formatToEmbed(video, requestedBy, noFields=false, songQueue) {
   return [ { embeds: [ embed ], files: [ default_path ] }, embed ];
 }
 
-module.exports = { formatToEmbed, durationToString: durationToString }
+module.exports = { formatToEmbed }

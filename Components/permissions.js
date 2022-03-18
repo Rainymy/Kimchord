@@ -18,7 +18,6 @@ function checkPermissions(channel, user_id, requiredPermissions) {
 
 function validatePermissions(channel, id, requiredPermissions) {
   const neededPermissions = checkPermissions(channel, id, requiredPermissions);
-  
   const batch = [];
   
   for (let neededPermission of neededPermissions) {
@@ -26,9 +25,7 @@ function validatePermissions(channel, id, requiredPermissions) {
       return { error: true, comment: null, stop: true };
     }
     
-    batch.push(
-      `I need permission for "${neededPermission.split("_").join(" ")}".`
-    );
+    batch.push(`I need permission for "${neededPermission.split("_").join(" ")}".`);
   }
   
   if (batch.length > 0) {
@@ -45,7 +42,14 @@ function validatePermissions(channel, id, requiredPermissions) {
 
 const PRESETS = {
   music: [ "CONNECT", "SPEAK" ],
-  channel: [ "SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "ATTACH_FILES" ]
+  channel: [ "SEND_MESSAGES", "VIEW_CHANNEL", "EMBED_LINKS", "ATTACH_FILES" ],
+  intents: [
+    "GUILDS",
+    "GUILD_VOICE_STATES",
+    "GUILD_MESSAGES",
+    "GUILD_MESSAGE_REACTIONS",
+    "DIRECT_MESSAGES",
+  ]
 }
 
 module.exports = {

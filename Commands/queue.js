@@ -7,7 +7,7 @@ const {
 const messageInfo = require('../Components/messageInfo.js');
 
 async function queue(message, basicInfo, arg, queue) {
-  let serverQueue = queue.get(message.guild.id);
+  const serverQueue = queue.get(message.guild.id);
   
   if (!serverQueue) { return message.channel.send(messageInfo.nothingPlaying); }
   
@@ -90,7 +90,7 @@ async function queue(message, basicInfo, arg, queue) {
   });
   
   collector.on('end', async collected => {
-    try { await embedMessage.edit("Song queue timer run out"); } 
+    try { await embedMessage.edit(messageInfo.songQueueCollectorEnd); } 
     catch (e) { console.log("Message deleted before collector timeout."); }
   });
   

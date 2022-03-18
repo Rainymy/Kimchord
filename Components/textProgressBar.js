@@ -1,4 +1,4 @@
-const { durationToString } = require('../Components/formatToEmbed.js');
+const { durationToString } = require('./util.js');
 
 function progressBar(lineLength, progressPercent, indicator="🔥", line="-") {
   let progressText = "".padStart(lineLength, line).split("");

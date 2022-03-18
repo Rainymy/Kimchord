@@ -3,7 +3,8 @@ const { handleVideo } = require('../Components/handleVideo.js');
 const { createAudioPlayer } = require('@discordjs/voice');
 const request = require('../Components/request.js');
 const radioInfo = require('../Components/radioStations.js');
-const measureText = require('../Components/measureText.js');
+const { measureText } = require('../Components/util.js');
+const messageInfo = require('../Components/messageInfo.js');
 
 let radioStations;
 
@@ -19,11 +20,7 @@ async function radio(message, basicInfo, searchString, queue) {
     radioStations = await radioInfo.getAllRadioStations();
   }
   const voiceChannel = message.member.voice.channel;
-  if (!voiceChannel) {
-    return message.channel.send(
-      "I'm sorry but you need to be in a voice channel to play music!"
-    );
-  }
+  if (!voiceChannel) return message.channel.send(messageInfo.notInVoiceChannel);
   
   const lowerCaseSearch = searchString?.toLowerCase();
   
@@ -73,10 +70,10 @@ async function radio(message, basicInfo, searchString, queue) {
     return message.channel.send(result.join("\n"));
   }
   
-  let nameByShort = radioStations.shorts?.[lowerCaseSearch];
-  let nameByLong = radioStations.cache?.[lowerCaseSearch]?.name?.toLowerCase();
+  const nameByShort = radioStations.shorts?.[lowerCaseSearch];
+  const nameByLong = radioStations.cache?.[lowerCaseSearch]?.name?.toLowerCase();
   
-  let stationName = nameByShort ? nameByShort: nameByLong;
+  const stationName = nameByShort ? nameByShort: nameByLong;
   if (!stationName) {
     message.channel.send([
       "FM Radio station name not found.",
@@ -120,10 +117,10 @@ async function radio(message, basicInfo, searchString, queue) {
   const [ addedSong, songQueue ] = handleVideo(args);
   
   if (addedSong) {
-    addedSong.description = "✅ has been added to the queue! ✅";
-    let [container, embed] = formatToEmbed(addedSong, message, false, songQueue);
+    addedSong.description = messageInfo.songAddedToQueue;
+    let [container, embed] = formatToEmbed(addedSong, false, songQueue);
     
-    message.channel.send(container);
+    return message.channel.send(container);
   }
   
   return;

@@ -1,3 +1,5 @@
+const { codeBlock } = require('../Components/markup.js');
+
 function voiceCount(message, basicInfo, arg, queue, client) {
   const servers = [];
   let index = 0;
@@ -9,7 +11,7 @@ function voiceCount(message, basicInfo, arg, queue, client) {
     return message.channel.send("I'm not in any voice channel.");
   }
   
-  return message.channel.send('```js\n' + servers.join("\n") + '```');
+  return message.channel.send(codeBlock(servers.join("\n"), "js"));
 }
 
 module.exports = {

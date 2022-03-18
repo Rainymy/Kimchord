@@ -1,5 +1,3 @@
-"use strict";
-
 const messageInfo = require('../Components/messageInfo.js');
 
 function remove(message, basicInfo, searchString, queue) {

@@ -126,7 +126,7 @@ async function main(message, basicInfo, searchString, queue, client) {
     
     if (!isPlaylist && addedSong) {
       addedSong.description = messageInfo.songAddedToQueue;
-      let [container, embed] = formatToEmbed(addedSong, message, false, songQueue);
+      let [container, embed] = formatToEmbed(addedSong, false, songQueue);
       
       message.channel.send(container);
     }
@@ -138,12 +138,13 @@ async function main(message, basicInfo, searchString, queue, client) {
       description: messageInfo.playlistAddedToQueue,
       url: requested.playlistURL,
       thumbnail: requested.thumbnail,
-      duration: requested.playlist.reduce((acc, curr) => acc + curr.duration, 0)
+      duration: requested.playlist.reduce((acc, curr) => acc + curr.duration, 0),
+      requestedBy: message.author
     }
     
     console.log(addPlayList);
     
-    let [ container, embed ] = formatToEmbed(addPlayList, message, false);
+    let [ container, embed ] = formatToEmbed(addPlayList, false);
     
     message.channel.send(container);
   }

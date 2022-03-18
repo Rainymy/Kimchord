@@ -29,7 +29,7 @@ async function np(message, basicInfo, arg, queue) {
   const video = serverQueue.songs[0];
   video.description = makeTextBar(timePlayed, duration, progress);
   
-  const [ container, embed ] = formatToEmbed(video, message, true);
+  const [ container, embed ] = formatToEmbed(video, true);
   
   return message.channel.send(container);
 }
