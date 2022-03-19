@@ -4,8 +4,9 @@
   },
   "devs_ids": [],
   "server": {
-    "location": "http:\/\/localhost",
+    "location": "http:\/\/127.0.0.1",
     "port": 3000
   },
+  "DOWNLOAD_MAX_ALLOWED_HOURS": 5,
   "prefix": "!"
 }
