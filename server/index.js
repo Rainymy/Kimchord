@@ -1,4 +1,4 @@
-const { server } = require('../config.json');
+const { server, DOWNLOAD_MAX_ALLOWED_HOURS: maxHours } = require('../config.json');
 
 const express = require('express');
 const app = express();
@@ -7,31 +7,29 @@ const port = server.port;
 const Youtube = require('./API/youtube.js');
 const youtube = new Youtube();
 
-const { validQueries } = require('./Components/validateQuery.js');
 const cacheSongs = require("./Components/cacheSongs.js");
+const { isError, validQueries, init } = require('./Components/util.js');
 const {
   saveLocation,
   checkFileExists,
   deleteFile,
   makeReadStream,
   makeWriteStream,
-  makeYTDLStream,
-  isError
+  makeYTDLStream
 } = require("./Components/handleFile.js");
 
 const songs = cacheSongs.parseLocalFolder();
-const maxHours = 5;
+// initialize server.
+init();
 
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.send("Main Page. Server working fine.");
-  return;
+  return res.send("Main Page. Server working fine.");
 });
 
 app.post("/", (req, res) => {
-  res.send("Main Page (POST)");
-  return;
+  return res.send("Main Page (POST)");
 });
 
 app.post("/remove", async (req, res) => {

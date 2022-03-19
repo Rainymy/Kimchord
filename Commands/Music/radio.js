@@ -1,10 +1,10 @@
-const { formatToEmbed } = require('../Components/formatToEmbed.js');
-const { handleVideo } = require('../Components/handleVideo.js');
+const { formatToEmbed } = require('../../Components/formatToEmbed.js');
+const { handleVideo } = require('../../Components/handleVideo.js');
 const { createAudioPlayer } = require('@discordjs/voice');
-const request = require('../Components/request.js');
-const radioInfo = require('../Components/radioStations.js');
-const { measureText } = require('../Components/util.js');
-const messageInfo = require('../Components/messageInfo.js');
+const request = require('../../Components/request.js');
+const radioInfo = require('../../Components/radioStations.js');
+const { measureText } = require('../../Components/util.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 let radioStations;
 
@@ -129,6 +129,5 @@ async function radio(message, basicInfo, searchString, queue) {
 module.exports = {
   name: "Play FM Radio",
   aliases: [ "radio", "fm" ],
-  category: "music",
   main: radio
 }

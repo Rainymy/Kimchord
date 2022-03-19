@@ -4,13 +4,13 @@ const playMusic = require("./play.js").main;
 const {
   getBasicInfo,
   getPlaylistId
-} = require('../Components/youtubeMetadata.js');
+} = require('../../Components/youtubeMetadata.js');
 const {
   customReadStream,
   customWriteStream
-} = require('../Components/fileHandler.js');
+} = require('../../Components/fileHandler.js');
 
-const playlistFolder = "../playlistFolder";
+const playlistFolder = "../../playlistFolder";
 
 async function addPlayList(searchString, userId) {
   const userFile = path.join(__dirname, playlistFolder, `${userId}.json`);
@@ -162,6 +162,5 @@ async function playlist(message, basicInfo, arg, queue, client) {
 module.exports = {
   name: "Playlist",
   aliases: ["playlist"],
-  category: "music",
   main: playlist
 }

@@ -1,11 +1,11 @@
-const { handleVideo } = require('../Components/handleVideo');
-const { formatToEmbed } = require('../Components/formatToEmbed.js');
+const { handleVideo } = require('../../Components/handleVideo');
+const { formatToEmbed } = require('../../Components/formatToEmbed.js');
 const { createAudioPlayer } = require('@discordjs/voice');
-const request = require('../Components/request.js');
-const { checkPermissions, PRESETS } = require('../Components/permissions.js');
-const { parseSearchString } = require('../Components/parseSearchString.js');
-const { codeBlock } = require('../Components/markup.js');
-const messageInfo = require('../Components/messageInfo.js');
+const request = require('../../Components/request.js');
+const { checkPermissions, PRESETS } = require('../../Components/permissions.js');
+const { parseSearchString } = require('../../Components/parseSearchString.js');
+const { codeBlock } = require('../../Components/markup.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 async function main(message, basicInfo, searchString, queue, client) {
   if (!searchString.length) {
@@ -155,6 +155,5 @@ async function main(message, basicInfo, searchString, queue, client) {
 module.exports = {
   name: "Play",
   aliases: ["play", "music", "p"],
-  category: "music",
   main: main
 }

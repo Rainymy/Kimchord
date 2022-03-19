@@ -1,6 +1,6 @@
-const { formatToEmbed } = require('../Components/formatToEmbed.js');
-const { parseSearchString } = require('../Components/parseSearchString.js');
-const messageInfo = require('../Components/messageInfo.js');
+const { formatToEmbed } = require('../../Components/formatToEmbed.js');
+const { parseSearchString } = require('../../Components/parseSearchString.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 async function searchVideo(message, basicInfo, searchString, queue) {
   const baseUrl = basicInfo.serverURL;
@@ -16,6 +16,5 @@ async function searchVideo(message, basicInfo, searchString, queue) {
 module.exports = {
   name: "Search",
   aliases: ["search"],
-  category: "music",
   main: searchVideo
 }

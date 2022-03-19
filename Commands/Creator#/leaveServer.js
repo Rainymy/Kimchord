@@ -1,4 +1,4 @@
-const { codeBlock } = require('../Components/markup.js');
+const { codeBlock } = require('../../Components/markup.js');
 
 function leaveServer(message, basicInfo, arg, queue, client) {
   if (!basicInfo.isDev) {
@@ -23,7 +23,6 @@ function leaveServer(message, basicInfo, arg, queue, client) {
 module.exports = {
   name: "leaveServer",
   aliases: "leaveserver",
-  category: "moderation",
   main: leaveServer,
   isHidden: true
 }

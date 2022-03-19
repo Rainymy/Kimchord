@@ -6,6 +6,5 @@ function roll(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Now Playing",
   aliases: ["roll"],
-  category: "fun",
   main: roll
 }

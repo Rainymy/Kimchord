@@ -1,4 +1,4 @@
-const { codeBlock } = require('../Components/markup.js');
+const { codeBlock } = require('../../Components/markup.js');
 
 async function logEveryServerName(message, basicInfo, arg, queue, client) {
   if (!basicInfo.isDev) { return; }
@@ -36,7 +36,6 @@ async function logEveryServerName(message, basicInfo, arg, queue, client) {
 module.exports = {
   name: "List server names",
   aliases: "logserver",
-  category: "moderation",
   main: logEveryServerName,
   isHidden: true
 };

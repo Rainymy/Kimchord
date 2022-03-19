@@ -1,3 +1,28 @@
+const { existsSync, mkdir } = require('fs');
+const path = require('path');
+
+const essentialFolders = [ "../Songs" ];
+
+function init() {
+  let pathToFolder;
+  for (let folder of essentialFolders) {
+    pathToFolder = path.join(__dirname, folder);
+    
+    if (existsSync(pathToFolder)) { continue; }
+    mkdir(pathToFolder, (err) => {
+      if (err) { return console.error(err); }
+      console.log(pathToFolder, 'directory created successfully!');
+    });
+  }
+  
+  return true;
+}
+
+function isError(e) {
+  return e && e.stack && e.message && 
+        typeof e.stack === 'string' && typeof e.message === 'string';
+}
+
 function validQueries(username, userId, videoData, optional_id) {
   if (optional_id) {
     if (!username || !userId || !videoData) {
@@ -25,4 +50,8 @@ function validQueries(username, userId, videoData, optional_id) {
   return { error: false, comment: null };
 }
 
-module.exports = { validQueries }
+module.exports = {
+  init: init,
+  isError: isError,
+  validQueries: validQueries
+}

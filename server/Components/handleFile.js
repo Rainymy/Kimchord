@@ -3,18 +3,6 @@ const path = require("path");
 const fs = require('fs');
 const ytdl = require('ytdl-core');
 
-if (!fs.existsSync(path.join(__dirname, "../Songs"))) {
-  fs.mkdir(path.join(__dirname, "../Songs"), (err) => {
-    if (err) { return console.error(err); }
-    console.log('Songs directory created successfully!');
-  });
-};
-
-function isError(e) {
-  return e && e.stack && e.message && 
-         typeof e.stack === 'string' && typeof e.message === 'string';
-}
-
 function saveLocation(songs, songId, container) {
   if (!songs[songId]) {
     return path.join(__dirname, `../Songs/${songId}.${container}`);
@@ -97,6 +85,5 @@ module.exports = {
   readdirectory: readdirectory,
   makeReadStream: makeReadStream,
   makeWriteStream: makeWriteStream,
-  makeYTDLStream: makeYTDLStream,
-  isError: isError
+  makeYTDLStream: makeYTDLStream
 }

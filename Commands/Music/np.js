@@ -1,7 +1,7 @@
 "use strict";
-const { formatToEmbed } = require('../Components/formatToEmbed.js');
-const { progressBar, makeTextBar } = require('../Components/textProgressBar.js');
-const messageInfo = require('../Components/messageInfo.js');
+const { formatToEmbed } = require('../../Components/formatToEmbed.js');
+const { progressBar, makeTextBar } = require('../../Components/textProgressBar.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 async function np(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
@@ -37,6 +37,5 @@ async function np(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Now Playing",
   aliases: ["np", "now", "progress"],
-  category: "music",
   main: np
 }

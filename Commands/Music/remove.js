@@ -1,4 +1,4 @@
-const messageInfo = require('../Components/messageInfo.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 function remove(message, basicInfo, searchString, queue) {
   const serverQueue = queue.get(message.guild.id);
@@ -31,6 +31,5 @@ function remove(message, basicInfo, searchString, queue) {
 module.exports = {
   name: "Remove",
   aliases: "remove",
-  category: "music",
   main: remove
 }

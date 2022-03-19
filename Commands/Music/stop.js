@@ -1,6 +1,6 @@
-const messageInfo = require('../Components/messageInfo.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
-function skip(message, basicInfo, arg, queue) {
+function stop(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
   
   if (!message.member.voice.channel) {
@@ -9,13 +9,14 @@ function skip(message, basicInfo, arg, queue) {
   
   if (!serverQueue) { return message.channel.send(messageInfo.queueIsEmpty); }
   
+  serverQueue.songs.length = 0;
   serverQueue.audioPlayer.stop();
-  return message.channel.send(messageInfo.skippingSong);
+  queue.delete(message.guild.id);
+  return;
 }
 
 module.exports = {
-  name: "Skip",
-  aliases: "skip",
-  category: "music",
-  main: skip
+  name: "Stop",
+  aliases: ["stop", "leave"],
+  main: stop
 };

@@ -2,9 +2,9 @@ const {
   createSongListEmbed,
   createButton,
   createPageIndicator
-} = require('../Components/discordComponents.js');
+} = require('../../Components/discordComponents.js');
 
-const messageInfo = require('../Components/messageInfo.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 async function queue(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
@@ -100,6 +100,5 @@ async function queue(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Song queue",
   aliases: ["q", "queue"],
-  category: "music",
   main: queue
 }

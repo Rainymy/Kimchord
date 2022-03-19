@@ -1,6 +1,6 @@
-const request = require('../Components/request.js');
-const messageInfo = require('../Components/messageInfo.js');
-const { codeBlock } = require('../Components/markup.js');
+const request = require('../../Components/request.js');
+const messageInfo = require('../../Components/messageInfo.js');
+const { codeBlock } = require('../../Components/markup.js');
 
 async function ping(message, basicInfo, searchString, queue, client) {
   const resmessage = await message.channel.send(messageInfo.pingAwait);
@@ -35,6 +35,5 @@ async function ping(message, basicInfo, searchString, queue, client) {
 module.exports = {
   name: "Ping",
   aliases: [ "check", "ping"],
-  category: "general",
   main: ping
 }

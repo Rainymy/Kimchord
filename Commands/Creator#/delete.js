@@ -1,13 +1,13 @@
-const request = require('../Components/request.js');
-const { parseSearchString } = require('../Components/parseSearchString.js');
-const messageInfo = require('../Components/messageInfo.js');
+const request = require('../../Components/request.js');
+const { parseSearchString } = require('../../Components/parseSearchString.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 async function deleteSong(message, basicInfo, searchString, queue) {
-  const baseUrl = basicInfo.serverURL;
-  
   if (!basicInfo.isDev) {
     return message.channel.send(messageInfo.commandDisabled);
   }
+  
+  const baseUrl = basicInfo.serverURL;
   
   const [param,, failed] = await parseSearchString(message, baseUrl, searchString);
   if (failed) { return message.channel.send(messageInfo.foundNoSearchResults); }
@@ -28,7 +28,7 @@ async function deleteSong(message, basicInfo, searchString, queue) {
 
 module.exports = {
   name: "Delete", 
-  aliases: "delete", 
-  category: "music",
-  main: deleteSong
+  aliases: "delete",
+  main: deleteSong,
+  isHidden: true
 }

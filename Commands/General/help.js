@@ -1,30 +1,18 @@
 const {
-  createSongListEmbed, createButton, createPageIndicator, createDropdown
-} = require('../Components/discordComponents.js');
+  createSongListEmbed, createPageIndicator, createDropdown
+} = require('../../Components/discordComponents.js');
 
-const categories = {
-  fun: {
-    label: "Fun",
-    description: "All fun Commands",
-    value: "fun",
-    default: false
-  },
-  music: {
-    label: "Music",
-    description: "All music Commands",
-    value: "music",
-    default: false
-  },
-  // moderation: {
-  //   label: "Moderation",
-  //   description: "All moderation Commands",
-  //   value: "moderation",
-  //   default: false
-  // },
-  general: {
-    label: "General",
-    description: "All general Commands",
-    value: "general",
+const path = require('path');
+const { readdirSync } = require('fs');
+
+const categories = {};
+
+for (let category of readdirSync(path.join(__dirname, "../"))) {
+  if (category.endsWith("#")) { continue; }
+  categories[category] = {
+    label: category,
+    description: `All ${category} Commands`,
+    value: category,
     default: false
   }
 }
@@ -50,9 +38,7 @@ function createEmbed(selected_id, message) {
 }
 
 function makeEmbed(newEmbed, options) {
-  return {
-    embeds: [ newEmbed ], components: [ createDropdown(options) ]
-  }
+  return { embeds: [ newEmbed ], components: [ createDropdown(options) ] }
 }
 
 async function help(message, basicInfo, arg, commands) {
@@ -99,6 +85,5 @@ async function help(message, basicInfo, arg, commands) {
 module.exports = {
   name: "Help",
   aliases: "help",
-  category: "general",
   main: help
 };

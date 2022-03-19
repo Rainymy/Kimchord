@@ -1,4 +1,4 @@
-const { codeBlock } = require('../Components/markup.js');
+const { codeBlock } = require('../../Components/markup.js');
 
 function logServerSongList(message, basicInfo, arg, queue, client) {
   if (!basicInfo.isDev) { return; }
@@ -26,7 +26,6 @@ function logServerSongList(message, basicInfo, arg, queue, client) {
 module.exports = {
   name: "Log Server Song",
   aliases: "logserversonglist",
-  category: "moderation",
   main: logServerSongList,
   isHidden: true
 }

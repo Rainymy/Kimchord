@@ -10,11 +10,7 @@ function parseLocalFolder() {
     
     if (!accum[basename]) { accum[basename] = []; }
     
-    accum[basename].push({
-      name: basename, 
-      file: file,
-      container: extension
-    });
+    accum[basename].push({ name: basename, file: file, container: extension });
   }
   
   return accum;
@@ -33,18 +29,13 @@ function appendSong(listObj, file) {
   }
   
   listObj[file.name] = [ create ];
-  // console.log("Song Appended", listObj[file.name]);
   return listObj;
 }
 
 function removeSong(listObj, file) {
-  if (Array.isArray(listObj[file.name])) {
-    listObj[file.name].shift();
-  }
+  if (Array.isArray(listObj[file.name])) { listObj[file.name].shift(); }
+  if (!listObj[file.name].length) { listObj[file.name] = null; }
   
-  if (!listObj[file.name].length) {
-    listObj[file.name] = null;
-  }
   return listObj;
 }
 

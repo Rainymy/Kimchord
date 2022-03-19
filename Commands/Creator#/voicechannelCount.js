@@ -1,4 +1,4 @@
-const { codeBlock } = require('../Components/markup.js');
+const { codeBlock } = require('../../Components/markup.js');
 
 function voiceCount(message, basicInfo, arg, queue, client) {
   const servers = [];
@@ -17,7 +17,6 @@ function voiceCount(message, basicInfo, arg, queue, client) {
 module.exports = {
   name: "Bot voice count",
   aliases: [ "voicecount" ],
-  category: "moderation",
   main: voiceCount,
   isHidden: true
 }

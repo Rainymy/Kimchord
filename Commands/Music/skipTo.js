@@ -1,5 +1,5 @@
-const { codeBlock } = require('../Components/markup.js');
-const messageInfo = require('../Components/messageInfo.js');
+const { codeBlock } = require('../../Components/markup.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 function skipTo(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
@@ -17,21 +17,27 @@ function skipTo(message, basicInfo, arg, queue) {
     );
   }
   
+  if (skippingTo === serverQueue.songs.length) {
+    serverQueue.audioPlayer.stop();
+    return message.channel.send(codeBlock(messageInfo.skippingSong));
+  }
+  
   if (skippingTo > serverQueue.songs.length - 1) {
     return message.channel.send(
-      `You are overskipping, there are ${serverQueue.songs.length} song in queue`
+      codeBlock(
+        `You are overskipping, there are ${serverQueue.songs.length} song in queue`
+      )
     );
   }
   
   serverQueue.songs.splice(0, skippingTo - 1);
   serverQueue.audioPlayer.stop();
-  message.channel.send(codeBlock(`Skipping to "${serverQueue.songs[0].title}"`));
+  message.channel.send(codeBlock(`Skipping to "${serverQueue.songs[1].title}"`));
   return;
 }
 
 module.exports = {
   name: "Skip to",
   aliases: "skipto",
-  category: "music",
   main: skipTo
 };

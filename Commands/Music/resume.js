@@ -1,4 +1,4 @@
-const messageInfo = require('../Components/messageInfo.js');
+const messageInfo = require('../../Components/messageInfo.js');
 
 function resume(message, basicInfo, arg, queue) {
   let serverQueue = queue.get(message.guild.id);
@@ -21,6 +21,5 @@ function resume(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Resume",
   aliases: ["resume", "continue"],
-  category: "music",
   main: resume
 }
