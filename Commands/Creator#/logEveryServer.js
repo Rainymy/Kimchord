@@ -14,7 +14,7 @@ async function logEveryServerName(message, basicInfo, arg, queue, client) {
   });
   
   if (serverNames.join("\n").length < textCharLimit) {
-    return message.channel.send(codeBlock(serverNames.join("\n"), "js"));
+    return message.channel.send(codeBlock(serverNames.join("\n"), "cpp"));
   }
   
   const endIndex = serverNames.join("\n").length / textCharLimit;
@@ -27,7 +27,7 @@ async function logEveryServerName(message, basicInfo, arg, queue, client) {
     );
     
     loopIndex++;
-    await message.channel.send(codeBlock(part, "js"));
+    await message.channel.send(codeBlock(part, "cpp"));
   }
   
   return;

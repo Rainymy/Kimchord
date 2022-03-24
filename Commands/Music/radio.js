@@ -73,7 +73,7 @@ async function radio(message, basicInfo, searchString, queue) {
   const nameByShort = radioStations.shorts?.[lowerCaseSearch];
   const nameByLong = radioStations.cache?.[lowerCaseSearch]?.name?.toLowerCase();
   
-  const stationName = nameByShort ? nameByShort: nameByLong;
+  let stationName = nameByShort ? nameByShort: nameByLong;
   if (!stationName) {
     message.channel.send([
       "FM Radio station name not found.",

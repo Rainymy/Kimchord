@@ -60,11 +60,14 @@ function YouTube() {
   }
   
   this.getDurationById = async function (videoId) {
-    let info = await ytdl.getInfo(videoId);
-    let format = ytdl.chooseFormat(info.formats, { filter: 'audioonly' });
-    
-    const seconds = format.approxDurationMs / 1000;
-    return [ seconds, format ];
+    try {
+      let info = await ytdl.getInfo(videoId);
+      let format = ytdl.chooseFormat(info.formats, { filter: 'audioonly' });
+      
+      const seconds = format.approxDurationMs / 1000;
+      return [ seconds, format ];
+    }
+    catch (e) { return [ null, { container: "mp4" } ]; }
   }
   
   this.getYoutubeData = async function (input) {

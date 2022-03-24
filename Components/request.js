@@ -7,7 +7,7 @@ function isValidPassthrough(headers) {
       !headers["content-type"]?.includes("application/json")) {
     return true;
   }
-  if (headers["content-type"].startsWith("audio/")) { return true; }
+  if (headers["content-type"]?.startsWith("audio/")) { return true; }
   
   return false;
 }
@@ -58,7 +58,9 @@ function custom_request(urlPath, params) {
         try { resolve(JSON.parse(bufferData)); }
         catch (e) {
           resolve({
-            error: true, body: responseData, comment: responseData.toString()
+            error: true,
+            body: bufferData.toString(),
+            comment: e.toString()
           });
         }
       

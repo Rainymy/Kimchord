@@ -8,7 +8,9 @@ yarn-error.log*
 # Custom ignore
 server/Songs/
 playlistFolder/
-config.json
+./config.json
+/server/cookies.json
+TODOs.txt
 
 # Runtime data
 pids
@@ -79,4 +81,3 @@ typings/
 
 # FuseBox cache
 .fusebox/
-config.json

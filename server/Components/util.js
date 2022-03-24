@@ -1,21 +1,64 @@
-const { existsSync, mkdir } = require('fs');
+const { existsSync, mkdir, statSync, readdirSync } = require('fs');
+const { execSync } = require('child_process');
 const path = require('path');
 
-const essentialFolders = [ "../Songs" ];
+const { saveFolder } = require('../config.json');
 
 function init() {
-  let pathToFolder;
+  const essentialFolders = [ getSaveLocation() ];
   for (let folder of essentialFolders) {
-    pathToFolder = path.join(__dirname, folder);
+    if (existsSync(folder)) { continue; }
     
-    if (existsSync(pathToFolder)) { continue; }
-    mkdir(pathToFolder, (err) => {
-      if (err) { return console.error(err); }
-      console.log(pathToFolder, 'directory created successfully!');
+    mkdir(folder, (err) => {
+      return console.log(err ?? `${folder} : directory created successfully!`);
     });
   }
   
-  return true;
+  return this;
+}
+
+function getSaveLocation() {
+  function isNotValidExt(ext) { return !!ext || ext === ".lnk" }
+  
+  const savePath = path.normalize(path.resolve(__dirname, saveFolder));
+  
+  try { if (statSync(savePath).isDirectory()) { return savePath; } }
+  catch (e) {
+    const userSaveExt = path.extname(savePath);
+    const userSaveBase = path.basename(savePath, userSaveExt);
+    
+    if (isNotValidExt(userSaveExt)) { return; }
+    
+    for (let item of readdirSync(path.dirname(savePath))) {
+      if (!path.extname(item) || path.extname(item) !== ".lnk") { continue; }
+      
+      const folderName = path.basename(item, path.extname(item));
+      if (folderName !== userSaveBase) { continue; }
+      
+      return readShortcutLink(path.join(__dirname, "../", item)).TargetPath;
+    }
+  }
+  
+  return savePath;
+}
+
+function getKeyValuePairFromLines(lines) {
+  const output = {};
+  
+  for (let line of lines.split("\r\n")) {
+    if (line === "") { continue; }
+    const [ key, ...value ] = line.split(":");
+    output[key.trim()] = value.join(":").trim();
+  }
+  
+  return output
+}
+
+function readShortcutLink(filePath) {
+  const text = `"(New-Object -COM WScript.Shell).CreateShortcut('${filePath}')"`;
+  const stats = execSync(`powershell.exe -command ${text}`, { encoding: "utf-8" });
+  
+  return getKeyValuePairFromLines(stats);
 }
 
 function isError(e) {
@@ -52,6 +95,7 @@ function validQueries(username, userId, videoData, optional_id) {
 
 module.exports = {
   init: init,
+  getSaveLocation: getSaveLocation,
   isError: isError,
   validQueries: validQueries
 }

@@ -1,62 +1,74 @@
-const { server, DOWNLOAD_MAX_ALLOWED_HOURS: maxHours } = require('../config.json');
+const {server, DOWNLOAD_MAX_ALLOWED_HOURS: maxHours} = require('../config.json');
 
 const express = require('express');
 const app = express();
-const port = server.port;
 
+const Cookies = require('./Components/Cookies.js');
 const Youtube = require('./API/youtube.js');
 const youtube = new Youtube();
 
 const cacheSongs = require("./Components/cacheSongs.js");
-const { isError, validQueries, init } = require('./Components/util.js');
+const util = require('./Components/util.js').init();
+
 const {
   saveLocation,
   checkFileExists,
   deleteFile,
+  parseLocalFolder,
   makeReadStream,
   makeWriteStream,
   makeYTDLStream
 } = require("./Components/handleFile.js");
 
-const songs = cacheSongs.parseLocalFolder();
-// initialize server.
-init();
+const songs = parseLocalFolder();
+
+let cookies;
+console.log("------------------------------------------------------");
+console.log("Checking Cookies...");
+
+if (!Cookies.exists()) {
+  console.log("Generating Cookie");
+  Cookies.login()
+    .then((data) => { cookies = data; })
+    .catch(console.log);
+}
+else {
+  console.log("loading Cookies...");
+  cookies = Cookies.load();
+}
+
+if (!cookies) { console.log("Error on Cookies."); }
+else { console.log("Cookies Ready!"); }
+console.log("------------------------------------------------------");
 
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  return res.send("Main Page. Server working fine.");
-});
-
-app.post("/", (req, res) => {
-  return res.send("Main Page (POST)");
-});
+app.get("/", (req, res) => res.send("Main Page. Server working fine."));
+app.post("/", (req, res) => res.send("Main Page (POST)"));
 
 app.post("/remove", async (req, res) => {
   const { username, userId, videoData } = req.body;
   
-  const { error, comment } = validQueries(username, userId, videoData);
+  const { error, comment } = util.validQueries(username, userId, videoData);
   console.log({ error, comment }, "remove");
   
   if (error) { return res.send({ error: error, comment: comment }); }
   
   const video = videoData[0];
-  
   const filePath = saveLocation(songs, video.id);
   
   const err = await deleteFile(filePath);
   if (err) { return res.send({ error: true, comment: err }); }
   
   cacheSongs.removeSong(songs, { name: video.id });
-  res.send({ error: false, comment: `Deleted: ${video.title}` });
   
-  return;
+  return res.send({ error: false, comment: `Deleted: ${video.title}` });
 });
 
 app.post("/download", async (req, res) => {
   const { username, userId, videoData: video } = req.body;
   
-  const { error, comment } = validQueries(username, userId, video);
+  const { error, comment } = util.validQueries(username, userId, video);
   console.log({ error, comment }, "download");
   
   if (error) { return res.send({ error: error, comment: comment }); }
@@ -66,7 +78,14 @@ app.post("/download", async (req, res) => {
   const [ seconds, metadata ] = await youtube.getDurationById(video.id);
   const hours = Math.floor(seconds / 60 / 60);
   
-  if (metadata.isLive) {
+  if (!seconds && !cookies) {
+    return res.send({
+      error: true,
+      comment: `- Age-restricted videos are not supported.`
+    });
+  }
+  
+  if (metadata?.isLive) {
     return res.send({ error: true, comment: `Live streams are not supported.` });
   }
   
@@ -77,7 +96,9 @@ app.post("/download", async (req, res) => {
     });
   }
   
-  const streamURL = await makeYTDLStream(video.url, (result) => {
+  let streamURL; 
+  
+  streamURL = await makeYTDLStream(video.url, cookies, (result) => {
     if (!result.error) {
       cacheSongs.appendSong(songs, {
         name: video.id,
@@ -90,14 +111,13 @@ app.post("/download", async (req, res) => {
   const filePath = saveLocation(songs, video.id, metadata.container);
   const streamToFile = await makeWriteStream(filePath);
   
-  streamURL.pipe(streamToFile);
-  return
+  return streamURL.pipe(streamToFile);
 });
 
 app.post("/request", async (req, res) => {
   const { username, userId, videoData } = req.body;
   
-  const { error, comment } = validQueries(username, userId, videoData);
+  const { error, comment } = util.validQueries(username, userId, videoData);
   console.log({ error, comment }, "request");
   
   if (error) { return res.send({ error: error, comment: comment }); }
@@ -126,25 +146,22 @@ app.post("/request", async (req, res) => {
 app.post('/songs', async (req, res) => {
   const { username, userId, videoData } = req.body;
   
-  const { error, comment } = validQueries(username, userId, videoData);
+  const { error, comment } = util.validQueries(username, userId, videoData);
   console.log({ error, comment }, "songs");
   
   if (error) { return res.send({ error: error, comment: comment }); }
   
   const filePath = saveLocation(songs, videoData.id);
+  const stream = await makeReadStream(filePath);
+  if (util.isError(stream)) { return res.send({ error: true, comment: stream }); }
   
-  const reading = await makeReadStream(filePath);
-  if (isError(reading)) {
-    return res.send({ error: true, comment: reading });
-  }
-  
-  return reading.pipe(res);
+  return stream.pipe(res);
 });
 
 app.post("/parseSearchString", async (req, res) => {
   const { username, userId, inputQuery } = req.body;
   
-  const { error, comment } = validQueries(username, userId, inputQuery, true);
+  const { error, comment } = util.validQueries(username, userId, inputQuery, true);
   console.log({ error, comment }, "parseSearchString");
   
   if (error) { return res.send({ error: error, comment: comment }); }
@@ -157,7 +174,7 @@ app.post("/parseSearchString", async (req, res) => {
 app.post("/getDuration", async (req, res) => {
   const { username, userId, videoData } = req.body;
   
-  const { error, comment } = validQueries(username, userId, videoData);
+  const { error, comment } = util.validQueries(username, userId, videoData);
   console.log({ error, comment }, "getDuration");
   
   if (error) { return res.send({ error: error, comment: comment }); }
@@ -175,19 +192,17 @@ app.post("/getDuration", async (req, res) => {
   const durations = [];
   for (let item of videoData) {
     const filePath = saveLocation(songs, item.id);
-    durations.push(await youtube.getVideoDurationInSeconds(filePath));
+    try { durations.push(await youtube.getVideoDurationInSeconds(filePath)); } 
+    catch (e) { console.log(e); }
   }
   
-  res.send(durations);
+  return res.send(durations);
 });
 
 app.get("/ping", async (req, res) => {
-  const { time } = req.query;
-  
-  res.send({ time: Date.now() });
-  return;
+  return res.send({ time: Date.now() });
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`)
+app.listen(server.port, () => {
+  console.log(`Server listening at http://localhost:${server.port}`)
 });

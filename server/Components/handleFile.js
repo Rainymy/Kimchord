@@ -3,11 +3,13 @@ const path = require("path");
 const fs = require('fs');
 const ytdl = require('ytdl-core');
 
+const { getSaveLocation } = require('./util.js');
+const baseFolder = getSaveLocation();
+console.log("Base save folder: ", "\x1b[33m", baseFolder, "\x1b[0m");
+
 function saveLocation(songs, songId, container) {
-  if (!songs[songId]) {
-    return path.join(__dirname, `../Songs/${songId}.${container}`);
-  }
-  return path.join(__dirname, `../Songs/${songs[songId][0].file}`);
+  if (!songs[songId]) return path.join(baseFolder, `./${songId}.${container}`);
+  return path.join(baseFolder, `./${songs[songId][0].file}`);
 }
 
 function checkFileExists(filepath) {
@@ -20,8 +22,37 @@ function deleteFile(filePath) {
   return new Promise((resolve, reject) => fs.unlink(filePath, resolve));
 }
 
-function readdirectory(dirPath) {
-  return fs.readdirSync(path.join(__dirname, dirPath));
+function parseLocalFolder() {
+  const accum = {};
+  const localFiles = fs.readdirSync(baseFolder);
+  for (let file of localFiles) {
+    const extension = path.extname(file); 
+    const basename = path.basename(file, extension);
+    
+    if (!accum[basename]) { accum[basename] = []; }
+    
+    accum[basename].push({ name: basename, file: file, container: extension });
+  }
+  
+  return accum;
+}
+
+function readFileSync(filePath) {
+  return fs.readFileSync(filePath);
+}
+
+function writeFile(filePath, data, cb) {
+  return new Promise(async function(resolve, reject) {
+    const stream = await makeWriteStream(filePath);
+    
+    stream.on("finish", (err) => {
+      cb && cb(err);
+      return resolve(err ? false : true);
+    });
+    
+    stream.write(data);
+    stream.end();
+  });
 }
 
 function makeReadStream(filePath) {
@@ -30,13 +61,8 @@ function makeReadStream(filePath) {
     
     readFile.on('error', (error) => resolve(error));
     
-    readFile.on('close', () => {
-      console.log('Read stream closed');
-    });
-    
-    readFile.on('finish', () => {
-      console.log('Read stream Finished');
-    });
+    readFile.on('close', () => { console.log('Read stream closed'); });
+    readFile.on('finish', () => { console.log('Read stream Finished'); });
     
     readFile.on("ready", () => resolve(readFile));
   });
@@ -47,7 +73,7 @@ function makeWriteStream(filePath) {
     const streamToFile = fs.createWriteStream(filePath);
     
     streamToFile.on("finish", (err) => {
-      if (err) { return console.error(err); }
+      if (err) { return console.error("ERROR from writeStream: ", err); }
       return console.log("Finished Writing to a FILE");
     });
     
@@ -55,15 +81,30 @@ function makeWriteStream(filePath) {
   });
 }
 
-async function makeYTDLStream(url, cb) {
-  const streamURL = await ytdl(url, {
+async function makeYTDLStream(url, cookies, cb) {
+  const cookiesString = cookies.cookies.map(({ name, value }) => {
+    return `${name}=${value}; `;
+  })
+  
+  const options = {
     filter: "audioonly",
-    highWaterMark: 1024 * 1024 * 16
-  });
+    highWaterMark: 1024 * 1024 * 16,
+    requestOptions: {
+      headers: {
+        Cookie: cookiesString,
+        "x-youtube-identity-token": cookies.identityToken
+      }
+    }
+  }
+  
+  const streamURL = await ytdl(url, options);
+  
+  cb = typeof cookies === "function" ? cookies: cb;
+  if (!cb) { console.warn("WARNING NO CALLBACK!!"); }
   
   streamURL.on("error", (error) => {
     console.log("error from YTDL", error);
-    cb && cb({ error: true, comment: error });
+    cb && cb({ error: true, comment: `Status Code ${error.statusCode}` });
   });
   
   streamURL.on("data", (data) => {
@@ -82,7 +123,9 @@ module.exports = {
   saveLocation: saveLocation,
   checkFileExists: checkFileExists,
   deleteFile: deleteFile,
-  readdirectory: readdirectory,
+  parseLocalFolder: parseLocalFolder,
+  readFileSync: readFileSync,
+  writeFile: writeFile,
   makeReadStream: makeReadStream,
   makeWriteStream: makeWriteStream,
   makeYTDLStream: makeYTDLStream
