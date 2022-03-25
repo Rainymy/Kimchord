@@ -81,15 +81,18 @@ function makeWriteStream(filePath) {
   });
 }
 
-async function makeYTDLStream(url, cookies, cb) {
-  const cookiesString = cookies.cookies.map(({ name, value }) => {
+async function makeYTDLStream(url, cookies, callback) {
+  const cookiesString = cookies?.cookies?.map(({ name, value }) => {
     return `${name}=${value}; `;
-  })
+  });
   
   const options = {
     filter: "audioonly",
-    highWaterMark: 1024 * 1024 * 16,
-    requestOptions: {
+    highWaterMark: 1024 * 1024 * 16
+  }
+  
+  if (cookiesString) {
+    options["requestOptions"] = {
       headers: {
         Cookie: cookiesString,
         "x-youtube-identity-token": cookies.identityToken
@@ -99,7 +102,7 @@ async function makeYTDLStream(url, cookies, cb) {
   
   const streamURL = await ytdl(url, options);
   
-  cb = typeof cookies === "function" ? cookies: cb;
+  const cb = typeof cookies === "function" ? cookies: callback;
   if (!cb) { console.warn("WARNING NO CALLBACK!!"); }
   
   streamURL.on("error", (error) => {

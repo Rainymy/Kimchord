@@ -10,6 +10,7 @@ server/Songs/
 playlistFolder/
 ./config.json
 /server/cookies.json
+/server/Songs.lnk
 TODOs.txt
 
 # Runtime data
