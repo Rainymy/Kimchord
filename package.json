@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "live": "node .",
-    "server": "node ./server/index.js"
+    "server": "node ./server/index.js",
+    "update": "node ./.update/update.js"
   },
   "keywords": [],
   "license": "MIT",

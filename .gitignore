@@ -11,6 +11,7 @@ playlistFolder/
 ./config.json
 /server/cookies.json
 /server/Songs.lnk
+.update/NEW_UPDATE
 TODOs.txt
 
 # Runtime data
