@@ -6,7 +6,7 @@ const music_status = {
   play: "🎶 Now Playing 🎶"
 }
 
-function formatEmbed(songQueue, status, author) {
+function formatEmbed(songQueue, status) {
   const currentSong = songQueue[0];
   const [ container, embed ] = formatToEmbed(currentSong, false, songQueue);
   embed.description = music_status[status];
@@ -30,17 +30,14 @@ function addEventListener(serverQueue, queue, musicPlayer) {
   });
   
   serverQueue.audioPlayer.on("paused", () => {
-    const author = serverQueue.songs[0].requestedBy;
-    
-    const embed = formatEmbed(serverQueue.songs, "paused", author);
+    const embed = formatEmbed(serverQueue.songs, "paused");
     serverQueue.textChannel.send(embed);
   });
   
   serverQueue.audioPlayer.on("playing", (previous) => {
     const status = previous.status === "paused" ? "resumed" : "play";
-    const author = serverQueue.songs[0].requestedBy;
     
-    const embed = formatEmbed(serverQueue.songs, status , author);
+    const embed = formatEmbed(serverQueue.songs, status);
     serverQueue.textChannel.send(embed);
   });
   

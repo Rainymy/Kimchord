@@ -7,7 +7,8 @@ async function searchVideo(message, basicInfo, searchString, queue) {
   const [, video, failed] = await parseSearchString(message, baseUrl, searchString);
   if (failed) { return message.channel.send(messageInfo.foundNoSearchResults); }
   
-  const [ container, embed ] = formatToEmbed(video[0], message, true);
+  video[0].requestedBy = message.author;
+  const [ container, embed ] = formatToEmbed(video[0], true);
   embed.description = messageInfo.foundSearchResult;
   
   return message.channel.send(container);

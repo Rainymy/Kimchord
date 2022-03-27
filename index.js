@@ -2,7 +2,13 @@
 
 const { validatePermissions, PRESETS } = require('./Components/permissions.js');
 const { exec_command } = require('./Components/switch.js');
-const { prefix, credential, server, devs_ids } = require("./config.json");
+const {
+  prefix,
+  credential,
+  server,
+  devs_ids,
+  SHOW_SERVER_COUNT
+} = require("./config.json");
 
 const { Client, DiscordAPIError, Constants } = require('discord.js');
 const client = new Client({ intents: PRESETS.intents });
@@ -17,13 +23,21 @@ client.login(credential.token);
 
 const queue = new Map();
 const devs_id_list = devs_ids ?? [];
-const showServerCount = true;
+let showServerCount = SHOW_SERVER_COUNT ?? true;
 
 function updateActivity(client) {
   if (!showServerCount) { return client.user.setActivity( `${prefix}help` ); }
   return client.user.setActivity(
     `${prefix}help [Serving ${client.guilds.cache.size} servers]`
   );
+}
+
+function callbackFn(event, data) {
+  if (event === "updateActivity") {
+    showServerCount = data;
+    updateActivity(client);
+    return;
+  }
 }
 
 client.on("ready", async (event) => {
@@ -48,13 +62,14 @@ client.on("messageCreate", async (message) => {
   const searchString = args.slice(1).join(' ');
   
   if (args[0].startsWith(prefix) && args[0].length > prefix.length) {
-    let command = args[0].substring(prefix.length);
-    let basic_data = {
+    const command = args[0].substring(prefix.length);
+    const basic_data = {
       prefix: prefix,
       serverHost: server.location,
       serverPort: server.port,
       serverURL: `${server.location}:${server.port}`,
-      isDev: devs_id_list.includes(message.author.id)
+      isDev: devs_id_list.includes(message.author.id),
+      cb: callbackFn
     }
     
     try {

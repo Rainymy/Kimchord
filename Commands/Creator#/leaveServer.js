@@ -1,9 +1,7 @@
 const { codeBlock } = require('../../Components/markup.js');
 
 function leaveServer(message, basicInfo, arg, queue, client) {
-  if (!basicInfo.isDev) {
-    return message.channel.send("Creator Command Only!");
-  }
+  if (!basicInfo.isDev) { return; }
   
   if (arg.length < 1) {
     return message.channel.send("Require Guild ID");

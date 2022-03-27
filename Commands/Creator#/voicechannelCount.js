@@ -1,10 +1,24 @@
 const { codeBlock } = require('../../Components/markup.js');
 
 function voiceCount(message, basicInfo, arg, queue, client) {
+  if (!basicInfo.isDev) { return; }
+  
   const servers = [];
   let index = 0;
+  let server;
+  let serverText;
+  
   for (const [key, value] of client.voice.adapters) {
-    servers.push(`${++index}. ${client.guilds.cache.get(key).name}`);
+    server = client.guilds.cache.get(key);
+    serverText = `${++index}. ${server.name}`;
+    
+    const serverQueue = queue.get(server.id);
+    if (serverQueue) {
+      let title = serverQueue.songs[0].title;
+      serverText += ` || Queue: ${serverQueue.songs.length} || ${title}`;
+    }
+    
+    servers.push(`${serverText}`);
   }
   
   if (!servers.length) {

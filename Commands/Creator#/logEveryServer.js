@@ -8,7 +8,7 @@ async function logEveryServerName(message, basicInfo, arg, queue, client) {
   let index = 0;
   
   client.guilds.cache.forEach((guild, serverId) => {
-    let guildName = guild.name.padStart(25, " ");
+    let guildName = guild.name.padStart(28, " ");
     let text = `${guildName} || ${((++index) + "").padEnd(2)} || ${serverId}`;
     serverNames.push( text );
   });

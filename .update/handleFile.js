@@ -1,18 +1,25 @@
 const fs = require('fs');
 const path = require('path');
 
+function skippableFile(fileName) {
+  if (fileName.startsWith(".")) { return true; }
+  if (fileName === "package-lock.json") { return true; }
+  if (fileName === "node_modules") { return true; }
+  
+  return false;
+}
+
 function getAllFilesInList(folderPath, folderName="./") {
   let fileList = [];
   
   for (let item of fs.readdirSync(folderPath)) {
-    if (item.startsWith(".")) { continue; }
-    if (item === "package-lock.json") { continue; }
-    if (item === "node_modules") { continue; }
+    if (skippableFile(item)) { continue; }
     
     if (fs.statSync(path.join(folderPath, item)).isDirectory()) {
       const readFolder = getAllFilesInList(
         path.join(folderPath, item), path.join(folderName, item)
       );
+      
       fileList.push(...readFolder);
       continue;
     }
