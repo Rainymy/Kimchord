@@ -8,6 +8,9 @@
     "location": "http:\/\/127.0.0.1",
     "port": 3000
   },
+  "REQUIRE_MUSIC_ROLE": true,
+  "REQUIRED_MUSIC_ROLE_NAME": "Music",
   "DOWNLOAD_MAX_ALLOWED_HOURS": 5,
+  "SHOW_SERVER_COUNT": true,
   "prefix": "!"
 }
