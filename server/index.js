@@ -1,4 +1,4 @@
-const {server, DOWNLOAD_MAX_ALLOWED_HOURS: maxHours} = require('../config.json');
+const { server, DOWNLOAD_MAX_ALLOWED_HOURS: maxHours } = require('../config.json');
 
 const express = require('express');
 const app = express();
@@ -86,7 +86,7 @@ app.post("/download", async (req, res) => {
   }
   
   if (metadata?.isLive) {
-    return res.send({ error: true, comment: `Live streams are not supported.` });
+    return res.send({ error: false, comment: null, isLive: true });
   }
   
   if (hours >= maxHours) {
@@ -96,9 +96,7 @@ app.post("/download", async (req, res) => {
     });
   }
   
-  let streamURL; 
-  
-  streamURL = await makeYTDLStream(video.url, cookies, (result) => {
+  const streamURL = await makeYTDLStream(video, cookies, (result) => {
     if (!result.error) {
       cacheSongs.appendSong(songs, {
         name: video.id,
@@ -151,9 +149,18 @@ app.post('/songs', async (req, res) => {
   
   if (error) { return res.send({ error: error, comment: comment }); }
   
+  if (videoData.isLive) {
+    const stream = await makeYTDLStream(videoData, (result) => {
+      if (result.error) { console.log(result); }
+    });
+    return stream.pipe(res);
+  }
+  
   const filePath = saveLocation(songs, videoData.id);
   const stream = await makeReadStream(filePath);
-  if (util.isError(stream)) { return res.send({ error: true, comment: stream }); }
+  if (util.isError(stream)) {
+    return res.send({ error: true, comment: stream.exitCode });
+  }
   
   return stream.pipe(res);
 });
@@ -182,6 +189,10 @@ app.post("/getDuration", async (req, res) => {
   if (videoData.type === "playlist") {
     const durations = [];
     for (let item of videoData.playlist) {
+      if (item.isLive) {
+        durations.push(0);
+        continue;
+      }
       const filePath = saveLocation(songs, item.id);
       durations.push(await youtube.getVideoDurationInSeconds(filePath));
     }
@@ -191,6 +202,10 @@ app.post("/getDuration", async (req, res) => {
   
   const durations = [];
   for (let item of videoData) {
+    if (item.isLive) {
+      durations.push(0);
+      continue;
+    }
     const filePath = saveLocation(songs, item.id);
     try { durations.push(await youtube.getVideoDurationInSeconds(filePath)); } 
     catch (e) { console.log(e); }

@@ -59,7 +59,7 @@ function makeReadStream(filePath) {
   return new Promise(function(resolve, reject) {
     const readFile = fs.createReadStream(filePath, { autoClose: true });
     
-    readFile.on('error', (error) => resolve(error));
+    readFile.on('error', resolve);
     
     readFile.on('close', () => { console.log('Read stream closed'); });
     readFile.on('finish', () => { console.log('Read stream Finished'); });
@@ -72,6 +72,10 @@ function makeWriteStream(filePath) {
   return new Promise(function(resolve, reject) {
     const streamToFile = fs.createWriteStream(filePath);
     
+    streamToFile.on("error", (error) => {
+      console.log("Caught error in makeWriteStream: ", error);
+    });
+    
     streamToFile.on("finish", (err) => {
       if (err) { return console.error("ERROR from writeStream: ", err); }
       return console.log("Finished Writing to a FILE");
@@ -81,26 +85,29 @@ function makeWriteStream(filePath) {
   });
 }
 
-async function makeYTDLStream(url, cookies, callback) {
+async function makeYTDLStream(video, cookies, callback) {
   const cookiesString = cookies?.cookies?.map(({ name, value }) => {
     return `${name}=${value}; `;
   });
   
-  const options = {
-    filter: "audioonly",
-    highWaterMark: 1024 * 1024 * 16
+  const options = { filter: "audioonly", highWaterMark: 1024 * 1024 * 1024 }
+  
+  if (video.isLive) {
+    options.filter = (format) => {
+      return [ 128, 127, 120, 96, 95, 94, 93 ].indexOf(format.itag) > -1;
+    };
   }
   
   if (cookiesString) {
     options["requestOptions"] = {
       headers: {
-        Cookie: cookiesString,
+        Cookie: cookiesString, 
         "x-youtube-identity-token": cookies.identityToken
       }
     }
   }
   
-  const streamURL = await ytdl(url, options);
+  const streamURL = await ytdl(video.url, options);
   
   const cb = typeof cookies === "function" ? cookies: callback;
   if (!cb) { console.warn("WARNING NO CALLBACK!!"); }

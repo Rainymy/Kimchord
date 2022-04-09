@@ -1,44 +1,23 @@
 "use strict";
+const { validatePermissions, PRESETS } = require('./src/Components/permissions.js');
+const { exec_command } = require('./src/Components/switch.js');
+const { printToTerminal, validateCommand } = require('./src/Components/util.js');
+const { updateActivity, callbackFn } = require('./src/Events/activity.js');
 
-const { validatePermissions, PRESETS } = require('./Components/permissions.js');
-const { exec_command } = require('./Components/switch.js');
-const {
-  prefix,
-  credential,
-  server,
-  devs_ids,
-  SHOW_SERVER_COUNT
-} = require("./config.json");
+const voiceStateUpdate = require('./src/Events/voiceStateUpdate.js');
+const guildCreate = require('./src/Events/guildCreate.js');
+const guildDelete = require('./src/Events/guildDelete.js');
+const disconnect = require('./src/Events/disconnect.js');
 
-const { Client, DiscordAPIError, Constants } = require('discord.js');
+const { loadServerData, saveDefaultData } = require('./src/Components/serverData.js');
+const { credential, server, devs_ids } = require("./config.json");
+
+const { Client } = require('discord.js');
 const client = new Client({ intents: PRESETS.intents });
-
-if (!credential?.token) {
-  console.error(`Discord token is missing`);
-  console.error(`Add 'credential: { token : <token here> }' in config.json file`);
-  return;
-}
-
-client.login(credential.token);
 
 const queue = new Map();
 const devs_id_list = devs_ids ?? [];
-let showServerCount = SHOW_SERVER_COUNT ?? true;
-
-function updateActivity(client) {
-  if (!showServerCount) { return client.user.setActivity( `${prefix}help` ); }
-  return client.user.setActivity(
-    `${prefix}help [Serving ${client.guilds.cache.size} servers]`
-  );
-}
-
-function callbackFn(event, data) {
-  if (event === "updateActivity") {
-    showServerCount = data;
-    updateActivity(client);
-    return;
-  }
-}
+const server_guilds = loadServerData();
 
 client.on("ready", async (event) => {
   console.info("---------------------------------");
@@ -49,82 +28,46 @@ client.on("ready", async (event) => {
 });
 
 client.on("messageCreate", async (message) => {
-  if ( message.author.bot ) return;
+  if (message.author.bot) { return; }
   
-  const validation = validatePermissions(
-    message.channel, client.user.id, PRESETS.channel
-  );
+  const bot_id = client.user.id;
+  const validation = validatePermissions(message.channel, bot_id, PRESETS.channel);
   
   if (validation.stop) { return; }
   if (validation.error) { return message.channel.send(validation.comment); }
   
-  const args = message.content.split(" ");
-  const searchString = args.slice(1).join(' ');
-  
-  if (args[0].startsWith(prefix) && args[0].length > prefix.length) {
-    const command = args[0].substring(prefix.length);
-    const basic_data = {
-      prefix: prefix,
-      serverHost: server.location,
-      serverPort: server.port,
-      serverURL: `${server.location}:${server.port}`,
-      isDev: devs_id_list.includes(message.author.id),
-      cb: callbackFn
-    }
-    
-    try {
-      await exec_command(
-        message, basic_data, searchString, queue, command, client
-      );
-    }
-    catch (e) {
-      if (e.code === Constants.APIErrors.MISSING_PERMISSIONS) {
-        return console.log("Has Timeout or MISSING_PERMISSIONS");
-      }
-      console.log("New ERROR found: ", e);
-    }
+  let guilds_settings = server_guilds.get(message.guild.id);
+  if (!guilds_settings) {
+    guilds_settings = await saveDefaultData(server_guilds, message);
   }
   
-  return;
+  const args = message.content.split(" ");
+  const searchString = args.slice(1).join(" ");
+  
+  if (!validateCommand(args[0], guilds_settings.prefix)) { return; }
+  
+  const command = args[0].substring(guilds_settings.prefix.length);
+  const data = {
+    prefix: guilds_settings.prefix,
+    guilds_settings: guilds_settings,
+    all_server_settings: server_guilds,
+    serverHost: server.location,
+    serverPort: server.port,
+    serverURL: `${server.location}:${server.port}`,
+    isDev: devs_id_list.includes(message.author.id),
+    cb: callbackFn
+  }
+  
+  try { await exec_command(message, data, searchString, queue, command, client); }
+  catch (e) { printToTerminal("New ERROR found:", e); }
 });
 
-client.on('voiceStateUpdate', (oldState, newState) => {
-  if (oldState?.guild?.name) { console.log(oldState.guild.name); }
-  
-  if (!oldState?.channelId) { return; }
-  if (newState.id !== client.user.id) { return };
-  if (newState.channelId === oldState.channelId) { return; }
-  
-  const serverQueue = queue.get(oldState.guild.id);
-  if (!serverQueue) { return; }
-  
-  serverQueue.textChannel.send(
-    `${client.user.username} disconnected by user action 😔`
-  )
-  .catch(e => {
-    if (e.code === Constants.APIErrors.MISSING_ACCESS) {
-      return console.log("Kicked from server or MISSING_ACCESS");
-    }
-    console.log('ERROR from "voiceStateUpdate"', e.code); 
-  });
-  
-  serverQueue.connection.destroy();
-  
-  return queue.delete(oldState.guild.id);
+client.on('voiceStateUpdate', async (oldState, newState) => {
+  return await voiceStateUpdate(oldState, newState, client, queue);
 });
 
-client.on('guildCreate', async (guild) => {
-  console.log("Joined a server YEAY");
-  updateActivity(client);
-});
+client.on('guildCreate', (guild) => guildCreate(guild, client));
+client.on("guildDelete", (guild) => guildDelete(guild, client))
+client.on('disconnect', async (erMsg, code) => disconnect(client, erMsg, code));
 
-client.on("guildDelete", async (guild) => {
-  console.log("Left from server so Sad");
-  updateActivity(client);
-})
-
-client.on('disconnect', async (erMsg, code) => {
-  console.log("Disconnect CODE: ", code);
-  console.log("ERROR MESSAGE From disconnect: ", erMsg);
-  client.connect();
-});
+client.login(credential.token);

@@ -7,10 +7,12 @@ yarn-error.log*
 
 # Custom ignore
 server/Songs/
-playlistFolder/
+/src/playlistFolder/*
+/src/guilds_settings/*
 ./config.json
 /server/cookies.json
 /server/Songs.lnk
+/server/config_push.json
 .update/NEW_UPDATE
 /config_push.json
 TODOs.txt
