@@ -15,10 +15,39 @@ function Cookies() {
   }
   
   this.load = () => {
+    try { return JSON.parse(readFileSync(path.join(__dirname, "../cookies.json"))); }
+    catch (e) { return console.log(e); }
+  }
+  
+  this.get = async () => {
+    console.log("------------------------------------------------------");
+    console.log("Checking Cookies...");
+    
+    let cookie;
+    
     try {
-      return JSON.parse(readFileSync(path.join(__dirname, "../cookies.json")));
+      if (this.exists()) {
+        console.log("loading Cookies...");
+        cookie = this.load();
+      }
+      else {
+        console.log("Generating Cookie");
+        cookie = await this.login();
+        if (typeof cookie === "string") {
+          console.log(cookie);
+          cookie = null;
+        }
+      }
+      
+      if (cookie) { console.log("Cookies Ready!"); }
     }
-    catch (e) { return; }
+    catch (e) {
+      console.log("Error on Cookies.");
+      console.log(e);
+    }
+    
+    console.log("------------------------------------------------------");
+    return cookie;
   }
   
   return this;

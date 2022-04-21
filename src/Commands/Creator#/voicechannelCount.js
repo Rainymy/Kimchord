@@ -5,12 +5,10 @@ function voiceCount(message, basicInfo, arg, queue, client) {
   
   const servers = [];
   let index = 0;
-  let server;
-  let serverText;
   
   for (const [key, value] of client.voice.adapters) {
-    server = client.guilds.cache.get(key);
-    serverText = `${++index}. ${server.name}`;
+    const server = client.guilds.cache.get(key);
+    let serverText = `${++index}. ${server.name}`;
     
     const serverQueue = queue.get(server.id);
     if (serverQueue) {

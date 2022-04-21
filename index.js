@@ -51,9 +51,11 @@ client.on("messageCreate", async (message) => {
     prefix: guilds_settings.prefix,
     guilds_settings: guilds_settings,
     all_server_settings: server_guilds,
-    serverHost: server.location,
-    serverPort: server.port,
-    serverURL: `${server.location}:${server.port}`,
+    server: {
+      host: server.location,
+      port: server.port,
+      URL: `${server.location}:${server.port}`,
+    },
     isDev: devs_id_list.includes(message.author.id),
     cb: callbackFn
   }

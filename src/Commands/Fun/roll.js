@@ -4,7 +4,7 @@ function roll(message, basicInfo, arg, queue) {
 }
 
 module.exports = {
-  name: "Now Playing",
+  name: "Roll 1-100",
   aliases: ["roll"],
   main: roll
 }

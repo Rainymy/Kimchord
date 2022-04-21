@@ -14,7 +14,7 @@ async function ping(message, basicInfo, searchString, queue, client) {
   const messageEditedTime = Math.floor(resmessage.createdTimestamp);
   
   const options = { method: "GET", headers: { "Content-type": "application/json" } }
-  const baseUrl = basicInfo.serverURL;
+  const baseUrl = basicInfo.server.URL;
   
   const sendTime = Date.now();
   const response = await request(`${baseUrl}/ping?time=${sendTime}`, options);

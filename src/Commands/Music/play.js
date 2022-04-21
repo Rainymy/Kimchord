@@ -47,13 +47,10 @@ async function main(message, basicInfo, searchString, queue, client) {
   }
   
   /*----------------------- Get url for video -----------------------*/
-  const baseUrl = basicInfo.serverURL;
-  
+  const baseUrl = basicInfo.server.URL;
   const [param,, failed] = await parseSearchString(message, baseUrl, searchString);
   
-  if (failed) {
-    return message.channel.send(messageInfo.videoNotFoundOrAvailable);
-  }
+  if (failed) { return message.channel.send(messageInfo.videoNotFoundOrAvailable); }
   
   /*--------------------- Get streamable response -------------------*/
   let sentMsg;
@@ -80,7 +77,7 @@ async function main(message, basicInfo, searchString, queue, client) {
       paramCopy.body = JSON.stringify(idk);
       
       const {
-        error, comment, isLive
+        error, comment, isLive, video
       } = await request(`${baseUrl}/download`, paramCopy);
       
       if (isLive) { songs[i].isLive = true; }
@@ -93,6 +90,8 @@ async function main(message, basicInfo, searchString, queue, client) {
       if (error && !isPlaylist) {
         return sentMsg.edit(messageInfo.downloadFailed(songs[i].title , comment));
       }
+      
+      songs[i].duration = video.duration;
     }
     
     if (skippedSongs.length) {
@@ -130,7 +129,7 @@ async function main(message, basicInfo, searchString, queue, client) {
   
   /*-----------------------------------------------------------------*/
   
-  const audioPlayer = createAudioPlayer({ behaviors: { noSubscriber: "pause"} });
+  const audioPlayer = createAudioPlayer({ behaviors: { noSubscriber: "pause" } });
   
   for (let item of songs) {
     const args = {
@@ -148,9 +147,9 @@ async function main(message, basicInfo, searchString, queue, client) {
     
     if (!isPlaylist && addedSong) {
       addedSong.description = messageInfo.songAddedToQueue;
-      let [container, embed] = formatToEmbed(addedSong, false, songQueue);
+      let [ container, embed ] = formatToEmbed(addedSong, false, songQueue);
       
-      message.channel.send(container).catch(err => {
+      await message.channel.send(container).catch(err => {
         console.log("Caught Error in play: ", err);
       });
     }
@@ -170,7 +169,7 @@ async function main(message, basicInfo, searchString, queue, client) {
     
     let [ container, embed ] = formatToEmbed(addPlayList, false);
     
-    message.channel.send(container).catch(err => {
+    await message.channel.send(container).catch(err => {
       console.log("Caught Error in playlist: ", err);
     });
   }

@@ -11,6 +11,7 @@ async function play(guild_id, song, queue) {
   const stream = await song.stream;
   
   if (stream.error) {
+    serverQueue?.audioPlayer?.stop();
     return serverQueue.textChannel.send([
       '```js',
       `Encountered error with: ${song.title}`,

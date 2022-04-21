@@ -20,11 +20,11 @@ function validatePermissions(channel, id, requiredPermissions) {
   const neededPermissions = checkPermissions(channel, id, requiredPermissions);
   const batch = [];
   
+  if (neededPermissions.includes("SEND_MESSAGES")) {
+    return { error: true, comment: null, stop: true };
+  }
+  
   for (let neededPermission of neededPermissions) {
-    if (neededPermission === "SEND_MESSAGES") {
-      return { error: true, comment: null, stop: true };
-    }
-    
     batch.push(`I need permission for "${neededPermission.split("_").join(" ")}".`);
   }
   

@@ -7,7 +7,7 @@ async function deleteSong(message, basicInfo, searchString, queue) {
     return message.channel.send(messageInfo.commandDisabled);
   }
   
-  const baseUrl = basicInfo.serverURL;
+  const baseUrl = basicInfo.server.URL;
   
   const [param,, failed] = await parseSearchString(message, baseUrl, searchString);
   if (failed) { return message.channel.send(messageInfo.foundNoSearchResults); }

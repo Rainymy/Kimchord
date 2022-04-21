@@ -20,17 +20,17 @@ function waitUntilToken(page) {
 
 async function login(email, password) {
   if (!email || !password) {
-    return console.log(`${(!email ? "Email" : "Password")} is missing.`);
+    return console.log(`Login detail - ${(!email ? "Email":"Password")} is missing.`);
   }
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
   await page.goto("https://accounts.google.com/signin/v2/identifier", {
-    waitUntil: "networkidle2",
+    waitUntil: "networkidle2"
   });
 
   await page.type("#identifierId", email);
   await page.click("#identifierNext");
-
+  
   await page.waitForSelector("#password", { visible: true, hidden: false, });
   
   await page.type(
@@ -39,9 +39,18 @@ async function login(email, password) {
   
   await sleep(1000);
   await page.click("#passwordNext > div > button");
-
+  
   await sleep(1000);
   await page.goto("https://www.youtube.com/", { waitUntil: "networkidle2", });
+  
+  const isLoggedIn = await page.evaluate(() => {
+    return document.querySelector("#buttons > ytd-button-renderer > a");
+  });
+  
+  if (!isLoggedIn) {
+    await browser.close();
+    return "Login failed - login detail is wrong (email/password).";
+  }
   
   const auth = {
     cookies: await page.cookies(),

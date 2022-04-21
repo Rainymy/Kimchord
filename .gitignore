@@ -11,6 +11,7 @@ server/Songs/
 /src/guilds_settings/*
 ./config.json
 /server/cookies.json
+/server/cookies_old.json
 /server/Songs.lnk
 /server/config_push.json
 .update/NEW_UPDATE

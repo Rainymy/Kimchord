@@ -7,6 +7,10 @@ const { getSaveLocation } = require('./util.js');
 const baseFolder = getSaveLocation();
 console.log("Base save folder: ", "\x1b[33m", baseFolder, "\x1b[0m");
 
+const custom_errors = {
+  ytdl_error: "ytdl_error"
+}
+
 function saveLocation(songs, songId, container) {
   if (!songs[songId]) return path.join(baseFolder, `./${songId}.${container}`);
   return path.join(baseFolder, `./${songs[songId][0].file}`);
@@ -71,8 +75,13 @@ function makeReadStream(filePath) {
 function makeWriteStream(filePath) {
   return new Promise(function(resolve, reject) {
     const streamToFile = fs.createWriteStream(filePath);
-    
+    let hasError = false;
+        
     streamToFile.on("error", (error) => {
+      hasError = true;
+      if (error.message === custom_errors.ytdl_error) {
+        return console.log("Restricted YouTube Video");
+      }
       console.log("Caught error in makeWriteStream: ", error);
     });
     
@@ -81,8 +90,21 @@ function makeWriteStream(filePath) {
       return console.log("Finished Writing to a FILE");
     });
     
+    streamToFile.on("close", async () => {
+      if (!hasError) { return; }
+      
+      const err = await deleteFile(filePath);
+      if (err) { return console.log("Encountered error <deleting>. ", err); }
+    });
+    
     streamToFile.on("ready", (err) => resolve(streamToFile));
   });
+}
+
+function audioFilter(format) {
+  return format.container === "mp4" &&
+          format.hasVideo === false &&
+          format.hasAudio === true;
 }
 
 async function makeYTDLStream(video, cookies, callback) {
@@ -90,7 +112,18 @@ async function makeYTDLStream(video, cookies, callback) {
     return `${name}=${value}; `;
   });
   
-  const options = { filter: "audioonly", highWaterMark: 1024 * 1024 * 1024 }
+  let foundFormat;
+  
+  const options = {
+    filter: (format) => {
+      const isAudioOnly = format.hasVideo === false && format.hasAudio === true;
+      
+      if (format.container === "mp4" && isAudioOnly) { foundFormat = format; }
+      
+      return format.container === "mp4" && isAudioOnly;
+    },
+    highWaterMark: 1024 * 1024 * 1024
+  }
   
   if (video.isLive) {
     options.filter = (format) => {
@@ -109,12 +142,29 @@ async function makeYTDLStream(video, cookies, callback) {
   
   const streamURL = await ytdl(video.url, options);
   
-  const cb = typeof cookies === "function" ? cookies: callback;
-  if (!cb) { console.warn("WARNING NO CALLBACK!!"); }
+  let cb = typeof cookies === "function" ? cookies: callback;
+  if (!cb) {
+    cb = function () {}
+    console.warn("WARNING NO CALLBACK!!");
+  }
   
   streamURL.on("error", (error) => {
     console.log("error from YTDL", error);
-    cb && cb({ error: true, comment: `Status Code ${error.statusCode}` });
+    
+    for (let stream of streamURL._readableState.pipes) {
+      streamURL.unpipe(stream);
+      stream.emit("error", new Error(custom_errors.ytdl_error));
+    }
+    
+    if (error.statusCode === 410) {
+      const restrictionsExemple = 'Geography, Suicide/Self harm';
+      return cb({
+        error: true,
+        comment: `Restricted (${restrictionsExemple}) videos are not supported.`
+      });
+    }
+    
+    return cb({ error: true, comment: `Status Code ${error.statusCode}` });
   });
   
   streamURL.on("data", (data) => {
@@ -123,7 +173,10 @@ async function makeYTDLStream(video, cookies, callback) {
   
   streamURL.on("finish", () => {
     console.log("FINISHED Reading Audio from YTDL");
-    cb && cb({ error: false, comment: null });
+    
+    video.duration = parseInt(foundFormat.approxDurationMs) / 1000;
+    
+    cb && cb({ error: false, comment: null, video: video });
   });
   
   return streamURL;

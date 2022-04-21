@@ -4,7 +4,7 @@ const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 function resume(message, basicInfo, arg, queue) {
-  let serverQueue = queue.get(message.guild.id);
+  const serverQueue = queue.get(message.guild.id);
   
   if (!serverQueue || !serverQueue.songs.length) {
     return message.channel.send(messageInfo.nothingPlaying);
@@ -18,7 +18,6 @@ function resume(message, basicInfo, arg, queue) {
   }
   
   if (serverQueue.playing) { return message.channel.send(messageInfo.songPlaying); }
-  
   
   serverQueue.playing = true; 
   serverQueue.audioPlayer.unpause();

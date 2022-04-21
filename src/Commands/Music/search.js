@@ -1,12 +1,11 @@
 const { formatToEmbed } = require('../../Components/formatToEmbed.js');
 const { parseSearchString } = require('../../Components/parseSearchString.js');
-const { checkServerMusicRole } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 async function searchVideo(message, basicInfo, searchString, queue) {
-  const baseUrl = basicInfo.serverURL;
+  const baseUrl = basicInfo.server.URL;
   const [, video, failed] = await parseSearchString(message, baseUrl, searchString);
   if (failed) { return message.channel.send(messageInfo.foundNoSearchResults); }
   
