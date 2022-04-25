@@ -3,9 +3,7 @@ const { codeBlock } = require('../../Components/markup.js');
 function logServerSongList(message, basicInfo, arg, queue, client) {
   if (!basicInfo.isDev) { return; }
   
-  if (arg.length < 1) {
-    return message.channel.send("Require Guild ID");
-  }
+  if (arg.length < 1) { return message.channel.send("Require Guild ID"); }
   
   const serverQueue = queue.get(arg);
   

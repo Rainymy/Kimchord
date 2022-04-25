@@ -19,6 +19,7 @@ function isValidPassthrough(headers) {
 function custom_request(urlPath, params) {
   const serverMeta = new URL(urlPath);
   const requestBody = params?.body ?? "";
+  const threshold_kb = 512;
   
   const httpOption = {
     host: serverMeta.hostname,
@@ -45,14 +46,14 @@ function custom_request(urlPath, params) {
         return resolve(streamResponse);
       }
       
-      let chunks = [];
-      let bytes = 0;
+      const chunks = [];
       
       res.on("data", (chunk) => {
-        bytes += chunk.length / 1024;
         chunks.push(chunk);
-        if (bytes > 512) {
-          console.log("Request Chunk getting bigger. Look for: ", urlPath);
+        
+        // chunks.length * chunk kilobyte > limit kilobyte
+        if (chunks.length * (chunk.length / 1024) > threshold_kb) {
+          console.log("Request Chunk getting bigger.", urlPath);
         }
       });
       

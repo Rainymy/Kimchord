@@ -4,6 +4,7 @@ const { exec_command } = require('./src/Components/switch.js');
 const { printToTerminal, validateCommand } = require('./src/Components/util.js');
 const { updateActivity, callbackFn } = require('./src/Events/activity.js');
 
+const onReady = require('./src/Events/ready.js');
 const voiceStateUpdate = require('./src/Events/voiceStateUpdate.js');
 const guildCreate = require('./src/Events/guildCreate.js');
 const guildDelete = require('./src/Events/guildDelete.js');
@@ -19,14 +20,6 @@ const queue = new Map();
 const devs_id_list = devs_ids ?? [];
 const server_guilds = loadServerData();
 
-client.on("ready", async (event) => {
-  console.info("---------------------------------");
-  console.log(`--- Logged in as ${client.user.tag}! ---`);
-  console.info("---------------------------------");
-  
-  updateActivity(client);
-});
-
 client.on("messageCreate", async (message) => {
   if (message.author.bot) { return; }
   
@@ -34,7 +27,7 @@ client.on("messageCreate", async (message) => {
   const validation = validatePermissions(message.channel, bot_id, PRESETS.channel);
   
   if (validation.stop) { return; }
-  if (validation.error) { return message.channel.send(validation.comment); }
+  if (validation.error) { return await message.channel.send(validation.comment); }
   
   let guilds_settings = server_guilds.get(message.guild.id);
   if (!guilds_settings) {
@@ -68,8 +61,10 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
   return await voiceStateUpdate(oldState, newState, client, queue);
 });
 
-client.on('guildCreate', (guild) => guildCreate(guild, client));
-client.on("guildDelete", (guild) => guildDelete(guild, client))
+client.on("ready", async (event) => await onReady(event, client));
+client.on('guildCreate', async (guild) => guildCreate(guild, client));
+client.on("guildDelete", async (guild) => guildDelete(guild, client))
 client.on('disconnect', async (erMsg, code) => disconnect(client, erMsg, code));
+client.on('error', console.log);
 
 client.login(credential.token);

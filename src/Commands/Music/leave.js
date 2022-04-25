@@ -3,7 +3,7 @@ const { checkServerMusicRole } = require('../../Components/permissions.js');
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
 
-function stop(message, basicInfo, arg, queue) {
+function leave(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
   
   if (!message.member.voice.channel) {
@@ -21,11 +21,14 @@ function stop(message, basicInfo, arg, queue) {
   
   serverQueue.songs.length = 0;
   serverQueue.audioPlayer.stop();
+  clearTimeout(serverQueue.timeout.id);
+  serverQueue.connection.destroy();
+  queue.delete(message.guild.id);
   return;
 }
 
 module.exports = {
-  name: "Stop",
-  aliases: "stop",
-  main: stop
+  name: "Leave",
+  aliases: "leave",
+  main: leave
 };

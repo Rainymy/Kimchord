@@ -24,8 +24,16 @@ function handleVideo(args) {
   }
   
   if (serverQueue) {
-    serverQueue.songs.push(song);
-    return [ song, serverQueue.songs ];
+    if (serverQueue.timeout.id === null) {
+      serverQueue.songs.push(song);
+      return [ song, serverQueue.songs ];
+    }
+    
+    clearTimeout(serverQueue.timeout.id);
+    serverQueue.timeout.id = null;
+    
+    player(guild.channel.guild.id, song, queue);
+    return [ song, serverQueue.songs ]
   }
   
   const queueConstruct = {
@@ -35,8 +43,7 @@ function handleVideo(args) {
     connection: createConnection(voiceChannel),
     songs: [],
     playing: true,
-    volume: 5,
-    timeoutID: null
+    timeout: { id: null, duration: 5 * 60 * 1000 }
   }
   
   queue.set(guild.channel.guild.id, queueConstruct);

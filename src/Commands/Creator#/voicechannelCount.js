@@ -11,7 +11,7 @@ function voiceCount(message, basicInfo, arg, queue, client) {
     let serverText = `${++index}. ${server.name}`;
     
     const serverQueue = queue.get(server.id);
-    if (serverQueue) {
+    if (serverQueue.songs.length) {
       let title = serverQueue.songs[0].title;
       serverText += ` || Queue: ${serverQueue.songs.length} || ${title}`;
     }

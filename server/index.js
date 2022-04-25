@@ -28,7 +28,7 @@ app.get("/", (req, res) => res.send("Main Page. Server working fine."));
 app.post("/", (req, res) => res.send("Main Page (POST)"));
 
 app.post("/remove", async (req, res) => await remove(req, res, GLOBAL_CONSTANTS));
-app.post("/download",async (req, res) => await download(req, res, GLOBAL_CONSTANTS));
+app.post("/download", async (req, res) => await download(req, res, GLOBAL_CONSTANTS));
 app.post("/request", async (req, res) => await request(req, res, GLOBAL_CONSTANTS));
 app.post('/songs', async (req, res) => await songsEvent(req, res, GLOBAL_CONSTANTS));
 app.get("/ping", async (req, res) => await pingEvent(req, res, GLOBAL_CONSTANTS));

@@ -10,6 +10,10 @@ async function np(message, basicInfo, arg, queue) {
   if (!serverQueue) { return message.channel.send(messageInfo.nothingPlaying); }
   if (!serverQueue.playing) { return message.channel.send(messageInfo.songPaused); }
   
+  if (!serverQueue.songs.length) {
+    return message.channel.send(messageInfo.nothingPlaying);
+  }
+  
   if (serverQueue.songs[0].type === "radio") {
     const stationId = serverQueue.songs[0].fmStationID;
     

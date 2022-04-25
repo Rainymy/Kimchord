@@ -9,6 +9,7 @@ const music_status = {
 function formatEmbed(songQueue, status) {
   const currentSong = songQueue[0];
   const [ container, embed ] = formatToEmbed(currentSong, false, songQueue);
+  if (!embed) { return; }
   embed.description = music_status[status];
   
   return container;
@@ -22,15 +23,24 @@ function addEventListener(serverQueue, queue, musicPlayer) {
     
     const currentSong = await musicPlayer(guild_id, serverQueue.songs[0], queue);
     if (!currentSong) {
-      console.log("No songs in the queue");
       serverQueue.textChannel.send("No songs in the queue");
-      serverQueue.connection.destroy();
-      queue.delete(guild_id);
+      serverQueue.textChannel.send("Initiating [ Bean Chillin' ] Mode 🍦🥶");
+      
+      serverQueue.timeout.id = setTimeout(() => {
+        const inactiveDuration = serverQueue.timeout.duration / 60 / 1000;
+        serverQueue.textChannel.send(
+          `Bean frozen to death 💀 (survived for ${inactiveDuration} minutes)`
+        );
+        serverQueue.connection.destroy();
+        queue.delete(guild_id);
+      }, serverQueue.timeout.duration);
     }
   });
   
   serverQueue.audioPlayer.on("paused", () => {
     const embed = formatEmbed(serverQueue.songs, "paused");
+    if (!embed) { return serverQueue.textChannel.send("No embed"); }
+    
     serverQueue.textChannel.send(embed);
   });
   
@@ -39,6 +49,8 @@ function addEventListener(serverQueue, queue, musicPlayer) {
     const status = previous.status === "paused" ? "resumed" : "play";
     
     const embed = formatEmbed(serverQueue.songs, status);
+    if (!embed) { return serverQueue.textChannel.send("No embed"); }
+    
     serverQueue.textChannel.send(embed);
   });
   
