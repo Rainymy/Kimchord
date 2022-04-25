@@ -1,5 +1,5 @@
 # Kimchord
-A pretty simple music bot 
+A pretty simple general purpose discord bot. Mainly focused on music functionalities.
 
 ## Requirements
   - [Nodejs](https://nodejs.org/) version 16 or higher.
