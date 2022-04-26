@@ -1,4 +1,4 @@
-const init = require('./init.js');
+const init = require('./init.js').default;
 const [ commands, status ] = init.init().commands();
 console.table(status);
 

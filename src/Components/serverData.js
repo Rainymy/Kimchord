@@ -1,11 +1,12 @@
 const path = require('path');
 const fileHandler = require('./fileHandler.js');
 const config = require('../../config.json');
+const { guilds_settings } = require('./init.js').essentialFolders;
 
 function loadServerData() {
   const servers = new Map();
   console.log("Loading server settings....");
-  const pathTo = path.join(__dirname, "../guilds_settings");
+  const pathTo = path.join(__dirname, guilds_settings);
   
   for (let file of fileHandler.readdirSync(pathTo)) {
     let ext = path.extname(file);
@@ -48,7 +49,7 @@ async function saveDefaultData(server_guilds, message) {
 }
 
 async function saveServerData(id, data) {
-  const pathTo = path.join(__dirname, "../guilds_settings/", `${id}.json`);
+  const pathTo = path.join(__dirname, guilds_settings, `${id}.json`);
   const error = await fileHandler.customWriteStream(pathTo, data);
   if (error) { console.log(error); }
   console.log("Saved.", error === undefined ? "" : error);

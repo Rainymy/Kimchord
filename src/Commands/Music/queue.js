@@ -12,6 +12,9 @@ async function queue(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
   
   if (!serverQueue) { return message.channel.send(messageInfo.nothingPlaying); }
+  if (!serverQueue.songs.length) {
+    return message.channel.send("Queue is empty");
+  }
   
   const backButton = createButton("Back", "back_button", false, "◀️");
   const nextButton = createButton("Next", "next_button", false, "▶️");

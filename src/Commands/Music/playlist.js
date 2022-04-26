@@ -1,13 +1,20 @@
 const path = require('path');
 const playMusic = require("./play.js").main;
+const { playlistFolder } = require('../../Components/init.js').essentialFolders;
 
-const { getBasicInfo, getPlaylistId } = require('../../Components/youtubeMetadata.js');
-const { customReadStream, customWriteStream } = require('../../Components/fileHandler.js');
-
-const playlistFolder = "../../playlistFolder";
+const {
+  getBasicInfo,
+  getPlaylistId
+} = require('../../Components/youtubeMetadata.js');
+const {
+  customReadStream,
+  customWriteStream
+} = require('../../Components/fileHandler.js');
 
 async function addPlayList(searchString, userId) {
-  const userFile = path.join(__dirname, playlistFolder, `${userId}.json`);
+  if (!searchString) { return { error: true, comment: "Link/Text" } }
+  
+  const userFile = path.join(__dirname, "..", playlistFolder, `${userId}.json`);
   
   const playlistId = getPlaylistId(searchString);
   if (!playlistId) {
@@ -18,6 +25,9 @@ async function addPlayList(searchString, userId) {
   
   if (!data[playlistId]) {
     const response = await getBasicInfo(searchString);
+    if (!response) {
+      return { error: false, comment: "Playlist either private or unlisted" }
+    }
     
     if (!data.titles) { data.titles = {}; }
     
@@ -40,29 +50,36 @@ async function addPlayList(searchString, userId) {
 }
 
 async function playPlayList(searchString, userId) {
-  const userFile = path.join(__dirname, playlistFolder, `${userId}.json`);
+  if (!searchString) { return { error: true, comment: "Link/Text" } }
+  
+  const userFile = path.join(__dirname, "..", playlistFolder, `${userId}.json`);
   
   const data = await customReadStream(userFile);
   let playlistId;
   
-  if (!data?.titles?.[searchString]?.id) { playlistId = getPlaylistId(searchString); }
+  if (!data?.titles?.[searchString]?.id) {playlistId = getPlaylistId(searchString);}
   else { playlistId = data.titles[searchString].id;}
   
-  if (!playlistId) { return { error: true, comment: `${searchString} playlist not found.` } }
+  if (!playlistId) {
+    return { error: true, comment: `${searchString} playlist not found.` }
+  }
+  
   if (data[playlistId]) { return { error: false, playURL: data[playlistId].url } }
   
   return { error: true, comment: "Playlist doesn't exists!" };
 }
 
 async function listPlayList(searchString, userId) {
-  const userFile = path.join(__dirname, playlistFolder, `${userId}.json`);
+  const userFile = path.join(__dirname, "..", playlistFolder, `${userId}.json`);
   
   const data = await customReadStream(userFile);
   return { error: false, comment: "Successful", list: data };
 }
 
 async function removePlayList(searchString, userId) {
-  const userFile = path.join(__dirname, playlistFolder, `${userId}.json`);
+  if (!searchString) { return { error: true, comment: "Link/Text" } }
+  
+  const userFile = path.join(__dirname, "..", playlistFolder, `${userId}.json`);
   
   const data = await customReadStream(userFile);
   let playlistId;
@@ -70,7 +87,9 @@ async function removePlayList(searchString, userId) {
   if (data?.titles?.[searchString]?.id) { playlistId = getPlaylistId(searchString); }
   else { playlistId = data.titles[searchString].id; }
   
-  if (!playlistId) { return { error: true, comment: `${searchString} playlist not found.` } }
+  if (!playlistId) {
+    return { error: true, comment: `${searchString} playlist not found.` }
+  }
   
   if (data[playlistId]) {
     delete data.titles[data[playlistId].title];

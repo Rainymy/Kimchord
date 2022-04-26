@@ -6,6 +6,13 @@ const stateChange = {
     
     return true;
   },
+  isBotJoined: function (oldState, newState, client) {
+    if (oldState.channelId) { return false; }
+    if (!newState.channelId) { return false; }
+    if (newState.id !== client.user.id) { return false; }
+    
+    return true;
+  },
   isBotMoved: function (oldState, newState) {
     if (!oldState?.channelId) { return false; }
     if (!newState?.channelId) { return false; }
@@ -13,7 +20,7 @@ const stateChange = {
     
     return true;
   },
-  isBotLeft: function (oldState, newState) {
+  isBotLeftByUser: function (oldState, newState) {
     if (newState.channelId) { return false; }
     
     return true;
@@ -39,12 +46,9 @@ const helpers = {
 }
 
 async function voiceStateUpdate(oldState, newState, client, queue) {
-  
   if (stateChange.userLeftOrChangedChannel(oldState, newState, client)) {
     const serverQueue = queue.get(oldState.guild.id);
     if (!serverQueue) { return; }
-    
-    console.log(oldState.guild.name);
     
     const connection = serverQueue.connection.joinConfig;
     const voicechannel = helpers.getVoicechannel(connection, client);
@@ -55,6 +59,10 @@ async function voiceStateUpdate(oldState, newState, client, queue) {
     .catch(e => printToTerminal('ERROR from "voiceStateUpdate"', e));
     
     return helpers.cleanLeave(queue, oldState.guild.id);
+  }
+  
+  if (stateChange.isBotJoined(oldState, newState, client)) {
+    return console.log(`${client.user.username} connected to ${newState.guild.name}`);
   }
   
   if (stateChange.isBotMoved(oldState, newState)) {
@@ -72,7 +80,7 @@ async function voiceStateUpdate(oldState, newState, client, queue) {
     return helpers.cleanLeave(queue, oldState.guild.id);
   }
   
-  if (stateChange.isBotLeft(oldState, newState)) {
+  if (stateChange.isBotLeftByUser(oldState, newState)) {
     const serverQueue = queue.get(oldState.guild.id);
     if (!serverQueue) { return; }
     

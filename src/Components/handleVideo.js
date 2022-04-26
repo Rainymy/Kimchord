@@ -32,8 +32,9 @@ function handleVideo(args) {
     clearTimeout(serverQueue.timeout.id);
     serverQueue.timeout.id = null;
     
+    serverQueue.songs.push(song);
     player(guild.channel.guild.id, song, queue);
-    return [ song, serverQueue.songs ]
+    return [ song, serverQueue.songs ];
   }
   
   const queueConstruct = {
@@ -43,7 +44,7 @@ function handleVideo(args) {
     connection: createConnection(voiceChannel),
     songs: [],
     playing: true,
-    timeout: { id: null, duration: 5 * 60 * 1000 }
+    timeout: { id: null, duration: 3 * 60 * 1000 }
   }
   
   queue.set(guild.channel.guild.id, queueConstruct);

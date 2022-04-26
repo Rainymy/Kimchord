@@ -7,7 +7,10 @@ function formatToEmbed(video, noFields=false, songQueue) {
   const radio_image = "attachment://radio.png";
   const radio_path = "./src/resources/radio.png";
   
-  if (!video) { return console.trace(`Video value is: ${video}`); }
+  if (!video) {
+    console.trace(`Video value is: ${video}`);
+    return [];
+  }
   
   const default_image = video.type === "radio" ? radio_image: placeholder_image;
   const default_path = video.type === "radio" ? radio_path: placeholder_path;

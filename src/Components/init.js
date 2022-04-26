@@ -1,6 +1,11 @@
 const { readdirSync, existsSync, mkdir, statSync } = require('fs');
 const path = require('path');
 
+const essentialFolders = {
+  playlistFolder: "../playlistFolder",
+  guilds_settings: "../guilds_settings"
+};
+
 function handleFile(filePath) {
   const commandFunction = require(filePath);
   const commmand = [];
@@ -40,11 +45,10 @@ function commands() {
   
   const commmand = {};
   const status = {};
-  let relPath;
   let stat;
   
   for (let [ index, file ] of readdirSync(commandPath).entries()) {
-    relPath = path.join(commandPath, file);
+    let relPath = path.join(commandPath, file);
     if (statSync(relPath).isFile()) {
       stat = handleAppend(commmand, relPath);
       status[ getFirstOrString(stat.aliases) ] = { ...stat };
@@ -63,11 +67,9 @@ function commands() {
 
 function Start() {
   this.commands = commands;
-  this.essentialFolders = [ "../playlistFolder", "../guilds_settings" ];
   this.init = () => {
-    let pathToFolder;
-    for (let folder of this.essentialFolders) {
-      pathToFolder = path.join(__dirname, folder);
+    for (let folder of Object.values(essentialFolders)) {
+      let pathToFolder = path.join(__dirname, folder);
       
       if (!existsSync(pathToFolder)) {
         mkdir(pathToFolder, (err) => {
@@ -81,4 +83,7 @@ function Start() {
   }
 }
 
-module.exports = new Start();
+module.exports = {
+  essentialFolders: essentialFolders,
+  default: new Start()
+};

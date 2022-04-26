@@ -74,8 +74,12 @@ function YouTube() {
     let video;
     try {
       video = await this.getVideo(input);
-      if (!video) { video = await this.getPlaylist(input); }
-      // console.log("video", video);
+      if (!video) {
+        video = await this.getPlaylist(input);
+        if (typeof video !== "boolean" && video === false) {
+          throw new Error("Playlist not found");
+        }
+      }
     } catch (e) {
       try {
         let videos = await this.searchVideos(input);
@@ -117,7 +121,9 @@ function YouTube() {
     const url = new URLSearchParams(parseSearchURL.search);
     const playListId = url.get("list");
     
-    const response = await ytpl(playListId);
+    let response;
+    try { response = await ytpl(playListId); }
+    catch (e) { return false; }
     
     for (let item of response.items) {
       delete item.index;

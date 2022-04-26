@@ -22,14 +22,14 @@ async function getBasicInfo(videoUrl) {
       res.on("data", (chunk) => { return data += chunk; });
       res.on("end", () => {
         let info; 
-        try { info = JSON.parse(data); } 
+        try { info = JSON.parse(data); }
         catch (e) { info = data; }
         
         const response = typeof info === "string" ? { title: info } : info;
         
-        if (typeof info !== "string") { return resolve(response); }
         if (info === "Not Found") { return resolve(); }
         if (info === "Bad Request") { return resolve(); }
+        if (typeof info !== "string") { return resolve(response); }
         
         return resolve({ title: info });
       });

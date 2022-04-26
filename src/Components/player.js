@@ -11,14 +11,15 @@ async function play(guild_id, song, queue) {
   const stream = await song.stream;
   
   if (stream.error) {
-    serverQueue?.audioPlayer?.stop();
-    return serverQueue.textChannel.send([
+    serverQueue.textChannel.send([
       '```js',
       `Encountered error with: ${song.title}`,
       `id: ${song.id} | url: "${song.url}"`,
       `Detail of error: ${stream.comment}`,
       '```'
     ].join("\n"));
+    
+    return await play(guild_id, serverQueue.songs.shift(), queue);
   }
   
   const resource = createAudioResource(stream);
