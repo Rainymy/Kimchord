@@ -50,6 +50,7 @@ function YouTube() {
     return {
       url: videoURL,
       id: videoId,
+      type: "video",
       title: video.title,
       thumbnail: video.thumbnail_url
     }

@@ -127,7 +127,26 @@ async function main(message, basicInfo, searchString, queue, client) {
     }
   }
   
-  /*-----------------------------------------------------------------*/
+  /*--------- Add the playable stream to queue and play it ---------*/
+  
+  if (isPlaylist) {
+    const addPlayList = {
+      title: `Playlist: ${requested.title}`,
+      description: messageInfo.playlistAddedToQueue,
+      url: requested.playlistURL,
+      thumbnail: requested.thumbnail,
+      duration: requested.playlist.reduce((acc, curr) => acc + curr.duration, 0),
+      requestedBy: message.author
+    }
+    
+    console.log(addPlayList);
+    
+    let [ container, embed ] = formatToEmbed(addPlayList, false);
+    
+    return await message.channel.send(container).catch(err => {
+      console.log("Caught Error in playlist: ", err);
+    });
+  }
   
   const audioPlayer = createAudioPlayer({ behaviors: { noSubscriber: "pause" } });
   
@@ -145,7 +164,7 @@ async function main(message, basicInfo, searchString, queue, client) {
     
     const [ addedSong, songQueue ] = handleVideo(args);
     
-    if (!isPlaylist && addedSong) {
+    if (addedSong && !(addedSong && songQueue?.length === 1) ) {
       addedSong.description = messageInfo.songAddedToQueue;
       let [ container, embed ] = formatToEmbed(addedSong, false, songQueue);
       
@@ -153,25 +172,6 @@ async function main(message, basicInfo, searchString, queue, client) {
         console.log("Caught Error in play: ", err);
       });
     }
-  }
-  
-  if (isPlaylist) {
-    const addPlayList = {
-      title: `Playlist: ${requested.title}`,
-      description: messageInfo.playlistAddedToQueue,
-      url: requested.playlistURL,
-      thumbnail: requested.thumbnail,
-      duration: requested.playlist.reduce((acc, curr) => acc + curr.duration, 0),
-      requestedBy: message.author
-    }
-    
-    console.log(addPlayList);
-    
-    let [ container, embed ] = formatToEmbed(addPlayList, false);
-    
-    await message.channel.send(container).catch(err => {
-      console.log("Caught Error in playlist: ", err);
-    });
   }
   
   return;
