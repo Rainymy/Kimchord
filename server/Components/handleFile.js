@@ -76,7 +76,7 @@ function makeWriteStream(filePath) {
   return new Promise(function(resolve, reject) {
     const streamToFile = fs.createWriteStream(filePath);
     let hasError = false;
-        
+    
     streamToFile.on("error", (error) => {
       hasError = true;
       if (error.message === custom_errors.ytdl_error) {
@@ -97,14 +97,9 @@ function makeWriteStream(filePath) {
       if (err) { return console.log("Encountered error <deleting>. ", err); }
     });
     
-    streamToFile.on("ready", (err) => resolve(streamToFile));
+    // streamToFile.on("ready", (err) => resolve(streamToFile));
+    resolve(streamToFile);
   });
-}
-
-function audioFilter(format) {
-  return format.container === "mp4" &&
-          format.hasVideo === false &&
-          format.hasAudio === true;
 }
 
 async function makeYTDLStream(video, cookies, callback) {
@@ -113,12 +108,18 @@ async function makeYTDLStream(video, cookies, callback) {
   });
   
   let foundFormat;
+  let downloadedBytes = 0;
   
   const options = {
     filter: (format) => {
       const isAudioOnly = format.hasVideo === false && format.hasAudio === true;
       
-      if (format.container === "mp4" && isAudioOnly) { foundFormat = format; }
+      if (format.container === "mp4" && isAudioOnly) {
+        console.log("-----------------------------------------------------");
+        console.log("Found format: ", format);
+        console.log("-----------------------------------------------------");
+        foundFormat = format;
+      }
       
       return format.container === "mp4" && isAudioOnly;
     },
@@ -157,7 +158,7 @@ async function makeYTDLStream(video, cookies, callback) {
     }
     
     if (error.statusCode === 410) {
-      const restrictionsExemple = 'Geography, Suicide/Self harm';
+      const restrictionsExemple = 'Geography, Suicide/Self harm/Copyright blocked';
       return cb({
         error: true,
         comment: `Restricted (${restrictionsExemple}) videos are not supported.`
@@ -168,11 +169,12 @@ async function makeYTDLStream(video, cookies, callback) {
   });
   
   streamURL.on("data", (data) => {
-    // console.log("data", data.length / 1024, "KiB");
+    downloadedBytes += data.length;
   });
   
   streamURL.on("finish", () => {
     console.log("FINISHED Reading Audio from YTDL");
+    console.log("Downloaded size", Math.round(downloadedBytes / 1024) + " KiB");
     
     video.duration = parseInt(foundFormat.approxDurationMs) / 1000;
     

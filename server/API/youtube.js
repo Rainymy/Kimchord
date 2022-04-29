@@ -52,6 +52,7 @@ function YouTube() {
       id: videoId,
       type: "video",
       title: video.title,
+      requestedTime: (new Date()).toLocaleString(),
       thumbnail: video.thumbnail_url
     }
   }

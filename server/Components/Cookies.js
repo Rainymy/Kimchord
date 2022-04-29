@@ -4,18 +4,18 @@ const { login } = require('./puppy.js');
 const { email, password } = require('../config.json');
 
 function Cookies() {
-  this.exists = () => {
-    return existsSync(path.join(__dirname, "../cookies.json"))
-  }
+  this.cookiesPath = path.join(__dirname, "../cookies.json");
+  
+  this.exists = () => { return existsSync(this.cookiesPath); }
   
   this.login = () => {
     return new Promise((resolve, reject) => {
-      login(email, password).then(resolve).catch(reject);
+      return login(email, password).then(resolve).catch(reject);
     });
   }
   
   this.load = () => {
-    try { return JSON.parse(readFileSync(path.join(__dirname, "../cookies.json"))); }
+    try { return JSON.parse(readFileSync(this.cookiesPath)); }
     catch (e) { return console.log(e); }
   }
   
