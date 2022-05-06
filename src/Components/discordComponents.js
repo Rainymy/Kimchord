@@ -1,38 +1,37 @@
 const { durationToString } = require('./util.js');
 
+function basicEmbed(video, queueLength) {
+  const embedTitle = video.type === "radio"
+    ? `📻🎶 Currently jamming to FM Radio 📻🎶`
+    : `Song Queue: ${durationToString(queueLength)}`;
+  
+  const embedDescription = video.type === "radio"
+    ? video.title 
+    : `Current Song: ${video.title}`;
+  
+  return {
+    title: embedTitle,
+    color: 0x0099ff,
+    description: embedDescription,
+    thumbnail: { url: video.thumbnail },
+    fields: []
+  }
+}
+
 function createSongListEmbed(songs, start, perPages=8) {
-  const offset = start === 0 ? 1 : 1;
-  const page = songs.slice(start + offset, start + offset + perPages);
+  if (!songs.length) { return; }
+  
+  const page = songs.slice(start + 1, start + 1 + perPages);
   const separatorLine = "".padStart(60, "-");
   
   const queuePlayLength = songs.reduce((acc, curr) => acc + curr.duration, 0);
-  
-  let embed;
-  if (songs[0].type === "radio") {
-    embed = {
-      title: `📻🎶 Currently jaming to FM Radio 📻🎶`,
-      color: 0x0099ff,
-      description: songs[0].title,
-      thumbnail: { url: songs[0].thumbnail },
-      fields: []
-    }
-  }
-  else {
-    embed = {
-      title: `Song Queue: ${durationToString(queuePlayLength)}`,
-      color: 0x0099ff,
-      description: "Current Song: " + songs[0].title,
-      thumbnail: { url: songs[0].thumbnail },
-      fields: []
-    }
-  }
-  
+  const embed = basicEmbed(songs[0], queuePlayLength);
   
   for (let [ index, item ] of page.entries()) {
     embed.fields.push({
       // name: "\u200B",
       name: separatorLine,
-      value: `${index + start + offset} - ${item.title}`,
+      value: `${index + start + 1} - ${item.title}`,
     });
   }
   

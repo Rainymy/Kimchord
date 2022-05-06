@@ -52,6 +52,13 @@ function addEventListener(serverQueue, queue, musicPlayer) {
     if (!embed) { return serverQueue.textChannel.send("No embed"); }
     
     serverQueue.textChannel.send(embed);
+    
+    if (status === "play" && serverQueue.songs[0].isLive) {
+      serverQueue.textChannel.send(
+        "Live stream is in experimental mode!, *May not work properly*"
+      );
+    }
+    
   });
   
   serverQueue.audioPlayer.on('error', (error) => {

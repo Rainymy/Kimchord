@@ -1,3 +1,4 @@
+"use strict";
 const {
   createSongListEmbed,
   createButton,
@@ -36,7 +37,7 @@ async function queue(message, basicInfo, arg, queue) {
   if (!embed.thumbnail.url) { embed.thumbnail.url = radio_image; }
   
   if (songQueue.length - 1 <= itemsPerPage) {
-    return message.channel.send({ files: [...default_path], embeds: [embed] });
+    return message.channel.send({ files: [ ...default_path ], embeds: [ embed ] });
   }
   
   const embedMessage = await message.channel.send({
@@ -60,6 +61,8 @@ async function queue(message, basicInfo, arg, queue) {
     
     let newEmbed = createSongListEmbed(songQueue, index, itemsPerPage);
     
+    if (!newEmbed) { return collector.stop("Empty list"); }
+    
     if (!newEmbed.fields.length) {
       index -= itemsPerPage;
       newEmbed = createSongListEmbed(songQueue, index, itemsPerPage);
@@ -71,9 +74,10 @@ async function queue(message, basicInfo, arg, queue) {
     }
     
     if (songQueue.length - 1 <= itemsPerPage) {
-      return interaction.update({
+      interaction.update({
         files: [ ...default_path ], embeds: [ newEmbed ], components: []
       });
+      return collector.stop("Single page list");
     }
     
     interaction.update({
@@ -82,9 +86,7 @@ async function queue(message, basicInfo, arg, queue) {
           type: "ACTION_ROW",
           components: [
             ...(index ? [backButton] : []),
-            ...(
-              (index + itemsPerPage) < songQueue.length ? [nextButton] : []
-            ),
+            ...((index + itemsPerPage) < songQueue.length ? [nextButton] : []),
             ...createPageIndicator(songQueue.length, index, itemsPerPage)
           ]
         }
@@ -94,7 +96,9 @@ async function queue(message, basicInfo, arg, queue) {
     return;
   });
   
-  collector.on('end', async collected => {
+  collector.on('end', async (collected, reason) => {
+    if (reason === "Single page list") { return; }
+    
     try { await embedMessage.edit(messageInfo.songQueueCollectorEnd); } 
     catch (e) { console.log("Message deleted before collector timeout."); }
   });

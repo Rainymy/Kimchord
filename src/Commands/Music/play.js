@@ -80,8 +80,6 @@ async function main(message, basicInfo, searchString, queue, client) {
         error, comment, isLive, video
       } = await request(`${baseUrl}/download`, paramCopy);
       
-      if (isLive) { songs[i].isLive = true; }
-      
       if (error && isPlaylist) {
         skippedSongs.push(messageInfo.skippingDownload(songs[i].title, comment));
         songs.splice(i, 1);
@@ -91,7 +89,8 @@ async function main(message, basicInfo, searchString, queue, client) {
         return sentMsg.edit(messageInfo.downloadFailed(songs[i].title , comment));
       }
       
-      songs[i].duration = video.duration;
+      if (isLive) { songs[i].isLive = true; }
+      else { songs[i].duration = video.duration; }
     }
     
     if (skippedSongs.length) {

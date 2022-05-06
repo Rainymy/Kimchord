@@ -1,6 +1,6 @@
 "use strict";
-const path = require("path");
-const fs = require('fs');
+const path = require("node:path");
+const fs = require('node:fs');
 const ytdl = require('ytdl-core');
 
 const { getSaveLocation } = require('./util.js');
@@ -9,11 +9,6 @@ console.log("Base save folder: ", "\x1b[33m", baseFolder, "\x1b[0m");
 
 const custom_errors = {
   ytdl_error: "ytdl_error"
-}
-
-function saveLocation(songs, songId, container) {
-  if (!songs[songId]) return path.join(baseFolder, `./${songId}.${container}`);
-  return path.join(baseFolder, `./${songs[songId][0].file}`);
 }
 
 function checkFileExists(filepath) {
@@ -27,15 +22,16 @@ function deleteFile(filePath) {
 }
 
 function parseLocalFolder() {
-  const accum = {};
+  const accum = new Map();
   const localFiles = fs.readdirSync(baseFolder);
   for (let file of localFiles) {
     const extension = path.extname(file); 
     const basename = path.basename(file, extension);
     
-    if (!accum[basename]) { accum[basename] = []; }
+    if (!accum.has(basename)) { accum.set(basename, []); }
     
-    accum[basename].push({ name: basename, file: file, container: extension });
+    const saved = accum.get(basename);
+    saved.push({ name: basename, file: file, container: extension });
   }
   
   return accum;
@@ -97,8 +93,7 @@ function makeWriteStream(filePath) {
       if (err) { return console.log("Encountered error <deleting>. ", err); }
     });
     
-    // streamToFile.on("ready", (err) => resolve(streamToFile));
-    resolve(streamToFile);
+    streamToFile.on("ready", (err) => resolve(streamToFile));
   });
 }
 
@@ -157,15 +152,21 @@ async function makeYTDLStream(video, cookies, callback) {
       stream.emit("error", new Error(custom_errors.ytdl_error));
     }
     
+    let returnValue;
     if (error.statusCode === 410) {
       const restrictionsExemple = 'Geography, Suicide/Self harm/Copyright blocked';
-      return cb({
+      
+      returnValue = {
         error: true,
         comment: `Restricted (${restrictionsExemple}) videos are not supported.`
-      });
+      }
+    }
+    else {
+      returnValue = { error: true, comment: `Status Code ${error.statusCode}` };
     }
     
-    return cb({ error: true, comment: `Status Code ${error.statusCode}` });
+    streamURL.emit("existing_stream", returnValue);
+    return cb(returnValue);
   });
   
   streamURL.on("data", (data) => {
@@ -178,14 +179,16 @@ async function makeYTDLStream(video, cookies, callback) {
     
     video.duration = parseInt(foundFormat.approxDurationMs) / 1000;
     
-    cb && cb({ error: false, comment: null, video: video });
+    const returnValue = { error: false, comment: null, video: video };
+    
+    streamURL.emit("existing_stream", returnValue);
+    cb(returnValue);
   });
   
   return streamURL;
 }
 
 module.exports = {
-  saveLocation: saveLocation,
   checkFileExists: checkFileExists,
   deleteFile: deleteFile,
   parseLocalFolder: parseLocalFolder,

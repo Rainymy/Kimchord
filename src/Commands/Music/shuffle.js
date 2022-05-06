@@ -3,10 +3,12 @@ const { checkServerMusicRole } = require('../../Components/permissions.js');
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
 
-async function np(message, basicInfo, arg, queue) {
+async function shuffle(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
   
-  if (!serverQueue) { return message.channel.send(messageInfo.nothingPlaying); }
+  if (!serverQueue || !serverQueue.songs.length) {
+    return message.channel.send(messageInfo.nothingPlaying);
+  }
   
   const REQUIRED_ROLE_NAME = basicInfo.guilds_settings.REQUIRED_MUSIC_ROLE_NAME;
   if (checkServerMusicRole(basicInfo.guilds_settings, message.member)) {
@@ -25,5 +27,5 @@ async function np(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Shuffle queue",
   aliases: "shuffle",
-  main: np
+  main: shuffle
 }

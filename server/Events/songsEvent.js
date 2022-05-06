@@ -1,12 +1,6 @@
 const util = require('../Components/util.js').init();
 
-const {
-  saveLocation,
-  makeReadStream,
-  makeYTDLStream
-} = require("../Components/handleFile.js");
-
-async function songsEvent(req, res, GLOBAL_CONSTANTS) {
+async function songsEvent(req, res, GLOBAL_OBJECTS) {
   const { username, userId, videoData } = req.body;
   
   const { error, comment } = util.validQueries(username, userId, videoData);
@@ -15,19 +9,19 @@ async function songsEvent(req, res, GLOBAL_CONSTANTS) {
   if (error) { return res.send({ error: error, comment: comment }); }
   
   if (videoData.isLive) {
-    const stream = await makeYTDLStream(videoData, (result) => {
-      if (result.error) { console.log(result); }
-    });
+    const callback = (result) => { if (result.error) { return console.log(result); } }
+    const stream = await GLOBAL_OBJECTS.fileManager.liveStream(videoData, callback);
+    
     return stream.pipe(res);
   }
   
-  const filePath = saveLocation(GLOBAL_CONSTANTS.songs, videoData.id);
-  const stream = await makeReadStream(filePath);
-  if (util.isError(stream)) {
-    return res.send({ error: true, comment: stream.exitCode });
+  const streamFile = await GLOBAL_OBJECTS.fileManager.read(videoData);
+  
+  if (util.isError(streamFile)) {
+    return res.send({ error: true, comment: streamFile.exitCode });
   }
   
-  return stream.pipe(res);
+  return streamFile.pipe(res);
 }
 
 module.exports = songsEvent;

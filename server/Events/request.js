@@ -1,8 +1,15 @@
 const util = require('../Components/util.js').init();
 
-const { saveLocation, checkFileExists } = require("../Components/handleFile.js");
+async function isFile(listFile, fileManager) {
+  for (let item of listFile) {
+    const filePath = fileManager.saveLocation(item);
+    item.isFile = await fileManager.checkFileExists(filePath);
+  }
+  
+  return listFile;
+}
 
-async function request(req, res, GLOBAL_CONSTANTS) {
+async function request(req, res, GLOBAL_OBJECTS) {
   const { username, userId, videoData } = req.body;
   
   const { error, comment } = util.validQueries(username, userId, videoData);
@@ -10,25 +17,10 @@ async function request(req, res, GLOBAL_CONSTANTS) {
   
   if (error) { return res.send({ error: error, comment: comment }); }
   
-  if (videoData.type === "playlist") {
-    let filePath_1;
-    for (let item of videoData.playlist) {
-      filePath_1 = saveLocation(GLOBAL_CONSTANTS.songs, item.id);
-      item.isFile = await checkFileExists(filePath_1);
-    }
-    
-    return res.send(videoData);
-  }
+  const songList = videoData.type === "playlist" ? videoData.playlist : videoData;
   
-  const checkedSongs = [];
-  
-  for (let item of videoData) {
-    const filePath_1 = saveLocation(GLOBAL_CONSTANTS.songs, item.id);
-    item.isFile = await checkFileExists(filePath_1);
-    checkedSongs.push(item);
-  }
-  
-  return res.send(checkedSongs);
+  await isFile(songList, GLOBAL_OBJECTS.fileManager);
+  return res.send(videoData);
 }
 
 module.exports = request;

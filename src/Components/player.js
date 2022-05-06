@@ -12,6 +12,7 @@ async function play(guild_id, song, queue) {
   
   if (stream.error) {
     await serverQueue.textChannel.send([
+      "Try again!",
       '```js',
       `Encountered error with: ${song.title}`,
       `id: ${song.id} | url: "${song.url}"`,

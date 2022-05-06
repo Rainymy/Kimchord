@@ -1,9 +1,6 @@
-const Youtube = require('../API/youtube.js');
-const youtube = new Youtube();
-
 const util = require('../Components/util.js').init();
 
-async function parseSearchString (req, res, GLOBAL_CONSTANTS) {
+async function parseSearchString (req, res, GLOBAL_OBJECTS) {
   const { username, userId, inputQuery } = req.body;
   
   const { error, comment } = util.validQueries(username, userId, inputQuery, true);
@@ -11,7 +8,7 @@ async function parseSearchString (req, res, GLOBAL_CONSTANTS) {
   
   if (error) { return res.send({ error: error, comment: comment }); }
   
-  const video = await youtube.getYoutubeData(inputQuery);
+  const video = await GLOBAL_OBJECTS.youtube.getYoutubeData(inputQuery);
   
   return res.send(video);
 }

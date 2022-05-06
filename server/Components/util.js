@@ -1,6 +1,7 @@
-const { existsSync, mkdir, statSync, readdirSync } = require('fs');
-const { execSync } = require('child_process');
-const path = require('path');
+"use strict";
+const { existsSync, mkdir, statSync, readdirSync } = require('node:fs');
+const { execSync } = require('node:child_process');
+const path = require('node:path');
 
 const { saveFolder } = require('../config.json');
 
@@ -17,12 +18,39 @@ function init() {
   return this;
 }
 
+function getKeyValuePairFromLines(lines) {
+  const output = {};
+  
+  for (let line of lines.split("\r\n")) {
+    if (line === "") { continue; }
+    const [ key, ...value ] = line.split(":");
+    output[key.trim()] = value.join(":").trim();
+  }
+  
+  return output;
+}
+
+function getPathFromShortcutLink(pathLink) {
+  if (process.platform === "win32") {
+    const text = `"(New-Object -COM WScript.Shell).CreateShortcut('${pathLink}')"`;
+    const stats = execSync(`powershell.exe -command ${text}`, { encoding: "utf-8" });
+    
+    return getKeyValuePairFromLines(stats).TargetPath;
+  }
+  
+  if (process.platform === "darwin") {
+    throw new Error("Shortcut for MacOS is not supported");
+  }
+  
+  throw new Error("Shortcuts for Unix/Linux is not supported");
+}
+
 function getSaveLocation() {
-  function isNotValidExt(ext) { return !!ext || ext === ".lnk" }
+  const isNotValidExt = (ext) => { return !!ext || ext === ".lnk" };
   
   const savePath = path.normalize(path.resolve(__dirname, saveFolder));
   
-  try { if (statSync(savePath).isDirectory()) { return savePath; } }
+  try { statSync(savePath).isDirectory(); }
   catch (e) {
     const userSaveExt = path.extname(savePath);
     const userSaveBase = path.basename(savePath, userSaveExt);
@@ -35,30 +63,11 @@ function getSaveLocation() {
       const folderName = path.basename(item, path.extname(item));
       if (folderName !== userSaveBase) { continue; }
       
-      return readShortcutLink(path.join(__dirname, "../", item)).TargetPath;
+      return getPathFromShortcutLink(path.join(__dirname, "../", item));
     }
   }
   
   return savePath;
-}
-
-function getKeyValuePairFromLines(lines) {
-  const output = {};
-  
-  for (let line of lines.split("\r\n")) {
-    if (line === "") { continue; }
-    const [ key, ...value ] = line.split(":");
-    output[key.trim()] = value.join(":").trim();
-  }
-  
-  return output
-}
-
-function readShortcutLink(filePath) {
-  const text = `"(New-Object -COM WScript.Shell).CreateShortcut('${filePath}')"`;
-  const stats = execSync(`powershell.exe -command ${text}`, { encoding: "utf-8" });
-  
-  return getKeyValuePairFromLines(stats);
 }
 
 function isError(e) {

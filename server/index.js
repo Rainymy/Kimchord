@@ -11,37 +11,36 @@ const getDuration = require('./Events/getDuration.js');
 const express = require('express');
 const app = express();
 
-const Cookies = require('./Components/Cookies.js');
-const cacheSongs = require("./Components/cacheSongs.js");
+const Youtube = require('./API/youtube.js');
+const File_Manager = require('./Components/FileManager.js');
+const fileManager = new File_Manager();
 
-const { parseLocalFolder } = require("./Components/handleFile.js");
-
-const GLOBAL_CONSTANTS = {
-  songs: parseLocalFolder(),
-  cacheSongs: cacheSongs,
-  cookies: {}
+const GLOBAL_OBJECTS = {
+  fileManager: null,
+  youtube: new Youtube()
 }
 
 app.use(express.json());
 
-app.get("/", (req, res) => res.send("Main Page. Server working fine."));
-app.post("/", (req, res) => res.send("Main Page (POST)"));
+app.get("/", async (req, res) => res.send("Main Page. Server working fine."));
+app.post("/", async (req, res) => res.send("Main Page (POST)"));
 
-app.post("/remove", async (req, res) => await remove(req, res, GLOBAL_CONSTANTS));
-app.post("/download", async (req, res) => await download(req, res, GLOBAL_CONSTANTS));
-app.post("/request", async (req, res) => await request(req, res, GLOBAL_CONSTANTS));
-app.post('/songs', async (req, res) => await songsEvent(req, res, GLOBAL_CONSTANTS));
-app.get("/ping", async (req, res) => await pingEvent(req, res, GLOBAL_CONSTANTS));
+app.post("/remove", async (req, res) => await remove(req, res, GLOBAL_OBJECTS));
+app.post("/download", async (req, res) => await download(req, res, GLOBAL_OBJECTS));
+app.post("/request", async (req, res) => await request(req, res, GLOBAL_OBJECTS));
+app.post('/songs', async (req, res) => await songsEvent(req, res, GLOBAL_OBJECTS));
+app.get("/ping", async (req, res) => await pingEvent(req, res, GLOBAL_OBJECTS));
 
 app.post("/parseSearchString", async (req, res) => {
-  return await parseSearchString(req, res, GLOBAL_CONSTANTS);
+  return await parseSearchString(req, res, GLOBAL_OBJECTS);
 });
 
 app.post("/getDuration", async (req, res) => {
-  return await getDuration(req, res, GLOBAL_CONSTANTS);
+  return await getDuration(req, res, GLOBAL_OBJECTS);
 });
 
 app.listen(server.port, async () => {
-  GLOBAL_CONSTANTS.cookies = await Cookies.get();
-  console.log(`Server listening at http://localhost:${server.port}`);
+  GLOBAL_OBJECTS.fileManager = await fileManager.init();
+  
+  console.log(`Server listening at ${server.location}:${server.port}`);
 });
