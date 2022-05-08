@@ -1,3 +1,5 @@
+const { printToTerminal } = require('../Components/util.js');
+
 const stateChange = {
   userLeftOrChangedChannel: function (oldState, newState, client) {
     if (!oldState?.channelId) { return false; }
