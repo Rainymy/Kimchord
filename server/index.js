@@ -8,8 +8,9 @@ const pingEvent = require('./Events/pingEvent.js');
 const parseSearchString = require('./Events/parseSearchString.js');
 const getDuration = require('./Events/getDuration.js');
 
+const helmet = require('helmet');
 const express = require('express');
-const app = express();
+const app = express().disable("x-powered-by");
 
 const Youtube = require('./API/youtube.js');
 const File_Manager = require('./Components/FileManager.js');
