@@ -1,7 +1,7 @@
 {
   "name": "Kimchord",
   "author": "Rainymy",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "A simple Discord music bot",
   "main": "index.js",
   "scripts": {

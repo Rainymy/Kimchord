@@ -17,8 +17,41 @@ function checkFileExists(filepath) {
   });
 }
 
+function getFilesizeInBytes(filePath) {
+  return new Promise((resolve, reject) => {
+    fs.stat(filePath, (error, stats) => resolve(stats?.size ?? 0));
+  });
+}
+
 function deleteFile(filePath) {
   return new Promise((resolve, reject) => fs.unlink(filePath, resolve));
+}
+
+async function logDownload(video, metadataBytes, downloadedBytes) {
+  const totalBytes = Math.round(metadataBytes / 1024)
+  const downloadBytes = Math.round(downloadedBytes / 1024);
+  
+  console.log("-----------------------------------------------------------");
+  console.log(`Downloaded:`);
+  console.log(` ╠ ${video.title}`);
+  console.log(` ╠ ${video.url}`);
+  console.log(` ╚ ${totalBytes} / ${downloadBytes} KiB`);
+  console.log("-----------------------------------------------------------");
+  
+  const savingText = [
+    "----------------------------------------------------------------------",
+    `${video.title}`,
+    ` ╠ ${new Date().toLocaleString("sv-Sv") + " - HH:MM:SS"}`,
+    ` ╚ ${video.url}\n`
+  ].join("\n");
+  
+  const saveTextPath = path.join(__dirname, "../downloaded_songs.txt");
+  const writeStream = await makeWriteStream(saveTextPath, { flags: "a+" });
+  
+  writeStream.write(savingText);
+  writeStream.close();
+  
+  return;
 }
 
 function parseLocalFolder() {
@@ -59,7 +92,10 @@ function makeReadStream(filePath) {
   return new Promise(function(resolve, reject) {
     const readFile = fs.createReadStream(filePath, { autoClose: true });
     
-    readFile.on('error', resolve);
+    readFile.on('error', (error) => {
+      console.log("ERROR from makeReadStream: ", error);
+      resolve(error);
+    });
     
     readFile.on('close', () => { console.log('Read stream closed'); });
     readFile.on('finish', () => { console.log('Read stream Finished'); });
@@ -68,13 +104,12 @@ function makeReadStream(filePath) {
   });
 }
 
-function makeWriteStream(filePath) {
+function makeWriteStream(filePath, flags) {
   return new Promise(function(resolve, reject) {
-    const streamToFile = fs.createWriteStream(filePath);
-    let hasError = false;
+    const streamToFile = fs.createWriteStream(filePath, flags ?? {});
     
     streamToFile.on("error", (error) => {
-      hasError = true;
+      streamToFile.close();
       if (error.message === custom_errors.ytdl_error) {
         return console.log("Restricted YouTube Video");
       }
@@ -83,40 +118,34 @@ function makeWriteStream(filePath) {
     
     streamToFile.on("finish", (err) => {
       if (err) { return console.error("ERROR from writeStream: ", err); }
-      return console.log("Finished Writing to a FILE");
     });
     
     streamToFile.on("close", async () => {
-      if (!hasError) { return; }
+      if (await getFilesizeInBytes(filePath) !== 0) { return; }
       
       const err = await deleteFile(filePath);
       if (err) { return console.log("Encountered error <deleting>. ", err); }
     });
     
-    streamToFile.on("ready", (err) => resolve(streamToFile));
+    streamToFile.on("ready", () => resolve(streamToFile));
   });
 }
 
-async function makeYTDLStream(video, cookies, callback) {
+function parseOptions(video, cookies, callback) {
   const cookiesString = cookies?.cookies?.map(({ name, value }) => {
     return `${name}=${value}; `;
   });
-  
-  let foundFormat;
-  let downloadedBytes = 0;
   
   const options = {
     filter: (format) => {
       const isAudioOnly = format.hasVideo === false && format.hasAudio === true;
       
       if (format.container === "mp4" && isAudioOnly) {
-        console.log("-----------------------------------------------------");
-        console.log("Found format: ", format);
-        console.log("-----------------------------------------------------");
-        foundFormat = format;
+        callback(format);
+        return true;
       }
       
-      return format.container === "mp4" && isAudioOnly;
+      return false;
     },
     highWaterMark: 1024 * 1024 * 1024
   }
@@ -124,11 +153,11 @@ async function makeYTDLStream(video, cookies, callback) {
   if (video.isLive) {
     options.filter = (format) => {
       return [ 128, 127, 120, 96, 95, 94, 93 ].indexOf(format.itag) > -1;
-    };
+    }
   }
   
   if (cookiesString) {
-    options["requestOptions"] = {
+    options.requestOptions = {
       headers: {
         Cookie: cookiesString, 
         "x-youtube-identity-token": cookies.identityToken
@@ -136,11 +165,21 @@ async function makeYTDLStream(video, cookies, callback) {
     }
   }
   
+  return options;
+}
+
+async function makeYTDLStream(video, cookies, callback) {
+  let foundFormat;
+  let downloadedBytes = 0;
+  
+  const saveFormat = (format) => { foundFormat = format; }
+  
+  const options = parseOptions(video, cookies, saveFormat);
   const streamURL = await ytdl(video.url, options);
   
   let cb = typeof cookies === "function" ? cookies: callback;
   if (!cb) {
-    cb = function () {}
+    cb = function () {};
     console.warn("WARNING NO CALLBACK!!");
   }
   
@@ -152,7 +191,8 @@ async function makeYTDLStream(video, cookies, callback) {
       stream.emit("error", new Error(custom_errors.ytdl_error));
     }
     
-    let returnValue;
+    let returnValue = { error: true, comment: `Status Code ${error.statusCode}` }
+    
     if (error.statusCode === 410) {
       const restrictionsExemple = 'Geography, Suicide/Self harm/Copyright blocked';
       
@@ -161,28 +201,22 @@ async function makeYTDLStream(video, cookies, callback) {
         comment: `Restricted (${restrictionsExemple}) videos are not supported.`
       }
     }
-    else {
-      returnValue = { error: true, comment: `Status Code ${error.statusCode}` };
-    }
     
     streamURL.emit("existing_stream", returnValue);
     return cb(returnValue);
   });
   
-  streamURL.on("data", (data) => {
-    downloadedBytes += data.length;
-  });
+  streamURL.on("data", (data) => { downloadedBytes += data.length; });
   
   streamURL.on("finish", () => {
-    console.log("FINISHED Reading Audio from YTDL");
-    console.log("Downloaded size", Math.round(downloadedBytes / 1024) + " KiB");
+    logDownload(video, parseInt(foundFormat.contentLength), downloadedBytes);
     
     video.duration = parseInt(foundFormat.approxDurationMs) / 1000;
     
     const returnValue = { error: false, comment: null, video: video };
     
     streamURL.emit("existing_stream", returnValue);
-    cb(returnValue);
+    return cb(returnValue);
   });
   
   return streamURL;

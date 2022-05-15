@@ -1,4 +1,14 @@
+"use strict";
 const { createAudioResource } = require('@discordjs/voice');
+const { Readable } = require('node:stream');
+
+function createEmptyReadableStream() {
+  const emptyStream = new Readable();
+  emptyStream.push("");
+  emptyStream.push(null);
+  
+  return emptyStream;
+}
 
 async function play(guild_id, song, queue) {
   const serverQueue = queue.get(guild_id);
@@ -20,7 +30,7 @@ async function play(guild_id, song, queue) {
       '```'
     ].join("\n"));
     
-    stream = stream.body;
+    stream = createEmptyReadableStream();
   }
   
   const resource = createAudioResource(stream);

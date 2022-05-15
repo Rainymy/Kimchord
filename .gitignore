@@ -6,16 +6,17 @@ yarn-debug.log*
 yarn-error.log*
 
 # Custom ignore
-server/Songs/
 /src/playlistFolder/*
 /src/guilds_settings/*
-./config.json
+/server/Songs/*
 /server/cookies.json
 /server/cookies_old.json
 /server/Songs.lnk
 /server/config_push.json
-.update/NEW_UPDATE
+/server/downloaded_songs.txt
+/config.json
 /config_push.json
+.update/NEW_UPDATE
 TODOs.txt
 
 # Runtime data

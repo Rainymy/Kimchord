@@ -1,6 +1,7 @@
-const http = require('http');
-const https = require('https');
-const { PassThrough } = require('stream');
+"use strict";
+const http = require('node:http');
+const https = require('node:https');
+const { PassThrough } = require('node:stream');
 
 function isValidPassthrough(headers) {
   const transferEncoding = headers["transfer-encoding"];
@@ -19,7 +20,7 @@ function isValidPassthrough(headers) {
 function custom_request(urlPath, params) {
   const serverMeta = new URL(urlPath);
   const requestBody = params?.body ?? "";
-  const threshold_kb = 512;
+  const THRESHOLD_KB = 512;
   
   const httpOption = {
     host: serverMeta.hostname,
@@ -52,23 +53,16 @@ function custom_request(urlPath, params) {
         chunks.push(chunk);
         
         // chunks.length * chunk kilobyte > limit kilobyte
-        if (chunks.length * (chunk.length / 1024) > threshold_kb) {
+        if (chunks.length * (chunk.length / 1024) > THRESHOLD_KB) {
           console.log("Request Chunk getting bigger.", urlPath);
         }
       });
       
       res.on("end", () => {
-        let bufferData = Buffer.concat(chunks);
-      
+        const bufferData = Buffer.concat(chunks);
+        
         try { resolve(JSON.parse(bufferData)); }
-        catch (e) {
-          resolve({
-            error: true,
-            body: bufferData.toString(),
-            comment: e.toString()
-          });
-        }
-      
+        catch (e) { resolve({ error: true, comment: "Unparseable data" }); }
       });
     });
     

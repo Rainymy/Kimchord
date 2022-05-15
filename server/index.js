@@ -1,3 +1,4 @@
+"use strict";
 const { server } = require('../config.json');
 
 const remove = require('./Events/remove.js');
@@ -21,6 +22,7 @@ const GLOBAL_OBJECTS = {
   youtube: new Youtube()
 }
 
+app.use(helmet());
 app.use(express.json());
 
 app.get("/", async (req, res) => res.send("Main Page. Server working fine."));
@@ -45,3 +47,15 @@ app.listen(server.port, async () => {
   
   console.log(`Server listening at ${server.location}:${server.port}`);
 });
+
+// GLOBAL_OBJECTS.fileManager.events.on("downloading", stream => {
+//   console.log("downloading");
+// });
+// 
+// GLOBAL_OBJECTS.fileManager.events.on("downloaded", id => {
+//   console.log("downloaded", id);
+// });
+// 
+// GLOBAL_OBJECTS.fileManager.events.on("finished", data => {
+//   console.log("finished", data);
+// });
