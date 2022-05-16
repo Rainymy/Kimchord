@@ -64,7 +64,7 @@ function File_Manager() {
   this.cookies;
   this.events = new EventEmitter();
   this.events.on("error", (error) => {
-    return console.log(error);
+    return console.log("Error from EventEmitter: ", error);
   });
   
   this.init = async () => {

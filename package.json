@@ -1,7 +1,7 @@
 {
   "name": "Kimchord",
   "author": "Rainymy",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "A simple Discord music bot",
   "main": "index.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "get-video-duration": "^4.0.0",
     "helmet": "^5.0.2",
     "libsodium-wrappers": "^0.7.10",
-    "puppeteer": "^13.5.2",
+    "puppeteer": "^13.7.0",
     "sodium-native": "^3.3.0",
     "tweetnacl": "^1.0.3",
     "ytdl-core": "^4.11.0",

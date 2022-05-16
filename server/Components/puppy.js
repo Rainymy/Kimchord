@@ -1,5 +1,6 @@
+"use strict";
 const puppeteer = require('puppeteer');
-const path = require('path');
+const path = require('node:path');
 
 const { writeFile } = require('./handleFile.js');
 
