@@ -1,5 +1,5 @@
 "use strict";
-const { DOWNLOAD_MAX_ALLOWED_HOURS: maxHours } = require('../config.json');
+const { DOWNLOAD_MAX_ALLOWED_HOURS: maxHours } = require('../../config.json');
 
 const util = require('../Components/util.js').init();
 
