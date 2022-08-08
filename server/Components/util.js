@@ -2,6 +2,7 @@
 const { existsSync, mkdir, statSync, readdirSync } = require('node:fs');
 const { execSync } = require('node:child_process');
 const path = require('node:path');
+const SHA256 = require("crypto-js/sha256");
 
 const { saveFolder } = require('../config.json');
 
@@ -70,6 +71,17 @@ function getSaveLocation() {
   return savePath;
 }
 
+function createHash(list) {
+  if (!list && !list.length) {
+    throw new Error("Expecting a list with more than 0 length");
+  }
+  
+  const wordList = SHA256(list.join("")).words;
+  const hash = wordList.map(v => v.toString(32).split("-").join("")).join("");
+  
+  return hash;
+}
+
 function isError(e) {
   return e && e.stack && e.message && 
         typeof e.stack === 'string' && typeof e.message === 'string';
@@ -105,6 +117,7 @@ function validQueries(username, userId, videoData, optional_id) {
 module.exports = {
   init: init,
   getSaveLocation: getSaveLocation,
+  createHash: createHash,
   isError: isError,
   validQueries: validQueries
 }

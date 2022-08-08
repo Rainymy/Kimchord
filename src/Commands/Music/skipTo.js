@@ -1,3 +1,4 @@
+"use strict";
 const { checkServerMusicRole } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
@@ -47,6 +48,6 @@ function skipTo(message, basicInfo, arg, queue) {
 
 module.exports = {
   name: "Skip to",
-  aliases: "skipto",
+  aliases: [ "st", "skipto" ],
   main: skipTo
 };

@@ -41,7 +41,11 @@ async function download(req, res, GLOBAL_OBJECTS) {
   if (typeof responseData === "object") { return await res.send(responseData); }
   
   const combined = { ...video, ...{ container: metadata.container } };
-  return await fileManager.download(combined, (result) => res.send(result));
+  return await fileManager.download(combined, (result) => {
+    if (res.headersSent === true) { return; }
+    
+    return res.send(result);
+  });
 }
 
 module.exports = download;

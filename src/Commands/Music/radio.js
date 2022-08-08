@@ -107,7 +107,7 @@ async function radio(message, basicInfo, searchString, queue) {
     duration: parseInt(station.currentsong.run_length),
     thumbnail: radioStations.thumbnail(station.currentsong.song.cover_art),
     type: "radio",
-    stream: radioStations.stream(fmLink),
+    getStream: () => radioStations.stream(fmLink),
     fmStationID: radioStations.cache[stationName].id,
     updateInfo: radioStations.update
   }

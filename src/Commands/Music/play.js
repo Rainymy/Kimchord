@@ -12,6 +12,15 @@ const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 const { createAudioPlayer } = require('@discordjs/voice');
+const { Readable } = require('node:stream');
+
+function createEmptyReadableStream() {
+  const emptyStream = new Readable();
+  emptyStream.push("");
+  emptyStream.push(null);
+  
+  return emptyStream;
+}
 
 async function main(message, basicInfo, searchString, queue, client) {
   if (!searchString.length) {
@@ -103,13 +112,29 @@ async function main(message, basicInfo, searchString, queue, client) {
   const songLoading = await message.channel.send(messageInfo.songLoading);
   
   for (let i = 0; i < songs.length; i++) {
-    const temp = JSON.parse(param.body);
+    let shallowCopy = JSON.parse(JSON.stringify(param));
+    const temp = JSON.parse(shallowCopy.body);
     temp.videoData = songs[i];
-    param.body = JSON.stringify(temp);
+    shallowCopy.body = JSON.stringify(temp);
     
-    const streams = request(`${baseUrl}/songs`, param);
-    
-    songs[i].stream = streams;
+    songs[i].getStream = async () => {
+      const response = await request(`${baseUrl}/songs`, shallowCopy);
+      
+      if (response.error) {
+        message.channel.send([
+          "Try again!",
+          '```js',
+          `Encountered error with: ${songs[i].title}`,
+          `id: ${songs[i].id} | url: "${songs[i].url}"`,
+          `Detail of error: ${response.comment}`,
+          '```'
+        ].join("\n"));
+        
+        return createEmptyReadableStream();
+      }
+      
+      return response;
+    }
   }
   
   songLoading.delete();

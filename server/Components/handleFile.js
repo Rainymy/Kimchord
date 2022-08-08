@@ -94,8 +94,14 @@ function makeReadStream(filePath) {
     
     readFile.on('error', (error) => {
       console.log("ERROR from makeReadStream: ", error);
+      readFile.destroy();
       resolve(error);
     });
+    
+    // let index = 1;
+    // readFile.on("data", () => {
+    //   console.log(index++, readFile.readableFlowing);
+    // });
     
     readFile.on('close', () => { console.log('Read stream closed'); });
     readFile.on('finish', () => { console.log('Read stream Finished'); });
@@ -113,6 +119,11 @@ function makeWriteStream(filePath, flags) {
       if (error.message === custom_errors.ytdl_error) {
         return console.log("Restricted YouTube Video");
       }
+      
+      if (error.myError) {
+        return console.log(error.info.message);
+      }
+      
       console.log("Caught error in makeWriteStream: ", error);
     });
     
@@ -184,11 +195,13 @@ async function makeYTDLStream(video, cookies, callback) {
   }
   
   streamURL.on("error", (error) => {
-    console.log("error from YTDL", error);
+    if (error.myError === false) { console.log("error from YTDL", error); }
     
     for (let stream of streamURL._readableState.pipes) {
       streamURL.unpipe(stream);
-      stream.emit("error", new Error(custom_errors.ytdl_error));
+      
+      const err = error.myError ? error : new Error(custom_errors.ytdl_error);
+      stream.emit("error", err);
     }
     
     let returnValue = { error: true, comment: `Status Code ${error.statusCode}` }
@@ -201,6 +214,8 @@ async function makeYTDLStream(video, cookies, callback) {
         comment: `Restricted (${restrictionsExemple}) videos are not supported.`
       }
     }
+    
+    if (error.myError) { returnValue = { error: true, comment: error.info.message } }
     
     streamURL.emit("existing_stream", returnValue);
     return cb(returnValue);

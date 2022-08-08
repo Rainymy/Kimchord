@@ -23,12 +23,6 @@ const server_guilds = loadServerData();
 client.on("messageCreate", async (message) => {
   if (message.author.bot) { return; }
   
-  const bot_id = client.user.id;
-  const validation = validatePermissions(message.channel, bot_id, PRESETS.channel);
-  
-  if (validation.stop) { return; }
-  if (validation.error) { return await message.channel.send(validation.comment); }
-  
   let guilds_settings = server_guilds.get(message.guild.id);
   if (!guilds_settings) {
     guilds_settings = await saveDefaultData(server_guilds, message);
@@ -38,6 +32,14 @@ client.on("messageCreate", async (message) => {
   const searchString = args.slice(1).join(" ");
   
   if (!validateCommand(args[0], guilds_settings.prefix)) { return; }
+  
+  const bot_id = client.user.id;
+  const validation = validatePermissions(message.channel, bot_id, PRESETS.channel);
+  
+  if (validation.stop) { return; }
+  if (validation.error) {
+    return message.channel.send(validation.comment).catch(e => console.log(e));
+  }
   
   const command = args[0].substring(guilds_settings.prefix.length);
   const data = {

@@ -42,7 +42,11 @@ const helpers = {
     const serverQueue = queue.get(guild_id);
     
     clearTimeout(serverQueue.timeout.id);
-    serverQueue.connection.destroy();
+    
+    if (serverQueue.connection._state.status !== "destroyed") {
+      serverQueue.connection.destroy();
+    }
+    
     return queue.delete(guild_id);  
   }
 }

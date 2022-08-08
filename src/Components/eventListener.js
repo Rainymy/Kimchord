@@ -31,7 +31,11 @@ function addEventListener(serverQueue, queue, musicPlayer) {
         serverQueue.textChannel.send(
           `Bean frozen to death 💀 (survived for ${inactiveDuration} minutes)`
         );
-        serverQueue.connection.destroy();
+        
+        if (serverQueue.connection._state.status !== "destroyed") {
+          serverQueue.connection.destroy();
+        }
+        
         queue.delete(guild_id);
       }, serverQueue.timeout.duration);
     }

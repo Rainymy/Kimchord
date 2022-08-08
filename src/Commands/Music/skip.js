@@ -25,6 +25,6 @@ function skip(message, basicInfo, arg, queue) {
 
 module.exports = {
   name: "Skip",
-  aliases: "skip",
+  aliases: [ "s", "skip" ],
   main: skip
 };

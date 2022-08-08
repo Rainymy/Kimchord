@@ -28,7 +28,7 @@ function File_Manager() {
       return this.queue.set(id, stream);
     },
     remove: (id) => {
-      this.events.emit("downloaded", id);
+      this.events.emit("downloaded", this.modQueue.get(id));
       return this.queue.delete(id);
     }
   }
@@ -39,6 +39,8 @@ function File_Manager() {
     append: (video) => {
       const saved = this.modCache.get(video.id);
       const newEntry = this.createDescriptor(video.id, video.container);
+      
+      console.log([ ...this.queue ]);
       
       if (!saved) {
         this.events.emit("finished", newEntry);
@@ -107,6 +109,8 @@ function File_Manager() {
   
   this.download = async (video, callback) => {
     const cb = (result) => {
+      clearTimeout(video.id);
+      
       this.modQueue.remove(video.id);
       
       if (!result.error) { this.modCache.append(video); }
@@ -116,18 +120,39 @@ function File_Manager() {
     }
     
     if (this.modQueue.exists(video.id)) {
-      const existing_stream = this.modQueue.get(video.id);
-      existing_stream.on("existing_stream", cb);
+      const { stream } = this.modQueue.get(video.id);
+      // console.log(stream);
+      stream.on("existing_stream", cb);
       
       return console.log("Duplicated request stream: ", video.title);
     }
     
     const filePath = this.saveLocation(video);
+    const timeoutTimer = 1000 * 60 * 60 * 30;
     
     const streamURL = await makeYTDLStream(video, this.cookies, cb);
     const streamToFile = await makeWriteStream(filePath);
     
-    this.modQueue.append(video.id, streamURL);
+    function cancelDownload() {
+      const customError = new Error("Download timeout");
+      customError.myError = true;
+      customError.info = {
+        message: `Canceling download: Idle timer reached ${timeoutTimer}ms`
+      }
+      
+      return streamURL.emit("error", customError);
+    }
+    
+    const data = {
+      id: video.id,
+      title: video.title,
+      url: video.url,
+      requestedTime: video.requestedTime,
+      stream: streamURL
+    }
+    
+    setTimeout(cancelDownload, timeoutTimer);
+    this.modQueue.append(video.id, data);
     
     return streamURL.pipe(streamToFile);
   }
