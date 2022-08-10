@@ -7,6 +7,8 @@ async function deleteSong(message, basicInfo, searchString, queue) {
     return message.channel.send(messageInfo.commandDisabled);
   }
   
+  if (message.author.id !== "291701986863349761") { return; }
+  
   const baseUrl = basicInfo.server.URL;
   
   const [param,, failed] = await parseSearchString(message, baseUrl, searchString);

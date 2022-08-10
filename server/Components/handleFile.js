@@ -91,23 +91,31 @@ function writeFile(filePath, data, cb) {
 function makeReadStream(filePath) {
   return new Promise(function(resolve, reject) {
     const readFile = fs.createReadStream(filePath, { autoClose: true });
-    
+  
     readFile.on('error', (error) => {
       console.log("ERROR from makeReadStream: ", error);
       readFile.destroy();
       resolve(error);
     });
-    
+  
     // let index = 1;
     // readFile.on("data", () => {
     //   console.log(index++, readFile.readableFlowing);
     // });
-    
+  
     readFile.on('close', () => { console.log('Read stream closed'); });
     readFile.on('finish', () => { console.log('Read stream Finished'); });
-    
+  
     readFile.on("ready", () => resolve(readFile));
   });
+  
+  // load the whole file on RAM
+  // return new Promise(function(resolve, reject) {
+  //   fs.readFile(filePath, (err, data) => {
+  //     if (err) { return resolve(err); }
+  //     return resolve(data);
+  //   });
+  // });
 }
 
 function makeWriteStream(filePath, flags) {

@@ -5,22 +5,12 @@ const {
   PRESETS,
   checkServerMusicRole
 } = require('../../Components/permissions.js');
-const { parseSearchString } = require('../../Components/parseSearchString.js');
-const request = require('../../Components/request.js');
+const handleRequests = require('../../Components/handleRequests.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 const { createAudioPlayer } = require('@discordjs/voice');
-const { Readable } = require('node:stream');
-
-function createEmptyReadableStream() {
-  const emptyStream = new Readable();
-  emptyStream.push("");
-  emptyStream.push(null);
-  
-  return emptyStream;
-}
 
 async function main(message, basicInfo, searchString, queue, client) {
   if (!searchString.length) {
@@ -56,15 +46,16 @@ async function main(message, basicInfo, searchString, queue, client) {
   }
   
   /*----------------------- Get url for video -----------------------*/
-  const baseUrl = basicInfo.server.URL;
-  const [param,, failed] = await parseSearchString(message, baseUrl, searchString);
+  const [
+    param,, failed
+  ] = await handleRequests.parseSearchString(message, searchString);
   
   if (failed) { return message.channel.send(messageInfo.videoNotFoundOrAvailable); }
   
   /*--------------------- Get streamable response -------------------*/
   let sentMsg;
   
-  const requested = await request(`${baseUrl}/request`, param);
+  const requested = await handleRequests.request(param);
   
   const isPlaylist = requested.type === "playlist";
   
@@ -87,7 +78,7 @@ async function main(message, basicInfo, searchString, queue, client) {
       
       const {
         error, comment, isLive, video
-      } = await request(`${baseUrl}/download`, paramCopy);
+      } = await handleRequests.download(paramCopy);
       
       if (error && isPlaylist) {
         skippedSongs.push(messageInfo.skippingDownload(songs[i].title, comment));
@@ -118,7 +109,7 @@ async function main(message, basicInfo, searchString, queue, client) {
     shallowCopy.body = JSON.stringify(temp);
     
     songs[i].getStream = async () => {
-      const response = await request(`${baseUrl}/songs`, shallowCopy);
+      const response = await handleRequests.getRequestSong(shallowCopy);
       
       if (response.error) {
         message.channel.send([
@@ -130,7 +121,7 @@ async function main(message, basicInfo, searchString, queue, client) {
           '```'
         ].join("\n"));
         
-        return createEmptyReadableStream();
+        return response.emptyReadableStream;
       }
       
       return response;
@@ -144,7 +135,7 @@ async function main(message, basicInfo, searchString, queue, client) {
     temp_1.videoData = JSON.parse(JSON.stringify(songs));
     param.body = JSON.stringify(temp_1);
     
-    const durations = await request(`${baseUrl}/getDuration`, param);
+    const durations = await handleRequests.getDuration(param);
     
     for (let i = 0; i < requested.length; i++) {
       requested[i].duration = durations[i];

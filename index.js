@@ -33,6 +33,7 @@ client.on("messageCreate", async (message) => {
   
   if (!validateCommand(args[0], guilds_settings.prefix)) { return; }
   
+  // validate bots permissions for sending text in channel 
   const bot_id = client.user.id;
   const validation = validatePermissions(message.channel, bot_id, PRESETS.channel);
   
@@ -55,6 +56,7 @@ client.on("messageCreate", async (message) => {
     cb: callbackFn
   }
   
+  // execute command
   try { await exec_command(message, data, searchString, queue, command, client); }
   catch (e) { printToTerminal("New ERROR found:", e); }
 });
