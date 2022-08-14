@@ -43,10 +43,10 @@ function YouTube() {
     if (!videoId) { return; }
     
     const videoURL = `https://www.youtube.com/watch?v=${videoId}`;
-    
     const video = await getBasicInfo(videoURL);
     
     if (!video) { return; }
+    
     return {
       url: videoURL,
       id: videoId,
@@ -55,6 +55,19 @@ function YouTube() {
       requestedTime: (new Date()).toLocaleString(),
       thumbnail: video.thumbnail_url
     }
+  }
+  
+  function isValidYoutubeHostLink(host) {
+    const hostlink = host.substring(0, 4) === "www." ? host.substring(4): host;
+    const youtubeValidLinkList = [
+      "youtube.com",
+      "m.youtube.com",
+      "youtu.be",
+      "youtube-nocookie.com"
+    ];
+    
+    // if hostlink matches a link in the array returns true.
+    return youtubeValidLinkList.indexOf(hostlink) >= 0;
   }
   
   this.getVideoDurationInSeconds = async function (resourcePath) {
@@ -74,29 +87,44 @@ function YouTube() {
   
   this.getYoutubeData = async function (input) {
     let video;
+    let isValidLink = false;
+    
     try {
-      video = await this.getVideo(input);
-      if (!video) {
-        video = await this.getPlaylist(input);
-        if (typeof video !== "boolean" && video === false) {
-          throw new Error("Playlist not found");
+      const parsed_URL = new URL(input);
+      isValidLink = true;
+      
+      if (!isValidYoutubeHostLink(parsed_URL.host)) { throw "Not a youtube link"; }
+      
+      video = await this.getVideo(parsed_URL) ?? await this.getPlaylist(parsed_URL);
+    }
+    catch (e) {
+      try {
+        if (isValidLink) { throw "Exiting cause of the valid URL link"; }
+        
+        const foundVideos = await this.searchVideos(input);
+        video = await this.getVideoByID(foundVideos[0]?.id);
+      } 
+      catch (err) {
+        if (!isValidLink) {
+          console.log(err);
         }
       }
-    } catch (e) {
-      try {
-        let videos = await this.searchVideos(input);
-        video = await this.getVideoByID(videos[0]?.id);
-        console.log(video);
-      } 
-      catch (err) { console.error(err); }
     }
     
+    console.log("Parsed data: ", video ?? `[ Failed to parse - ${input}] `);
     return video ?? [];
   }
   
-  this.getVideo = async function (content) {
-    const url = new URLSearchParams(new URL(content).search);
-    const videoId = url.get("v");
+  this.getVideo = async function ({ search, host, pathname }) {
+    let videoId;
+    
+    if (host === "youtu.be" && pathname.length === 12) {
+      videoId = pathname.substring(1);
+    }
+    else {
+      const url = new URLSearchParams(search);
+      videoId = url.get("v");
+    }
     
     return await parseYTDLBasicInfo(videoId);
   }
@@ -115,12 +143,10 @@ function YouTube() {
     return searchResults.items;
   }
   
-  this.getPlaylist = async function (content) {
-    const parseSearchURL = new URL(content);
+  this.getPlaylist = async function ({ search, pathname }) {
+    if (pathname !== "/playlist") { return; }
     
-    if (parseSearchURL.pathname !== "/playlist") { return; }
-    
-    const url = new URLSearchParams(parseSearchURL.search);
+    const url = new URLSearchParams(search);
     const playListId = url.get("list");
     
     let response;

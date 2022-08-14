@@ -10,10 +10,9 @@ const parseSearchString = require('./Events/parseSearchString.js');
 const getDuration = require('./Events/getDuration.js');
 const dashboard = require('./Events/dashboard.js');
 
+const WebSocket = require('ws');
 const express = require('express');
 const app = express().disable("x-powered-by");
-
-const WebSocket = require('ws');
 
 const Youtube = require('./API/youtube.js');
 const File_Manager = require('./Components/FileManager.js');
@@ -58,23 +57,19 @@ app.post("/API", async (req, res) => {
   return res.send({ ok: true });
 });
 
-const createdServer = app.listen(server.port, async () => {
+async function onServerStart() {
   GLOBAL_OBJECTS.fileManager = await fileManager.init();
   
   console.log(`Server listening at ${server.location}:${server.port}`);
-});
+}
 
-const wss = new WebSocket.Server({ server: createdServer, path: "/WS"});
+const createdServer = app.listen(server.port, onServerStart);
+const wss = new WebSocket.Server({ server: createdServer, path: "/WS" });
+
 wss.on('connection', function (ws) {
   console.log("New connection.");
   
   ws.send("hello client");
-  
-  console.log(ws.isAlive);
-  
-  // const interloop = setInterval(function () {
-  //   if (ws.isAlive === false) { return ws.terminate(); }
-  // }, 3000);
   
   ws.on('close', (code) => {
     console.log("Connection closed: ", code);
@@ -86,22 +81,8 @@ wss.on('connection', function (ws) {
   });
 });
 
-function heartbeat() {
-  this.isAlive = true;
-}
-
-const interval = setInterval(function ping() {
-  wss.clients.forEach(function each(ws) {
-    console.log("hello");
-    if (ws.isAlive === false) return ws.terminate();
-
-    ws.isAlive = false;
-    ws.ping();
-  });
-}, 1000);
-
-wss.on('close', function close() {
-  clearInterval(interval);
+wss.on('close', function () {
+  return console.log("connection closed");
 });
 
 // connection.on("connection", function(socket) {

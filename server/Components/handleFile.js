@@ -98,15 +98,12 @@ function makeReadStream(filePath) {
       resolve(error);
     });
   
-    // let index = 1;
-    // readFile.on("data", () => {
-    //   console.log(index++, readFile.readableFlowing);
-    // });
-  
     readFile.on('close', () => { console.log('Read stream closed'); });
     readFile.on('finish', () => { console.log('Read stream Finished'); });
   
     readFile.on("ready", () => resolve(readFile));
+    
+    return;
   });
   
   // load the whole file on RAM

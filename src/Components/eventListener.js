@@ -30,7 +30,7 @@ function addEventListener(serverQueue, queue, musicPlayer) {
         const inactiveDuration = serverQueue.timeout.duration / 60 / 1000;
         serverQueue.textChannel.send(
           `Bean frozen to death 💀 (survived for ${inactiveDuration} minutes)`
-        );
+        ).catch(e => { console.log(e); });
         
         if (serverQueue.connection._state.status !== "destroyed") {
           serverQueue.connection.destroy();
