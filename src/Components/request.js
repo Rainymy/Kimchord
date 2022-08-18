@@ -1,13 +1,16 @@
 "use strict";
 const http = require('node:http');
 const https = require('node:https');
-const { PassThrough } = require('node:stream');
+const { PassThrough, Readable } = require('node:stream');
+
+const got = (...args) => import('got').then(({ default: got }) => got(...args));
 
 function isValidPassthrough(headers) {
   const transferEncoding = headers["transfer-encoding"];
   const contentType = headers["content-type"] ?? "";
   
-  if (transferEncoding === "chunked" && !contentType?.includes("application/json")) {
+  if (transferEncoding === "chunked" && 
+      !contentType?.includes("application/json")) {
     return true;
   }
   
@@ -76,4 +79,42 @@ function custom_request(urlPath, params) {
   });
 }
 
-module.exports = custom_request;
+function got_request(urlPath, params) {
+  const requestBody = params?.body ?? "{}";
+  const THRESHOLD_KB = 512;
+  
+  const request_data = {
+    json: JSON.parse(requestBody),
+    ...params
+  }
+  
+  if (request_data.method.toLowerCase() === "get") { delete request_data.json; }
+  
+  delete request_data.body;
+  
+  return new Promise(async function(resolve, reject) {
+    try {
+      const response = await got(urlPath, request_data);
+      
+      if (isValidPassthrough(response.headers)) {
+        const streamResponse = new PassThrough();
+        const stream = Readable.from(response.rawBody);
+        stream.pipe(streamResponse);
+        
+        response.pipe(streamResponse);
+        
+        return resolve(streamResponse);
+      }
+      
+      try { resolve(JSON.parse(response.body)); }
+      catch (e) { resolve({ error: true, comment: "Unparseable data" }); }
+    }
+    catch (e) {
+      console.log(e);
+      return resolve({ error: true, comment: e });
+    }
+  });
+}
+
+module.exports = got_request;
+// module.exports = custom_request;

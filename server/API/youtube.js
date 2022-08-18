@@ -43,18 +43,21 @@ function YouTube() {
     if (!videoId) { return; }
     
     const videoURL = `https://www.youtube.com/watch?v=${videoId}`;
-    const video = await getBasicInfo(videoURL);
     
-    if (!video) { return; }
-    
-    return {
-      url: videoURL,
-      id: videoId,
-      type: "video",
-      title: video.title,
-      requestedTime: (new Date()).toLocaleString(),
-      thumbnail: video.thumbnail_url
+    try {
+      const video = await getBasicInfo(videoURL);
+      if (!video) { return; }
+      
+      return {
+        url: videoURL,
+        id: videoId,
+        type: "video",
+        title: video.title,
+        requestedTime: (new Date()).toLocaleString(),
+        thumbnail: video.thumbnail_url
+      }
     }
+    catch (e) { return; }
   }
   
   function isValidYoutubeHostLink(host) {
@@ -68,6 +71,38 @@ function YouTube() {
     
     // if hostlink matches a link in the array returns true.
     return youtubeValidLinkList.indexOf(hostlink) >= 0;
+  }
+  
+  function removeTextFormat(inputText) {
+    if (!inputText) { return inputText; }
+    
+    let removedText;
+    
+    for (let character of [ "*", "%<>", "`", "~~~", "_" ]) {
+      const firstLetter = inputText[0];
+      const lastLetter = inputText[inputText.length - 1];
+      
+      let currentText = (removedText ?? inputText);
+      
+      if (character.charAt(0) === "%") {
+        const charLength = Math.ceil((character.length - 1) / 2);
+        const firstHalf = character.substring(1, charLength);
+        const secondHalf = character.substring(charLength, character.length);
+        
+        if (firstLetter === firstHalf && lastLetter === secondHalf) {
+          removedText = currentText.substring(1, currentText.length - 1);
+        }
+        
+        continue;
+      }
+      
+      if (firstLetter === character && lastLetter === character) {
+        const cutString = currentText.substring(1, currentText.length - 1);
+        removedText = removeTextFormat(cutString);
+      }
+    }
+    
+    return removedText ?? inputText;
   }
   
   this.getVideoDurationInSeconds = async function (resourcePath) {
@@ -89,8 +124,12 @@ function YouTube() {
     let video;
     let isValidLink = false;
     
+    console.log("Parsing: ", input);
+    const searchInput = removeTextFormat(input);
+    console.log("Removed text Format: ", searchInput);
+    
     try {
-      const parsed_URL = new URL(input);
+      const parsed_URL = new URL(searchInput);
       isValidLink = true;
       
       if (!isValidYoutubeHostLink(parsed_URL.host)) { throw "Not a youtube link"; }
@@ -99,19 +138,20 @@ function YouTube() {
     }
     catch (e) {
       try {
+        if (!searchInput) { throw "Empty string"; }
         if (isValidLink) { throw "Exiting cause of the valid URL link"; }
         
-        const foundVideos = await this.searchVideos(input);
+        const foundVideos = await this.searchVideos(searchInput);
         video = await this.getVideoByID(foundVideos[0]?.id);
       } 
       catch (err) {
-        if (!isValidLink) {
+        if (!isValidLink || !searchInput) {
           console.log(err);
         }
       }
     }
     
-    console.log("Parsed data: ", video ?? `[ Failed to parse - ${input}] `);
+    console.log("Parsed data: ", video ?? `[ Failed to parse - ${searchInput}] `);
     return video ?? [];
   }
   
