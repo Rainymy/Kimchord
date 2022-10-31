@@ -61,6 +61,7 @@ async function onServerStart() {
   GLOBAL_OBJECTS.fileManager = await fileManager.init();
   
   console.log(`Server listening at ${server.location}:${server.port}`);
+  console.log(`Web UI at ${server.location}:${server.port}/dashboard`);
 }
 
 const createdServer = app.listen(server.port, onServerStart);
@@ -77,7 +78,7 @@ wss.on('connection', function (ws) {
   
   ws.on('message', (message) => {
     console.log("Connection established");
-    // console.log("Message received:", message.toString());
+    console.log("Message received:", message.toString());
   });
 });
 

@@ -7,62 +7,20 @@
     <title>Dashboard</title>
   </head>
   <body>
-    <app-entry></app-entry>
+    <app-entry>
+      <nav class="nav">
+        Nav
+      </nav>
+      <div class="main">
+        <div class="burger">
+          burger
+        </div>
+        Main
+      </div>
+      <footer class="foot">
+        Foot
+      </footer>
+    </app-entry>
   </body>
-  <script type="module" charset="utf-8">
-    import { createSignal, onCleanup, } from "https://cdn.skypack.dev/solid-js";
-    import { render } from "https://cdn.skypack.dev/solid-js/web";
-    import html from "https://cdn.skypack.dev/solid-js/html";
-    import world from "./HTML/Components/world.js";
-    
-    function createSocketConnection() {
-      const webSocket = new WebSocket(`ws://${window.location.host}/WS`);
-      
-      webSocket.addEventListener("open", function(event) {
-        console.log("Connection established");
-      });
-      
-      webSocket.addEventListener("message", (message) => {
-        console.log("Received message: %s", message.data);
-        webSocket.send("hello server");
-      });
-      
-      webSocket.addEventListener("error", function (error) {
-        console.log(error);
-      });
-      
-      webSocket.addEventListener("close", function (error) {
-        console.log("Connection closed");
-      });
-      
-      return webSocket;
-    }
-    
-    function reconnectSocket() {
-      if (socket.readyState === socket.OPEN) {
-        return console.log("Still connected");
-      }
-      
-      socket = createSocketConnection();
-    }
-    
-    function disconnectSocket() {
-      socket.close();
-    }
-    
-    let socket = createSocketConnection();
-    
-    function App() {
-      return (
-        html
-        `<div>
-          <button onclick=${disconnectSocket}>Close Connection</button>
-          <button onclick=${reconnectSocket}>Reconnect</button>
-          ${world(html)}
-        </div>`
-      );
-    }
-    
-    render(App, document.querySelector("app-entry"));
-  </script>
+  <script defer="true" type="module" src="/HTML/entry.js" charset="utf-8"></script>
 </html>
