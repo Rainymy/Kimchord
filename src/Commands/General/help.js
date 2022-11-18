@@ -2,8 +2,8 @@ const {
   createSongListEmbed, createPageIndicator, createDropdown
 } = require('../../Components/discordComponents.js');
 
-const path = require('path');
-const { readdirSync } = require('fs');
+const path = require('node:path');
+const { readdirSync } = require('node:fs');
 
 const categories = {};
 
@@ -55,7 +55,7 @@ async function help(message, basicInfo, arg, commands) {
   
   collector.on("collect", async interaction => {
     const newEmbed = createEmbed(interaction.values[0], message);
-    
+  
     let index = 1;
     let valueText;
     for (let command in commands) {
@@ -68,11 +68,11 @@ async function help(message, basicInfo, arg, commands) {
         });
       }
     }
-    
+  
     for (let option of options) {
       option.default = option.value === interaction.values[0];
     }
-    
+  
     interaction.update(makeEmbed(newEmbed, options));
   });
   

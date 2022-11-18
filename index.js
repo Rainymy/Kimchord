@@ -13,7 +13,7 @@ const disconnect = require('./src/Events/disconnect.js');
 const { loadServerData, saveDefaultData } = require('./src/Components/serverData.js');
 const { credential, server, devs_ids } = require("./config.json");
 
-const { Client } = require('discord.js');
+const { Client, GatewayIntentBits  } = require('discord.js');
 const client = new Client({ intents: PRESETS.intents });
 
 const queue = new Map();

@@ -1,4 +1,5 @@
 const { durationToString } = require('./util.js');
+const { ActionRowBuilder, SelectMenuBuilder } = require('discord.js');
 
 function basicEmbed(video, queueLength) {
   const embedTitle = video.type === "radio"
@@ -39,19 +40,19 @@ function createSongListEmbed(songs, start, perPages=8) {
 }
 
 function createDropdown(options) {
-  return {
-    type: "ACTION_ROW",
-    components: [
-      {
-        type: "SELECT_MENU",
-        customId: "select_menu",
-        placeholder: "Choose a category",
-        min_values: 1,
-        max_values: 1,
-        options: options
-      }
-    ]
-  }
+  const menu_builder = new SelectMenuBuilder();
+  const menu = new ActionRowBuilder();
+  
+  menu.addComponents(
+    menu_builder.setCustomId('select')
+    .setPlaceholder("Choose a category")
+    .setCustomId("select_menu")
+    .setMinValues(1)
+		.setMaxValues(1)
+    .addOptions(options),
+  );
+  
+  return menu;
 }
 
 function createButton(label, id, disabled, emoji, buttonStyle) {
