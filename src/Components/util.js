@@ -60,16 +60,15 @@ function durationToString(durationInSeconds) {
 }
 
 function printToTerminal(customText, error) {
-  // console.log(Constants);
   // if (error.code === Constants.APIErrors.MISSING_ACCESS) {
   //   return console.log("Kicked from server or MISSING_ACCESS");
   // }
-  // 
-  // if (error.code === Constants.APIErrors.MISSING_PERMISSIONS) {
-  //   return console.log("Has Timeout or MISSING_PERMISSIONS");
-  // }
   
-  console.log(customText, error.code, error); 
+  if (error.code === 50013) {
+    return console.log("Has Timeout or MISSING_PERMISSIONS");
+  }
+  
+  return console.log(customText, error.code, error); 
 }
 
 module.exports = {

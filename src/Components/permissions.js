@@ -20,7 +20,7 @@ function validatePermissions(channel, id, requiredPermissions) {
   const neededPermissions = checkPermissions(channel, id, requiredPermissions);
   const batch = [];
   
-  if (neededPermissions.includes("SEND_MESSAGES")) {
+  if (neededPermissions.includes("SendMessages")) {
     return { error: true, comment: '"SEND_MESSAGES" needed', stop: true };
   }
   
