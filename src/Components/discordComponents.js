@@ -1,5 +1,7 @@
 const { durationToString } = require('./util.js');
-const { ActionRowBuilder, SelectMenuBuilder } = require('discord.js');
+const {
+  ActionRowBuilder, SelectMenuBuilder, ButtonBuilder
+} = require('discord.js');
 
 function basicEmbed(video, queueLength) {
   const embedTitle = video.type === "radio"
@@ -39,35 +41,41 @@ function createSongListEmbed(songs, start, perPages=8) {
   return embed;
 }
 
+function createQueueButtons(components) {
+  const wrapper = new ActionRowBuilder();
+  
+  for (let component of components) { wrapper.addComponents(component); }
+  
+  return wrapper;
+}
+
 function createDropdown(options) {
   const menu_builder = new SelectMenuBuilder();
   const menu = new ActionRowBuilder();
   
   menu.addComponents(
-    menu_builder.setCustomId('select')
-    .setPlaceholder("Choose a category")
-    .setCustomId("select_menu")
-    .setMinValues(1)
-		.setMaxValues(1)
-    .addOptions(options),
+    menu_builder
+      .setCustomId('select')
+      .setPlaceholder("Choose a category")
+      .setCustomId("select_menu")
+      .setMinValues(1)
+  		.setMaxValues(1)
+      .addOptions(options),
   );
   
   return menu;
 }
 
 function createButton(label, id, disabled, emoji, buttonStyle) {
-  return {
-    type: "BUTTON",
-    label: label,
-    custom_id: id,
-    style: buttonStyle ?? "SECONDARY",
-    disabled: disabled,
-    emoji: {
-      animated: false,
-      id: null,
-      name: emoji ?? null
-    }
-  }
+  const buttons = new ButtonBuilder();
+  
+  buttons
+    .setLabel(label.toString())
+    .setCustomId(id)
+    .setStyle(buttonStyle ?? "Secondary")
+    .setDisabled(disabled);
+    
+  return buttons;
 }
 
 function createPageIndicator(songCount, current, perPage) {
@@ -85,5 +93,6 @@ module.exports = {
   createSongListEmbed: createSongListEmbed,
   createButton: createButton,
   createPageIndicator: createPageIndicator,
-  createDropdown: createDropdown
+  createDropdown: createDropdown,
+  createQueueButtons: createQueueButtons
 }

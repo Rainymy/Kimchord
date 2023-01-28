@@ -2,7 +2,8 @@
 const {
   createSongListEmbed,
   createButton,
-  createPageIndicator
+  createPageIndicator,
+  createQueueButtons
 } = require('../../Components/discordComponents.js');
 const { checkServerMusicRole } = require('../../Components/permissions.js');
 
@@ -26,30 +27,17 @@ async function queue(message, basicInfo, arg, queue) {
   
   const embed = createSongListEmbed(songQueue, index, itemsPerPage);
   
-  const radio_image = "attachment://radio.png";
-  const radio_path = "./resources/radio.png";
-  let default_path = [];
-  
-  if (songQueue[0].type === "radio" && !songQueue[0].thumbnail) {
-    default_path  = [ radio_path ];
-  }
-  
-  if (!embed.thumbnail.url) { embed.thumbnail.url = radio_image; }
-  
   if (songQueue.length - 1 <= itemsPerPage) {
-    return message.channel.send({ files: [ ...default_path ], embeds: [ embed ] });
+    return message.channel.send({ embeds: [ embed ] });
   }
+  
+  const buttons = createQueueButtons([
+    nextButton,
+    ...createPageIndicator(songQueue.length, index, itemsPerPage)
+  ]);
   
   const embedMessage = await message.channel.send({
-    files: [ ...default_path ], embeds: [ embed ], components: [
-      {
-        type: "ACTION_ROW",
-        components: [
-          nextButton,
-          ...createPageIndicator(songQueue.length, index, itemsPerPage)
-        ]
-      }
-    ]
+    embeds: [ embed ], components: [ buttons ]
   });
   
   const collector = embedMessage.createMessageComponentCollector({
@@ -68,30 +56,18 @@ async function queue(message, basicInfo, arg, queue) {
       newEmbed = createSongListEmbed(songQueue, index, itemsPerPage);
     }
     
-    if (songQueue[0].type === "radio" && !newEmbed.thumbnail.url) {
-      newEmbed.thumbnail.url = radio_image;
-      default_path = [ radio_path ];
-    }
-    
     if (songQueue.length - 1 <= itemsPerPage) {
-      interaction.update({
-        files: [ ...default_path ], embeds: [ newEmbed ], components: []
-      });
+      interaction.update({ embeds: [ newEmbed ], components: [] });
       return collector.stop("Single page list");
     }
     
-    interaction.update({
-      files: [ ...default_path ], embeds: [ newEmbed ], components: [
-        {
-          type: "ACTION_ROW",
-          components: [
-            ...(index ? [backButton] : []),
-            ...((index + itemsPerPage) < songQueue.length ? [nextButton] : []),
-            ...createPageIndicator(songQueue.length, index, itemsPerPage)
-          ]
-        }
-      ]
-    });
+    const newButtons = createQueueButtons([
+      ...(index ? [backButton] : []),
+      ...((index + itemsPerPage) < songQueue.length ? [nextButton] : []),
+      ...createPageIndicator(songQueue.length, index, itemsPerPage)
+    ]);
+    
+    interaction.update({ embeds: [ newEmbed ], components: [ newButtons ] });
     
     return;
   });

@@ -64,6 +64,10 @@ function printToTerminal(customText, error) {
   //   return console.log("Kicked from server or MISSING_ACCESS");
   // }
   
+  if (error.code === 50001) {
+    return console.log("Disconnected by a user");
+  }
+  
   if (error.code === 50013) {
     return console.log("Has Timeout or MISSING_PERMISSIONS");
   }

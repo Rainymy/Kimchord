@@ -137,7 +137,7 @@ function File_Manager() {
       const customError = new Error("Download timeout");
       customError.myError = true;
       customError.info = {
-        message: `Canceling download: Idle timer reached ${timeoutTimer}ms`
+        message: `Cancelling download: Idle timer reached ${timeoutTimer}ms`
       }
       
       return streamURL.emit("error", customError);

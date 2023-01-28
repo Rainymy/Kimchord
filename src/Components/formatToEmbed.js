@@ -1,26 +1,17 @@
 const { durationToString } = require('./util.js');
 
 function formatToEmbed(video, noFields=false, songQueue) {
-  const placeholder_image = "attachment://placeholder.png";
-  const placeholder_path = "./src/resources/placeholder.png";
-  
-  const radio_image = "attachment://radio.png";
-  const radio_path = "./src/resources/radio.png";
-  
   if (!video) {
     console.trace(`Video value is: ${video}`);
     return [];
   }
-  
-  const default_image = video.type === "radio" ? radio_image: placeholder_image;
-  const default_path = video.type === "radio" ? radio_path: placeholder_path;
   
   const embed = {
   	color: 0x0099ff,
   	title: video.title,
   	url: video.url,
   	description: video.description,
-  	thumbnail: { url: video.thumbnail ?? default_image },
+  	thumbnail: { url: video.thumbnail },
     fields: [],
   	timestamp: new Date(),
   	footer: {
@@ -46,9 +37,7 @@ function formatToEmbed(video, noFields=false, songQueue) {
     });
   }
   
-  if (video.thumbnail) { return [ { embeds: [ embed ] }, embed ] }
-  
-  return [ { embeds: [ embed ], files: [ default_path ] }, embed ];
+  return [ { embeds: [ embed ] }, embed ];
 }
 
 module.exports = { formatToEmbed }
