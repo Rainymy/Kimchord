@@ -27,7 +27,9 @@ function RadioStations() {
   
   this.get = async (id) => await request(`${CHANNEL_URL}/${id}`, options);
   
-  this.stream = async (urlString) => { return await request(urlString, options); }
+  this.stream = async (urlString) => {
+    return await request(urlString, { ...options, isStream: true });
+  }
   
   this.thumbnail = (img) => { return `${THUMBNAIL_URL}/${img}`; }
   

@@ -60,5 +60,6 @@ module.exports = {
   request: parseRequest,
   download: download,
   getRequestSong: getRequestSong,
-  getDuration: getDuration
+  getDuration: getDuration,
+  createEmptyReadableStream: createEmptyReadableStream
 }

@@ -3,6 +3,7 @@ const { createAudioPlayer } = require('@discordjs/voice');
 const { checkServerMusicRole } = require('../../Components/permissions.js');
 const request = require('../../Components/request.js');
 const radioInfo = require('../../Components/radioStations.js');
+const { createEmptyReadableStream } = require('../../Components/handleRequests.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
@@ -107,7 +108,22 @@ async function radio(message, basicInfo, searchString, queue) {
     duration: parseInt(station.currentsong.run_length),
     thumbnail: radioStations.thumbnail(station.currentsong.song.cover_art),
     type: "radio",
-    getStream: () => radioStations.stream(fmLink),
+    getStream: async () => {
+      const response = await radioStations.stream(fmLink);
+      
+      if (response.error) {
+        message.channel.send([
+          "Try again!",
+          '```js',
+          `${response.comment}`,
+          '```'
+        ].join("\n"));
+        
+        return createEmptyReadableStream();
+      }
+      
+      return response;
+    },
     fmStationID: radioStations.cache[stationName].id,
     updateInfo: radioStations.update
   }

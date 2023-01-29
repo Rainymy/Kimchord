@@ -80,8 +80,7 @@ function custom_request(urlPath, params) {
 }
 
 function got_request(urlPath, params) {
-  const requestBody = params?.body ?? "{}";
-  const THRESHOLD_KB = 512;
+  const requestBody = params?.body ?? '{ "method": "get" }';
   
   const request_data = {
     json: JSON.parse(requestBody),
@@ -94,14 +93,16 @@ function got_request(urlPath, params) {
   
   return new Promise(async function(resolve, reject) {
     try {
+      if (request_data?.noWork) { throw "Temporarily disabled"; }
+      
       const response = await got(urlPath, request_data);
+      
+      if (request_data.isStream) { return resolve(response); }
       
       if (isValidPassthrough(response.headers)) {
         const streamResponse = new PassThrough();
         const stream = Readable.from(response.rawBody);
         stream.pipe(streamResponse);
-        
-        response.pipe(streamResponse);
         
         return resolve(streamResponse);
       }
@@ -110,7 +111,7 @@ function got_request(urlPath, params) {
       catch (e) { resolve({ error: true, comment: "Unparseable data" }); }
     }
     catch (e) {
-      console.log(e);
+      console.log("catching error in \"got_request\":", e);
       return resolve({ error: true, comment: e });
     }
   });
