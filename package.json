@@ -21,7 +21,7 @@
     "get-video-duration": "^4.1.0",
     "got": "^12.5.3",
     "helmet": "^5.1.1",
-    "libsodium-wrappers": "^0.7.10",
+    "libsodium-wrappers": "^0.7.11",
     "puppeteer": "^13.7.0",
     "sodium-native": "^3.3.0",
     "tweetnacl": "^1.0.3",
