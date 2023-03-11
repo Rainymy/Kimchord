@@ -6,11 +6,9 @@ const helmet = require('helmet');
 const express = require('express');
 
 const cookieParser = require('cookie-parser');
-const compression = require('compression');
 
 function setMiddlewares(app) {
   app.use(cookieParser());
-  // app.use(compression());
   
   app.use(helmet.contentSecurityPolicy({
     directives: {

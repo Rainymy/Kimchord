@@ -1,5 +1,11 @@
-const { readdirSync, existsSync, mkdir, statSync } = require('fs');
-const path = require('path');
+const { readdirSync, existsSync, mkdir, statSync } = require('node:fs');
+const path = require('node:path');
+
+const firstRun = {
+  hasInited: false,
+  hasCachedCommands: false,
+  cachedCommands: []
+}
 
 const essentialFolders = {
   playlistFolder: "../playlistFolder",
@@ -41,6 +47,8 @@ function getFirstOrString(aliases) {
 }
 
 function commands() {
+  if (firstRun.hasCachedCommands) { return firstRun.cachedCommands; }
+  
   const commandPath = path.join(__dirname, "../Commands");
   
   const commmand = {};
@@ -62,12 +70,16 @@ function commands() {
     }
   }
   
-  return [ commmand, status ];
+  firstRun.hasCachedCommands = true;
+  firstRun.cachedCommands = [ commmand, status ];
+  return firstRun.cachedCommands;
 }
 
 function Start() {
   this.commands = commands;
   this.init = () => {
+    if (firstRun.hasInited) { return this; }
+    
     for (let folder of Object.values(essentialFolders)) {
       let pathToFolder = path.join(__dirname, folder);
       
@@ -79,6 +91,7 @@ function Start() {
       };
     }
     
+    firstRun.hasInited = true;
     return this;
   }
 }

@@ -5,12 +5,18 @@ const { email, password } = require('../config.json');
 
 function Cookies() {
   this.cookiesPath = path.join(__dirname, "../cookies.json");
+  this.netscapeCookiePath = path.join(__dirname, "../netscapeCookie.txt");
   
   this.exists = () => { return existsSync(this.cookiesPath); }
   
   this.login = () => {
     return new Promise((resolve, reject) => {
-      return login(email, password).then(resolve).catch(reject);
+      const cookiePaths = {
+        json: this.cookiesPath,
+        netscape: this.netscapeCookiePath
+      }
+      
+      return login(email, password, cookiePaths).then(resolve).catch(reject);
     });
   }
   
@@ -32,19 +38,28 @@ function Cookies() {
       }
       else {
         console.log("Generating Cookie");
-        cookie = await this.login();
-        if (typeof cookie === "string") {
-          console.log(cookie);
-          cookie = null;
+        const [ auth, error ] = await this.login();
+        
+        if (auth === false) {
+          console.log(`Login detail - ${(!email ? "Email":"Password")} is missing.`);
+        }
+        else if (auth === null) {
+          console.log("Login failed - login detail is wrong (email/password).");
+        }
+        else if (!error.length) {
+          console.log("Succesfully logged in and saved cookies.");
+          cookie = auth;
+        }
+        else {
+          console.log("Error in Cookies: ", error);
         }
       }
-      
-      if (cookie) { console.log("Cookies Ready!"); }
     }
     catch (e) {
-      console.log("Error on Cookies.");
-      console.log(e);
+      console.log("Error (catch) on Cookies.", e);
     }
+    
+    if (cookie) { console.log("Cookies Ready!"); }
     
     console.log("------------------------------------------------------");
     return cookie;

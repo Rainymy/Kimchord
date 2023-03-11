@@ -37,10 +37,13 @@ async function download(req, res, GLOBAL_OBJECTS) {
   
   console.log("Video Meta: ", video);
   
-  const [ responseData, metadata ] = await parseData(video.id, GLOBAL_OBJECTS);
-  if (typeof responseData === "object") { return await res.send(responseData); }
+  const metadata = await fileManager.YT_DLP.getMetadata(video.url);
   
-  const combined = { ...video, ...{ container: metadata.container } };
+  if (metadata.is_live) {
+    return res.send({ error: false, comment: null, isLive: true })
+  }
+  
+  const combined = { ...video, ...{ container: metadata.ext } };
   return await fileManager.download(combined, (result) => {
     if (res.headersSent === true) { return; }
     

@@ -1,73 +1,53 @@
 "use strict";
-const puppeteer = require('puppeteer');
-const path = require('node:path');
+const puppeteer = require('puppeteer-extra');
+const stealth = require('puppeteer-extra-plugin-stealth')();
+puppeteer.use(stealth);
 
-const { writeFile } = require('./handleFile.js');
+const {
+  sleep,
+  authenticate,
+  saveCookies,
+  generateMovement,
+  parseToNetscape,
+  waitUntilToken,
+  handleCookieDialog,
+  isLoggedIn
+} = require('./puppyHandler.js');
 
-function sleep(seconds) {
-  return new Promise((resolve) => setTimeout(resolve, seconds));
-}
-
-function waitUntilToken(page) {
-  return new Promise(function(resolve, reject) {
-    page.on('request', interceptedRequest => {
-      const headers = interceptedRequest.headers();
-      
-      if (!headers["x-youtube-identity-token"]) { return; }
-      resolve(headers["x-youtube-identity-token"]);
-    });
-  });
-}
-
-async function login(email, password) {
-  if (!email || !password) {
-    return console.log(`Login detail - ${(!email ? "Email":"Password")} is missing.`);
-  }
+async function login(email, password, cookiePath) {
+  if (!email || !password) { return false; }
+  
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
-  await page.goto("https://accounts.google.com/signin/v2/identifier", {
-    waitUntil: "networkidle2"
-  });
-
-  await page.type("#identifierId", email);
-  await page.click("#identifierNext");
   
-  await page.waitForSelector("#password", { visible: true, hidden: false, });
+  // login with email and password
+  await authenticate(page, email, password);
   
-  await page.type(
-    "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input", password
-  );
+  // check for cookie dailog
+  await handleCookieDialog(page);
   
-  await sleep(1000);
-  await page.click("#passwordNext > div > button");
-  
-  await sleep(1000);
-  await page.goto("https://www.youtube.com/", { waitUntil: "networkidle2", });
-  
-  const isLoggedIn = await page.evaluate(() => {
-    return document.querySelector("#buttons > ytd-button-renderer > a");
-  });
-  
-  if (!isLoggedIn) {
+  if (!(await isLoggedIn(page))) {
     await browser.close();
-    return "Login failed - login detail is wrong (email/password).";
+    return null;
   }
+  
+  // generate some simulated user movement
+  generateMovement(page);
   
   const auth = {
     cookies: await page.cookies(),
     identityToken: await waitUntilToken(page)
   }
   
-  const authString = JSON.stringify(auth, null, 2);
-  const pathFile = path.join(__dirname, "../cookies.json");
+  const container = [
+    { path: cookiePath.json,     data: JSON.stringify(auth, null, 2) },
+    { path: cookiePath.netscape, data: parseToNetscape(auth.cookies) }
+  ]
   
-  await writeFile(pathFile, authString, (err) => {
-    if (err) { return console.log(err); }
-    return console.log("Succesfully logged in and saved cookies.");
-  });
+  const [ succes, error ] = await saveCookies(container);
   
   await browser.close();
-  return auth;
+  return [ auth, error ];
 }
 
 module.exports = {

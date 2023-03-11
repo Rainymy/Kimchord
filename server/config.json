@@ -1,5 +1,11 @@
 {
   "saveFolder": "../Songs",
+  "plugins": {
+    "YTDLP": {
+      "path": "./plugins/yt_dlp/",
+      "fileFormat": "binary_[%_tag_name_%].[%_extension_%]"
+    }
+  },
   "email": "",
   "password": ""
 }

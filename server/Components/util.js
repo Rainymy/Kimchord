@@ -1,22 +1,25 @@
 "use strict";
-const { existsSync, mkdir, statSync, readdirSync } = require('node:fs');
+const { existsSync, mkdir, statSync, readdirSync, mkdirSync } = require('node:fs');
 const { execSync } = require('node:child_process');
 const path = require('node:path');
 
-const { saveFolder } = require('../config.json');
+const { saveFolder, plugins } = require('../config.json');
 
 let initialized = false;
 
 function init() {
   if (initialized) { return this; }
   
-  const essentialFolders = [ getSaveLocation() ];
+  const essentialFolders = [
+    getSaveLocation(),
+    ...Object.values(plugins).map(v => path.join(__dirname, "../", v.path)),
+  ];
   for (let folder of essentialFolders) {
     if (existsSync(folder)) { continue; }
     
-    mkdir(folder, (err) => {
-      return console.log(err ?? `${folder} : directory created successfully!`);
-    });
+    // in case failure (throw error)
+    const folderPath = mkdirSync(folder, { recursive: true });
+    console.log(`Directory created successfully! : ${folderPath}`);
   }
   
   initialized = true;

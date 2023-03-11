@@ -1,22 +1,22 @@
 "use strict";
 const path = require('node:path');
-const stream = require('node:stream');
 const EventEmitter = require('node:events');
 
 const {
   makeWriteStream,
-  makeYTDLStream,
+  makeDLPStream,
   makeReadStream,
   deleteFile,
   checkFileExists,
   parseLocalFolder
 } = require("./handleFile.js");
 
-const { getSaveLocation } = require('./util.js');
 const Cookies = require('./Cookies.js');
-const Youtube = require('../API/youtube.js');
+const YT_DLP = require('../API/ytDLPHandler.js');
 
+const { getSaveLocation } = require('./util.js');
 const baseFolder = getSaveLocation();
+console.log("Base save folder: ", "\x1b[33m", baseFolder, "\x1b[0m");
 
 function File_Manager() {
   this.queue = new Map();
@@ -70,8 +70,11 @@ function File_Manager() {
   });
   
   this.init = async () => {
-    this.cache = parseLocalFolder();
+    this.cache = parseLocalFolder(baseFolder);
     this.cookies = await Cookies.get();
+    
+    this.YT_DLP = await YT_DLP.init();
+    this.YT_DLP.setCookie(Cookies.netscapeCookiePath);
     
     return this;
   }
@@ -130,7 +133,7 @@ function File_Manager() {
     const filePath = this.saveLocation(video);
     const timeoutTimer = 1000 * 60 * 60 * 30;
     
-    const streamURL = await makeYTDLStream(video, this.cookies, cb);
+    const streamURL = await makeDLPStream(video, this.cookies, cb);
     const streamToFile = await makeWriteStream(filePath);
     
     function cancelDownload() {
@@ -158,7 +161,7 @@ function File_Manager() {
   }
   
   this.liveStream = async (video, callback) => {
-    return await makeYTDLStream(video, this.cookies, callback);
+    return await makeDLPStream(video, this.cookies, callback);
   }
   
   return this;

@@ -8,8 +8,10 @@ yarn-error.log*
 # Custom ignore
 /src/playlistFolder/*
 /src/guilds_settings/*
+/server/plugins/*
 /server/Songs/*
 /server/cookies.json
+/server/netscapeCookie.txt
 /server/cookies_old.json
 /server/Songs.lnk
 /server/config_push.json

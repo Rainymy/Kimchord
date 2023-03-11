@@ -64,8 +64,8 @@ async function settings(message, basicInfo, arg, queue) {
     const data = basicInfo.guilds_settings;
     data.prefix = searchString;
     
-    basicInfo.all_server_settings.set(message.guild.id, data);
     await saveServerData(message.guild.id, data);
+    
     return message.channel.send(
       codeBlock(`Server prefix changed to: ${searchString}`)
     );
@@ -95,7 +95,6 @@ async function settings(message, basicInfo, arg, queue) {
     const data = basicInfo.guilds_settings;
     data["required_music_role_name".toUpperCase()] = searchString;
     
-    basicInfo.all_server_settings.set(message.guild.id, data);
     await saveServerData(message.guild.id, data);
     
     return message.channel.send(
@@ -136,7 +135,6 @@ async function settings(message, basicInfo, arg, queue) {
     const data = basicInfo.guilds_settings;
     data["require_music_role".toUpperCase()] = trueOrFalse;
     
-    basicInfo.all_server_settings.set(message.guild.id, data);
     await saveServerData(message.guild.id, data);
     
     return message.channel.send(

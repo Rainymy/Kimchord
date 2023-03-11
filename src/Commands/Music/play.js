@@ -50,7 +50,9 @@ async function main(message, basicInfo, searchString, queue, client) {
     param,, failed
   ] = await handleRequests.parseSearchString(message, searchString);
   
-  if (failed) { return message.channel.send(messageInfo.videoNotFoundOrAvailable); }
+  if (failed) {
+    return message.channel.send(messageInfo.videoNotFoundOrAvailable);
+  }
   
   /*--------------------- Get streamable response -------------------*/
   let sentMsg;
@@ -107,6 +109,7 @@ async function main(message, basicInfo, searchString, queue, client) {
     const temp = JSON.parse(shallowCopy.body);
     temp.videoData = songs[i];
     shallowCopy.body = JSON.stringify(temp);
+    shallowCopy.isStream = songs[i].isLive ?? false;
     
     songs[i].getStream = async () => {
       const response = await handleRequests.getRequestSong(shallowCopy);

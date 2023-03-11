@@ -1,10 +1,11 @@
-const path = require('path');
+const path = require('node:path');
 const fileHandler = require('./fileHandler.js');
 const config = require('../../config.json');
 const { guilds_settings } = require('./init.js').essentialFolders;
 
+const servers = new Map();
+
 function loadServerData() {
-  const servers = new Map();
   console.log("Loading server settings....");
   const pathTo = path.join(__dirname, guilds_settings);
   
@@ -56,8 +57,18 @@ async function saveServerData(id, data) {
   return data; 
 }
 
+async function getServer(server_id, message) {
+  let guilds_settings = servers.get(server_id);
+  if (!guilds_settings) {
+    guilds_settings = await saveDefaultData(servers, message);
+  }
+  
+  return guilds_settings;
+}
+
 module.exports = {
   loadServerData: loadServerData,
   saveServerData: saveServerData,
-  saveDefaultData: saveDefaultData
+  saveDefaultData: saveDefaultData,
+  getServer: getServer
 }

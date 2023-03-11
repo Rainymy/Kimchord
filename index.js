@@ -1,8 +1,14 @@
 "use strict";
-const { validatePermissions, PRESETS } = require('./src/Components/permissions.js');
+const {
+  validateCommandPersmissions,
+  validatePermissions,
+  PRESETS
+} = require('./src/Components/permissions.js');
 const { exec_command } = require('./src/Components/switch.js');
 const { printToTerminal, validateCommand } = require('./src/Components/util.js');
 const { updateActivity, callbackFn } = require('./src/Events/activity.js');
+const init = require('./src/Components/init.js').default;
+const [ commands, status ] = init.init().commands();
 
 const onReady = require('./src/Events/ready.js');
 const voiceStateUpdate = require('./src/Events/voiceStateUpdate.js');
@@ -10,7 +16,7 @@ const guildCreate = require('./src/Events/guildCreate.js');
 const guildDelete = require('./src/Events/guildDelete.js');
 const disconnect = require('./src/Events/disconnect.js');
 
-const { loadServerData, saveDefaultData } = require('./src/Components/serverData.js');
+const { loadServerData, getServer } = require('./src/Components/serverData.js');
 const { credential, server, devs_ids } = require("./config.json");
 
 const { Client, GatewayIntentBits  } = require('discord.js');
@@ -18,15 +24,11 @@ const client = new Client({ intents: PRESETS.intents });
 
 const queue = new Map();
 const devs_id_list = devs_ids ?? [];
-const server_guilds = loadServerData();
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) { return; }
   
-  let guilds_settings = server_guilds.get(message.guild.id);
-  if (!guilds_settings) {
-    guilds_settings = await saveDefaultData(server_guilds, message);
-  }
+  const guilds_settings = await getServer(message.guild.id, message);
   
   const args = message.content.split(" ");
   const searchString = args.slice(1).join(" ");
@@ -46,7 +48,6 @@ client.on("messageCreate", async (message) => {
   const data = {
     prefix: guilds_settings.prefix,
     guilds_settings: guilds_settings,
-    all_server_settings: server_guilds,
     server: {
       host: server.location,
       port: server.port,
@@ -65,7 +66,10 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
   return await voiceStateUpdate(oldState, newState, client, queue);
 });
 
-client.on("ready", async (event) => await onReady(event, client));
+client.on("ready", async (event) => {
+  await onReady(event, client);
+  loadServerData();
+});
 client.on('guildCreate', async (guild) => guildCreate(guild, client));
 client.on("guildDelete", async (guild) => guildDelete(guild, client))
 client.on('disconnect', async (erMsg, code) => disconnect(client, erMsg, code));

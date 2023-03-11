@@ -2,7 +2,6 @@
 const https = require('https');
 const ytsr = require('ytsr');
 const ytpl = require('ytpl');
-const ytdl = require('ytdl-core');
 const { getVideoDurationInSeconds } = require("get-video-duration");
 
 function YouTube() {
@@ -107,17 +106,6 @@ function YouTube() {
   
   this.getVideoDurationInSeconds = async function (resourcePath) {
     return await getVideoDurationInSeconds(resourcePath);
-  }
-  
-  this.getDurationById = async function (videoId) {
-    try {
-      let info = await ytdl.getInfo(videoId);
-      let format = ytdl.chooseFormat(info.formats, { filter: 'audioonly' });
-      
-      const seconds = format.approxDurationMs / 1000;
-      return [ seconds, format ];
-    }
-    catch (e) { return [ null, { container: "mp4" } ]; }
   }
   
   this.getYoutubeData = async function (input) {

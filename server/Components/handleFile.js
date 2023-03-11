@@ -1,11 +1,8 @@
 "use strict";
 const path = require("node:path");
 const fs = require('node:fs');
-const ytdl = require('ytdl-core');
 
-const { getSaveLocation } = require('./util.js');
-const baseFolder = getSaveLocation();
-console.log("Base save folder: ", "\x1b[33m", baseFolder, "\x1b[0m");
+const DLP = require('../API/ytDLPHandler.js');
 
 const custom_errors = {
   ytdl_error: "ytdl_error"
@@ -54,9 +51,10 @@ async function logDownload(video, metadataBytes, downloadedBytes) {
   return;
 }
 
-function parseLocalFolder() {
+function parseLocalFolder(baseFolder) {
   const accum = new Map();
   const localFiles = fs.readdirSync(baseFolder);
+  
   for (let file of localFiles) {
     const extension = path.extname(file); 
     const basename = path.basename(file, extension);
@@ -105,14 +103,6 @@ function makeReadStream(filePath) {
     
     return;
   });
-  
-  // load the whole file on RAM
-  // return new Promise(function(resolve, reject) {
-  //   fs.readFile(filePath, (err, data) => {
-  //     if (err) { return resolve(err); }
-  //     return resolve(data);
-  //   });
-  // });
 }
 
 function makeWriteStream(filePath, flags) {
@@ -147,63 +137,19 @@ function makeWriteStream(filePath, flags) {
   });
 }
 
-function parseOptions(video, cookies, callback) {
-  const cookiesString = cookies?.cookies?.map(({ name, value }) => {
-    return `${name}=${value}; `;
-  });
-  
-  const options = {
-    filter: (format) => {
-      const isAudioOnly = format.hasVideo === false && format.hasAudio === true;
-      
-      if (format.container === "mp4" && isAudioOnly) {
-        callback(format);
-        return true;
-      }
-      
-      return false;
-    },
-    highWaterMark: 1024 * 1024 * 1024
-  }
-  
-  if (video.isLive) {
-    options.filter = (format) => {
-      return [ 128, 127, 120, 96, 95, 94, 93 ].indexOf(format.itag) > -1;
-    }
-  }
-  
-  if (cookiesString) {
-    options.requestOptions = {
-      headers: {
-        Cookie: cookiesString, 
-        "x-youtube-identity-token": cookies.identityToken
-      }
-    }
-  }
-  
-  return options;
-}
-
-async function makeYTDLStream(video, cookies, callback) {
-  let foundFormat;
+async function makeDLPStream( video, cookies, cb=()=>{} ) {
   let downloadedBytes = 0;
   
-  const saveFormat = (format) => { foundFormat = format; }
+  const metadata = await DLP.getMetadata(video.url);
+  const readableStream = DLP.createDownload(video.url, video.isLive);
   
-  const options = parseOptions(video, cookies, saveFormat);
-  const streamURL = await ytdl(video.url, options);
+  readableStream.on("data", (data) => { downloadedBytes += data.length; });
   
-  let cb = typeof cookies === "function" ? cookies: callback;
-  if (!cb) {
-    cb = function () {};
-    console.warn("WARNING NO CALLBACK!!");
-  }
-  
-  streamURL.on("error", (error) => {
-    if (error.myError === false) { console.log("error from YTDL", error); }
+  readableStream.on("error", (error) => {
+    if (error.myError === false) { console.log("error from YT_DLP", error); }
     
-    for (let stream of streamURL._readableState.pipes) {
-      streamURL.unpipe(stream);
+    for (let stream of readableStream._readableState.pipes) {
+      readableStream.unpipe(stream);
       
       const err = error.myError ? error : new Error(custom_errors.ytdl_error);
       stream.emit("error", err);
@@ -222,24 +168,23 @@ async function makeYTDLStream(video, cookies, callback) {
     
     if (error.myError) { returnValue = { error: true, comment: error.info.message } }
     
-    streamURL.emit("existing_stream", returnValue);
+    readableStream.emit("existing_stream", returnValue);
     return cb(returnValue);
   });
   
-  streamURL.on("data", (data) => { downloadedBytes += data.length; });
-  
-  streamURL.on("finish", () => {
-    logDownload(video, parseInt(foundFormat.contentLength), downloadedBytes);
+  readableStream.on("finish", () => {
+    logDownload(video, metadata.filesize, downloadedBytes);
     
-    video.duration = parseInt(foundFormat.approxDurationMs) / 1000;
+    video.duration = metadata.duration;
     
     const returnValue = { error: false, comment: null, video: video };
     
-    streamURL.emit("existing_stream", returnValue);
+    readableStream.emit("existing_stream", returnValue);
     return cb(returnValue);
   });
   
-  return streamURL;
+  
+  return readableStream;
 }
 
 module.exports = {
@@ -250,5 +195,5 @@ module.exports = {
   writeFile: writeFile,
   makeReadStream: makeReadStream,
   makeWriteStream: makeWriteStream,
-  makeYTDLStream: makeYTDLStream
+  makeDLPStream: makeDLPStream
 }

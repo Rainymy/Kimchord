@@ -65,6 +65,10 @@ function checkServerMusicRole(guilds_settings, member) {
   return user_roles.indexOf(REQUIRED_ROLE_NAME) === -1 && REQUIRE_MUSIC_ROLE;
 }
 
+function validateCommandPersmissions(commands, command, message) {
+  return [""];
+}
+
 const PRESETS = {
   music: [ "Connect", "Speak" ],
   channel: [ "SendMessages", "ViewChannel", "EmbedLinks", "AttachFiles" ],
@@ -85,5 +89,6 @@ module.exports = {
   validatePermissions: validatePermissions,
   validateUserPermissions: validateUserPermissions,
   checkServerMusicRole: checkServerMusicRole,
+  validateCommandPersmissions: validateCommandPersmissions,
   PRESETS: PRESETS
 }
