@@ -2,7 +2,7 @@
 A pretty simple general purpose discord bot. Mainly focused on music functionalities.
 
 ## Requirements
-  - [Nodejs](https://nodejs.org/) version 16 or higher.
+  - [Nodejs](https://nodejs.org/) version 19 or higher.
   - Discord login token from [Discord](https://discord.com/developers/).
   - Any text editor (even notepad works).
 
