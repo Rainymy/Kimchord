@@ -1,7 +1,7 @@
 {
   "name": "Kimchord",
   "author": "Rainymy",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A simple Discord music bot",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "keywords": [],
   "license": "MIT",
   "dependencies": {
-    "@discordjs/voice": "^0.14.0",
+    "@discordjs/voice": "^0.15.0",
     "bufferutil": "^4.0.7",
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",

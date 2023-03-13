@@ -5,21 +5,24 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Development (Custom)
+node_modules_old
+/server/cookies_old.json
+/server/config_push.json
+/config_push.json
+
 # Custom ignore
+TODOs.txt
+/config.json
+.update/NEW_UPDATE
 /src/playlistFolder/*
 /src/guilds_settings/*
 /server/plugins/*
 /server/Songs/*
 /server/cookies.json
 /server/netscapeCookie.txt
-/server/cookies_old.json
 /server/Songs.lnk
-/server/config_push.json
 /server/downloaded_songs.txt
-/config.json
-/config_push.json
-.update/NEW_UPDATE
-TODOs.txt
 
 # Runtime data
 pids
