@@ -1,29 +1,26 @@
 "use strict";
-const { DOWNLOAD_MAX_ALLOWED_HOURS: maxHours } = require('../../config.json');
+const {
+  DOWNLOAD_MAX_ALLOWED_HOURS: MAX_ALLOWED_HOUR
+} = require('../../config.json');
 
 const util = require('../Components/util.js').init();
 
-async function parseData(id, GLOBAL_OBJECTS) {
-  const { fileManager, youtube } = GLOBAL_OBJECTS;
-  
-  const [ seconds, metadata ] = await youtube.getDurationById(id);
-  const hours = Math.floor(seconds / 60 / 60);
-  
-  if (!seconds && !fileManager.cookies) {
-    const AGE_RESTRICTED = `Age-restricted videos are not supported.`;
-    return [ { error: true, comment: AGE_RESTRICTED } ];
+function checkValidMeta(meta) {
+  if (meta.is_live) {
+    return [ false, { error: false, comment: null, isLive: true } ];
   }
   
-  if (metadata?.isLive) {
-    return [ { error: false, comment: null, isLive: true } ];
+  const hours = Math.floor(meta.duration / 60 / 60);
+  if (hours >= MAX_ALLOWED_HOUR) {
+    const MAX_HOUR_COMMENT = `Max ${MAX_ALLOWED_HOUR} hours is allowed`;
+    const VIDEO_HOUR_COMMENT = `Video is ${hours} hours long`;
+    
+    const MAX_HOUR_REACHED = `${MAX_HOUR_COMMENT}: ${VIDEO_HOUR_COMMENT}`;
+    
+    return [ false, { error: true, comment: MAX_HOUR_REACHED } ];
   }
   
-  if (hours >= maxHours) {
-    const MAX_HOUR = `Max ${maxHours} hours is allowed: Video is ${hours} hours long`;
-    return [ { error: true, comment: MAX_HOUR } ];
-  }
-  
-  return [ undefined, metadata ];
+  return [ true ];
 }
 
 async function download(req, res, GLOBAL_OBJECTS) {
@@ -38,10 +35,9 @@ async function download(req, res, GLOBAL_OBJECTS) {
   console.log("Video Meta: ", video);
   
   const metadata = await fileManager.YT_DLP.getMetadata(video.url);
+  const [ isValid, errorInfo ] = checkValidMeta(metadata);
   
-  if (metadata.is_live) {
-    return res.send({ error: false, comment: null, isLive: true })
-  }
+  if (!isValid) { return res.send(errorInfo); }
   
   const combined = { ...video, ...{ container: metadata.ext } };
   return await fileManager.download(combined, (result) => {

@@ -1,7 +1,7 @@
 {
   "name": "Kimchord",
   "author": "Rainymy",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A simple Discord music bot",
   "main": "index.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cookiefile": "^1.0.10",
-    "discord.js": "^14.7.1",
+    "discord.js": "^14.8.0",
     "express": "^4.18.2",
     "ffmpeg-static": "^5.1.0",
     "get-video-duration": "^4.1.0",
