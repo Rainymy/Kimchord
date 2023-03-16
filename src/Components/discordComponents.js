@@ -1,6 +1,6 @@
 const { durationToString } = require('./util.js');
 const {
-  ActionRowBuilder, SelectMenuBuilder, ButtonBuilder
+  ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder
 } = require('discord.js');
 
 function basicEmbed(video, queueLength) {
@@ -50,7 +50,7 @@ function createQueueButtons(components) {
 }
 
 function createDropdown(options) {
-  const menu_builder = new SelectMenuBuilder();
+  const menu_builder = new StringSelectMenuBuilder();
   const menu = new ActionRowBuilder();
   
   menu.addComponents(

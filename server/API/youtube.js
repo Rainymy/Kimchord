@@ -182,17 +182,27 @@ function YouTube() {
     catch (e) { return false; }
     
     for (let item of response.items) {
+      const temp_url = new URL(item.url);
+      const temp_url_1 = new URL(item.url);
+      
       delete item.index;
       delete item.shortUrl;
       delete item.thumbnails;
       delete item.isLive;
       delete item.isPlayable;
       
-      item.thumbnail = removeExtraImgQuery(item.bestThumbnail.url)
+      item.thumbnail = removeExtraImgQuery(item.bestThumbnail.url);
       delete item.bestThumbnail;
       
       item.duration = item.durationSec;
       delete item.durationSec;
+      
+      for (let param of temp_url.searchParams.keys()) {
+        if (param === "v") { continue; }
+        temp_url_1.searchParams.delete(param);
+      }
+      
+      item.url = temp_url_1.toString();
     }
     
     return {
