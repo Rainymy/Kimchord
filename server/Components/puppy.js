@@ -15,7 +15,7 @@ const {
 } = require('./puppyHandler.js');
 
 async function login(email, password, cookiePath) {
-  if (!email || !password) { return false; }
+  if (!email || !password) { return [ false ]; }
   
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
@@ -28,7 +28,7 @@ async function login(email, password, cookiePath) {
   
   if (!(await isLoggedIn(page))) {
     await browser.close();
-    return null;
+    return [ null ];
   }
   
   // generate some simulated user movement
