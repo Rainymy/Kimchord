@@ -10,9 +10,9 @@ const parseSearchString = require('./Events/parseSearchString.js');
 const getDuration = require('./Events/getDuration.js');
 const dashboard = require('./Events/dashboard.js');
 
-const connectionWS = require('./WebSocket/connection.js');
-const createServerWS = require('./WebSocket/createServer.js');
-const closeConnectionWS = require('./WebSocket/close.js');
+const connectionWS = require('./Websocket/connection.js');
+const createServerWS = require('./Websocket/createServer.js');
+const closeConnectionWS = require('./Websocket/close.js');
 
 const express = require('express');
 const app = express().disable("x-powered-by");
