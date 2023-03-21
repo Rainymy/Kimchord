@@ -1,3 +1,5 @@
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 function logServerSongList(message, basicInfo, arg, queue, client) {
@@ -23,6 +25,9 @@ function logServerSongList(message, basicInfo, arg, queue, client) {
 
 module.exports = {
   name: "Log Server Song",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: "logserversonglist",
   main: logServerSongList,
   isHidden: true

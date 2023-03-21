@@ -1,4 +1,25 @@
 const { codeBlock } = require('./markup.js');
+const messageInfo = require('./messageInfo.js');
+
+const PRESETS = {
+  music: [ "Connect", "Speak" ],
+  channel: [ "SendMessages", "ViewChannel", "EmbedLinks", "AttachFiles" ],
+  server_mods: [ "ManageGuild" ],
+  PERMISSIONS: {
+    MUSIC: "music",
+    TEXT: "text",
+    CONNECT_REQUIRED: "connect_required",
+    ROLE_REQUIRED: "role_required"
+  },
+  intents: [
+    "Guilds",
+    "GuildVoiceStates",
+    "GuildMessages",
+    "GuildMessageReactions",
+    "DirectMessages",
+    "MessageContent"
+  ]
+}
 
 function compareListsTo(userPermissions, requiredPermissions) {
   let misssingPermissions = [];
@@ -45,7 +66,7 @@ function validateUserPermissions(user, requiredPermissions) {
   
   for (let permission of requiredPermissions) {
     if (user.permissions.has(permission)) { continue; }
-    if (permission === "MANAGE_GUILD") { permission = "MANAGE SERVER"; }
+    if (permission === "MANAGE_GUILD") { permission = "MANAGE_SERVER"; }
     
     batch.push(`You need "${permission.split("_").join(" ")}" permission.`);
   }
@@ -65,30 +86,66 @@ function checkServerMusicRole(guilds_settings, member) {
   return user_roles.indexOf(REQUIRED_ROLE_NAME) === -1 && REQUIRE_MUSIC_ROLE;
 }
 
-function validateCommandPersmissions(commands, command, message) {
-  return [""];
+function getVoicePermission(message, bot_id) {
+  const voiceChannel = getConnectedVoice(message);
+  if (!voiceChannel) { return [ messageInfo.notInVoiceChannel ]; }
+  
+  return checkPermissions(voiceChannel, bot_id, PRESETS.music);
 }
 
-const PRESETS = {
-  music: [ "Connect", "Speak" ],
-  channel: [ "SendMessages", "ViewChannel", "EmbedLinks", "AttachFiles" ],
-  server_mods: [ "ManageGuild" ],
-  intents: [
-    "Guilds",
-    "GuildVoiceStates",
-    "GuildMessages",
-    "GuildMessageReactions",
-    "DirectMessages",
-    "MessageContent"
-  ]
+function getConnectedVoice(message) {
+  return message.member.voice.channel;
+}
+
+function validateCommandPersmissions(message, client, permissions, metadata) {
+  if (!permissions) { return; }
+  
+  for (let permission of permissions) {
+    if (permission == PRESETS.PERMISSIONS.CONNECT_REQUIRED) {
+      if (!getConnectedVoice(message)) { return [ messageInfo.notInVoiceChannel ]; }
+    }
+    
+    if (permission == PRESETS.PERMISSIONS.MUSIC) {
+      const perms = getVoicePermission(message, client.user.id); 
+      
+      if (perms.length) {
+        return [ messageInfo.permissionNeeded(perms.join(", ")) ];
+      }
+    }
+    
+    if (permission == PRESETS.PERMISSIONS.ROLE_REQUIRED) {
+      const guilds_settings = metadata.guilds_settings;
+      const REQUIRED_ROLE_NAME = guilds_settings.REQUIRED_MUSIC_ROLE_NAME;
+      
+      if (checkServerMusicRole(guilds_settings, message.member)) {
+        return [
+          codeBlock(
+            [
+              `Requires "${REQUIRED_ROLE_NAME}" role.`,
+              [
+                `You can disable this with`,
+                `"${guilds_settings.prefix}settings REQUIRE_MUSIC_ROLE false"`
+              ].join(" ")
+            ].join("\n"),
+            "js"
+          )
+        ];
+      }
+      // if PRESETS.PERMISSIONS.ROLE_REQUIRED - END
+    }
+    
+    if (permission == PRESETS.PERMISSIONS.TEXT) {
+      const res = validatePermissions(message.channel, client.user.id, PRESETS.channel);
+      
+      if (res.stop || res.error) { return res.stop ? null : [ res.comment ]; }
+    }
+  }
+  
+  return [];
 }
 
 module.exports = {
-  compareListsTo: compareListsTo,
-  checkPermissions: checkPermissions,
-  validatePermissions: validatePermissions,
+  PRESETS: PRESETS,
   validateUserPermissions: validateUserPermissions,
-  checkServerMusicRole: checkServerMusicRole,
-  validateCommandPersmissions: validateCommandPersmissions,
-  PRESETS: PRESETS
+  validateCommandPersmissions: validateCommandPersmissions
 }

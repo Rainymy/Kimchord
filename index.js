@@ -1,14 +1,8 @@
 "use strict";
-const {
-  validateCommandPersmissions,
-  validatePermissions,
-  PRESETS
-} = require('./src/Components/permissions.js');
+const { PRESETS } = require('./src/Components/permissions.js');
 const { exec_command } = require('./src/Components/switch.js');
 const { printToTerminal, validateCommand } = require('./src/Components/util.js');
 const { updateActivity, callbackFn } = require('./src/Events/activity.js');
-const init = require('./src/Components/init.js').default;
-const [ commands, status ] = init.init().commands();
 
 const onReady = require('./src/Events/ready.js');
 const voiceStateUpdate = require('./src/Events/voiceStateUpdate.js');
@@ -34,15 +28,6 @@ client.on("messageCreate", async (message) => {
   const searchString = args.slice(1).join(" ");
   
   if (!validateCommand(args[0], guilds_settings.prefix)) { return; }
-  
-  // validate bots permissions for sending text in channel 
-  const bot_id = client.user.id;
-  const validation = validatePermissions(message.channel, bot_id, PRESETS.channel);
-  
-  if (validation.stop) { return; }
-  if (validation.error) {
-    return message.channel.send(validation.comment).catch(e => console.log(e));
-  }
   
   const command = args[0].substring(guilds_settings.prefix.length);
   const data = {

@@ -2,6 +2,7 @@
 const { formatToEmbed } = require('../../Components/formatToEmbed.js');
 const { progressBar, makeTextBar } = require('../../Components/textProgressBar.js');
 
+const { PRESETS } = require('../../Components/permissions.js');
 const messageInfo = require('../../Components/messageInfo.js');
 
 async function np(message, basicInfo, arg, queue) {
@@ -42,6 +43,9 @@ async function np(message, basicInfo, arg, queue) {
 
 module.exports = {
   name: "Now Playing",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: ["np", "now", "progress"],
   main: np
 }

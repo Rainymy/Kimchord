@@ -1,10 +1,7 @@
+"use strict";
 const { handleVideo } = require('../../Components/handleVideo');
 const { formatToEmbed } = require('../../Components/formatToEmbed.js');
-const {
-  checkPermissions,
-  PRESETS,
-  checkServerMusicRole
-} = require('../../Components/permissions.js');
+const { PRESETS } = require('../../Components/permissions.js');
 const handleRequests = require('../../Components/handleRequests.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
@@ -18,32 +15,6 @@ async function main(message, basicInfo, searchString, queue, client) {
   }
   
   const voiceChannel = message.member.voice.channel;
-  if (!voiceChannel) { return message.channel.send(messageInfo.notInVoiceChannel); }
-  
-  /*---------------------- Check for permissions --------------------*/
-  const bot_id = client.user.id;
-  const neededPermissions = checkPermissions(voiceChannel, bot_id, PRESETS.music);
-  
-  for (let [ index, neededPermission ] of neededPermissions.entries()) {
-    message.channel.send(messageInfo.permissionNeeded(neededPermission));
-    if (index === neededPermissions.length - 1) { return; }
-  }
-  
-  const REQUIRED_ROLE_NAME = basicInfo.guilds_settings.REQUIRED_MUSIC_ROLE_NAME;
-  if (checkServerMusicRole(basicInfo.guilds_settings, message.member)) {
-    return message.channel.send(
-      codeBlock(
-        [
-          `Requires "${REQUIRED_ROLE_NAME}" role.`,
-          [
-            `You can disable this with`,
-            `"${basicInfo.prefix}settings REQUIRE_MUSIC_ROLE false"`
-          ].join(" ")
-        ].join("\n"),
-        "js"
-      )
-    )
-  }
   
   /*----------------------- Get url for video -----------------------*/
   const [
@@ -197,6 +168,12 @@ async function main(message, basicInfo, searchString, queue, client) {
 
 module.exports = {
   name: "Play",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT,
+    PRESETS.PERMISSIONS.MUSIC,
+    PRESETS.PERMISSIONS.CONNECT_REQUIRED,
+    PRESETS.PERMISSIONS.ROLE_REQUIRED
+  ],
   aliases: ["play", "music", "p"],
   main: main
 }

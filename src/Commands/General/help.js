@@ -1,9 +1,9 @@
-const {
-  createSongListEmbed, createPageIndicator, createDropdown
-} = require('../../Components/discordComponents.js');
-
+"use strict";
 const path = require('node:path');
 const { readdirSync } = require('node:fs');
+
+const { PRESETS } = require('../../Components/permissions.js');
+const { createDropdown } = require('../../Components/discordComponents.js');
 
 const categories = {};
 
@@ -84,6 +84,9 @@ async function help(message, basicInfo, arg, commands) {
 
 module.exports = {
   name: "Help",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: "help",
   main: help
 };

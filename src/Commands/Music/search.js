@@ -1,5 +1,7 @@
+"use strict";
 const { formatToEmbed } = require('../../Components/formatToEmbed.js');
 const { parseSearchString } = require('../../Components/parseSearchString.js');
+const { PRESETS } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
@@ -18,6 +20,9 @@ async function searchVideo(message, basicInfo, searchString, queue) {
 
 module.exports = {
   name: "Search",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: ["search"],
   main: searchVideo
 }

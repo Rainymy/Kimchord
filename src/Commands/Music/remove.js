@@ -1,4 +1,5 @@
-const { checkServerMusicRole } = require('../../Components/permissions.js');
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
@@ -8,13 +9,6 @@ function remove(message, basicInfo, searchString, queue) {
   
   if (!serverQueue?.songs.length) {
     return message.channel.send(messageInfo.nothingPlaying);
-  }
-  
-  const REQUIRED_ROLE_NAME = basicInfo.guilds_settings.REQUIRED_MUSIC_ROLE_NAME;
-  if (checkServerMusicRole(basicInfo.guilds_settings, message.member)) {
-    return message.channel.send(
-      codeBlock(messageInfo.requiresRoleName(REQUIRED_ROLE_NAME), "js")
-    )
   }
   
   const number = parseInt(searchString);
@@ -40,6 +34,11 @@ function remove(message, basicInfo, searchString, queue) {
 
 module.exports = {
   name: "Remove",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT,
+    PRESETS.PERMISSIONS.CONNECT_REQUIRED,
+    PRESETS.PERMISSIONS.ROLE_REQUIRED
+  ],
   aliases: "remove",
   main: remove
 }

@@ -67,6 +67,7 @@ function commands() {
       stat = handleAppend(commmand, path.join(relPath, sec_file), file);
       status[ getFirstOrString(stat.aliases) ] = { ...stat };
       delete status[ getFirstOrString(stat.aliases) ].main;
+      delete status[ getFirstOrString(stat.aliases) ].permissions;
     }
   }
   

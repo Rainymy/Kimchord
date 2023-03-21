@@ -1,3 +1,6 @@
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
+
 const request = require('../../Components/request.js');
 const { parseSearchString } = require('../../Components/parseSearchString.js');
 const messageInfo = require('../../Components/messageInfo.js');
@@ -6,8 +9,6 @@ async function deleteSong(message, basicInfo, searchString, queue) {
   if (!basicInfo.isDev) {
     return message.channel.send(messageInfo.commandDisabled);
   }
-  
-  if (message.author.id !== "291701986863349761") { return; }
   
   const baseUrl = basicInfo.server.URL;
   
@@ -30,6 +31,9 @@ async function deleteSong(message, basicInfo, searchString, queue) {
 
 module.exports = {
   name: "Delete", 
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: "delete",
   main: deleteSong,
   isHidden: true

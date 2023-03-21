@@ -1,15 +1,12 @@
-const path = require('path');
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
+
+const path = require('node:path');
 const playMusic = require("./play.js").main;
 const { playlistFolder } = require('../../Components/init.js').essentialFolders;
 
-const {
-  getBasicInfo,
-  getPlaylistId
-} = require('../../Components/youtubeMetadata.js');
-const {
-  customReadStream,
-  customWriteStream
-} = require('../../Components/fileHandler.js');
+const { getBasicInfo, getPlaylistId } = require('../../Components/youtubeMetadata.js');
+const { customReadStream, customWriteStream } = require('../../Components/fileHandler.js');
 
 async function addPlayList(searchString, userId) {
   if (!searchString) { return { error: true, comment: "Link/Text" } }
@@ -152,6 +149,9 @@ async function playlist(message, basicInfo, arg, queue, client) {
 
 module.exports = {
   name: "Playlist",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: ["playlist"],
   main: playlist
 }

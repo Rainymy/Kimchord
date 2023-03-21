@@ -1,3 +1,5 @@
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 async function logEveryServerName(message, basicInfo, arg, queue, client) {
@@ -35,6 +37,9 @@ async function logEveryServerName(message, basicInfo, arg, queue, client) {
 
 module.exports = {
   name: "List server names",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: "logserver",
   main: logEveryServerName,
   isHidden: true

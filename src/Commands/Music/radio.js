@@ -1,6 +1,7 @@
+"use strict";
 const { handleVideo } = require('../../Components/handleVideo.js');
 const { createAudioPlayer } = require('@discordjs/voice');
-const { checkServerMusicRole } = require('../../Components/permissions.js');
+const { PRESETS } = require('../../Components/permissions.js');
 const request = require('../../Components/request.js');
 const radioInfo = require('../../Components/radioStations.js');
 const { createEmptyReadableStream } = require('../../Components/handleRequests.js');
@@ -23,16 +24,8 @@ async function radio(message, basicInfo, searchString, queue) {
   if (!radioStations?.isCached) {
     radioStations = await radioInfo.getAllRadioStations();
   }
+  
   const voiceChannel = message.member.voice.channel;
-  if (!voiceChannel) return message.channel.send(messageInfo.notInVoiceChannel);
-  
-  const REQUIRED_ROLE_NAME = basicInfo.guilds_settings.REQUIRED_MUSIC_ROLE_NAME;
-  if (checkServerMusicRole(basicInfo.guilds_settings, message.member)) {
-    return message.channel.send(
-      codeBlock(messageInfo.requiresRoleName(REQUIRED_ROLE_NAME), "js")
-    )
-  }
-  
   const lowerCaseSearch = searchString?.toLowerCase();
   
   if (lowerCaseSearch === "list") {
@@ -154,6 +147,12 @@ async function radio(message, basicInfo, searchString, queue) {
 
 module.exports = {
   name: "Play FM Radio",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT,
+    PRESETS.PERMISSIONS.MUSIC,
+    PRESETS.PERMISSIONS.CONNECT_REQUIRED,
+    PRESETS.PERMISSIONS.ROLE_REQUIRED
+  ],
   aliases: [ "radio", "fm" ],
   main: radio
 }

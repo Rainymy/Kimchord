@@ -152,6 +152,9 @@ async function settings(message, basicInfo, arg, queue) {
 
 module.exports = {
   name: "Settings",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: "settings",
   main: settings
 };

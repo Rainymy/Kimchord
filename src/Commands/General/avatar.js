@@ -1,3 +1,6 @@
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
+
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
 
@@ -46,6 +49,9 @@ async function avatar(message, basicInfo, arg, queue, client) {
 
 module.exports = {
   name: "Avatar",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: "avatar",
   main: avatar
 }

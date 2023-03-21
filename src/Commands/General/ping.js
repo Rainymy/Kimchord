@@ -1,4 +1,6 @@
+"use strict";
 const handleRequests = require('../../Components/handleRequests.js');
+const { PRESETS } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
@@ -37,6 +39,9 @@ async function ping(message, basicInfo, searchString, queue, client) {
 
 module.exports = {
   name: "Ping",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: [ "check", "ping"],
   main: ping
 }

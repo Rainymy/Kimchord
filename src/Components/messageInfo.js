@@ -1,6 +1,6 @@
 const messageInfos = {
   notInVoiceChannel: "I'm sorry but you need to be in a voice channel to play music!",
-  permissionNeeded: (permission) => { return `I cannot *${permission}*, make sure I have the proper permissions!`; },
+  permissionNeeded: (permission) => { return `I cannot "${permission}", make sure I have the proper permissions!`; },
   requiresRoleName: (requiredRole) => { return `Requires "${requiredRole}" role.` },
   videoNotFoundOrAvailable: "🆘 Video unavailable OR I could not obtain any search results. 🆘",
   videoDownloading: "Downloading.... [0s -> 5s]",

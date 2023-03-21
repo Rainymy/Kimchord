@@ -1,3 +1,5 @@
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 function voiceCount(message, basicInfo, arg, queue, client) {
@@ -28,6 +30,9 @@ function voiceCount(message, basicInfo, arg, queue, client) {
 
 module.exports = {
   name: "Bot voice count",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: [ "voicecount" ],
   main: voiceCount,
   isHidden: true

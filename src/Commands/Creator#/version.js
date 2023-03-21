@@ -1,3 +1,6 @@
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
+
 const { codeBlock } = require('../../Components/markup.js');
 const path = require('node:path');
 
@@ -12,6 +15,9 @@ async function getBotVersion(message, basicInfo, arg, queue, client) {
 
 module.exports = {
   name: "Version",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: "version",
   main: getBotVersion,
   isHidden: true

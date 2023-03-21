@@ -1,4 +1,5 @@
-const { checkServerMusicRole } = require('../../Components/permissions.js');
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
@@ -8,13 +9,6 @@ function pause(message, basicInfo, arg, queue) {
   
   if (!serverQueue || !serverQueue.songs.length) {
     return message.channel.send(messageInfo.nothingPlaying);
-  }
-  
-  const REQUIRED_ROLE_NAME = basicInfo.guilds_settings.REQUIRED_MUSIC_ROLE_NAME;
-  if (checkServerMusicRole(basicInfo.guilds_settings, message.member)) {
-    return message.channel.send(
-      codeBlock(messageInfo.requiresRoleName(REQUIRED_ROLE_NAME), "js")
-    )
   }
   
   if (!serverQueue.playing) {
@@ -29,6 +23,11 @@ function pause(message, basicInfo, arg, queue) {
 
 module.exports = {
   name: "Pause",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT,
+    PRESETS.PERMISSIONS.CONNECT_REQUIRED,
+    PRESETS.PERMISSIONS.ROLE_REQUIRED
+  ],
   aliases: ["pause", "hold"],
   main: pause
 }

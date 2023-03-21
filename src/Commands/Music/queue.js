@@ -5,17 +5,16 @@ const {
   createPageIndicator,
   createQueueButtons
 } = require('../../Components/discordComponents.js');
-const { checkServerMusicRole } = require('../../Components/permissions.js');
+const { PRESETS } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
-const { codeBlock } = require('../../Components/markup.js');
 
 async function queue(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
   
   if (!serverQueue) { return message.channel.send(messageInfo.nothingPlaying); }
   if (!serverQueue.songs.length) {
-    return message.channel.send("Queue is empty");
+    return message.channel.send(messageInfo.queueIsEmpty);
   }
   
   const backButton = createButton("Back", "back_button", false, "◀️");
@@ -84,6 +83,9 @@ async function queue(message, basicInfo, arg, queue) {
 
 module.exports = {
   name: "Song queue",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: ["q", "queue"],
   main: queue
 }

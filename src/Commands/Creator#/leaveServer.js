@@ -1,3 +1,5 @@
+"use strict";
+const { PRESETS } = require('../../Components/permissions.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 function leaveServer(message, basicInfo, arg, queue, client) {
@@ -20,6 +22,9 @@ function leaveServer(message, basicInfo, arg, queue, client) {
 
 module.exports = {
   name: "leaveServer",
+  permissions: [
+    PRESETS.PERMISSIONS.TEXT
+  ],
   aliases: "leaveserver",
   main: leaveServer,
   isHidden: true
