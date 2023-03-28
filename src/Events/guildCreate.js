@@ -1,9 +1,15 @@
+"use strict";
+const chalk = require('chalk');
+
 const { updateActivity } = require('./activity.js');
+const { saveDefaultData } = require('../Components/serverData.js');
 
 async function guildCreate(guild, client) {
   if (guild.name === undefined) { return; }
   
-  console.log("Joined a server YEAY");
+  await saveDefaultData(guild.id, guild.name);
+  
+  console.log(chalk.yellow(guild.id), "Joined a server YEAY");
   updateActivity(client);
   return;
 }

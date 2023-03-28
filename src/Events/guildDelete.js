@@ -1,9 +1,16 @@
+"use strict";
+const chalk = require('chalk');
+
 const { updateActivity } = require('./activity.js');
+const { removeServerData } = require('../Components/serverData.js');
 
 async function guildDelete(guild, client) {
   if (guild.name === undefined) { return; }
   
-  console.log("Left from server so Sad");
+  const err = await removeServerData(guild.id);
+  if (err) { console.log("Encountered error <deleting>. ", err); }
+  
+  console.log(chalk.yellow(guild.id), "Left from server so Sad");
   updateActivity(client);
   return;
 }

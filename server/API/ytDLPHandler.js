@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { PassThrough } = require("node:stream");
 const YTDlpWrap = require('yt-dlp-wrap').default;
+const chalk = require('chalk');
 
 const { plugins } = require('../config.json');
 const pathToBinaryFolder = path.join(__dirname, "..", plugins.YTDLP.path);
@@ -170,7 +171,7 @@ function YTDlp() {
     const hasVersion = this.getCurrentVersion() !== null;
     const shouldUpdate = await this.isUpdateRequired();
     
-    console.log("╠ Current version  :", this.getCurrentVersion());
+    console.log("╠ Current version  :", chalk.cyan(this.getCurrentVersion()));
     console.log("╠ Update available :", shouldUpdate);
     
     if (!hasVersion || shouldUpdate) {
@@ -186,7 +187,7 @@ function YTDlp() {
       this.getCurrentVersion()
     );
     
-    console.log("╚ Path To Binary   :", pathToBinary);
+    console.log("╚ Path To Binary   :", chalk.cyan(pathToBinary));
     console.log("------------------------------------------------------");
     
     this.ytdlp = new YTDlpWrap(pathToBinary);

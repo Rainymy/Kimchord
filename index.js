@@ -11,8 +11,10 @@ const guildDelete = require('./src/Events/guildDelete.js');
 const disconnect = require('./src/Events/disconnect.js');
 
 const { loadServerData, getServer } = require('./src/Components/serverData.js');
+const { removeAllNotConnectedServer } = require("./src/Components/serverData.js");
 const { credential, server, devs_ids } = require("./config.json");
 
+const chalk = require('chalk');
 const { Client, GatewayIntentBits  } = require('discord.js');
 const client = new Client({ intents: PRESETS.intents });
 
@@ -22,7 +24,7 @@ const devs_id_list = devs_ids ?? [];
 client.on("messageCreate", async (message) => {
   if (message.author.bot) { return; }
   
-  const guilds_settings = await getServer(message.guild.id, message);
+  const guilds_settings = await getServer(message.guild.id, message.guild.name);
   
   const args = message.content.split(" ");
   const searchString = args.slice(1).join(" ");
@@ -52,8 +54,22 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 });
 
 client.on("ready", async (event) => {
-  await onReady(event, client);
+  console.log("Loading server settings....");
   loadServerData();
+  
+  // remove all servers that left while bot was offline
+  if (!client.user.username.endsWith("_dev")) {
+    const removedServersIDs = await removeAllNotConnectedServer(client);
+    
+    for (let removedServersID of removedServersIDs) {
+      if (!removedServersID == "string") { console.log(removedServersID); }
+      else { console.log(chalk.redBright(`${removedServersID} DELETED`)); }
+    }
+  }
+  
+  console.log("Loaded.");
+  
+  await onReady(event, client);
 });
 client.on('guildCreate', async (guild) => guildCreate(guild, client));
 client.on("guildDelete", async (guild) => guildDelete(guild, client))

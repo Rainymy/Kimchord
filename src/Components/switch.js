@@ -1,3 +1,4 @@
+"use strict";
 const { validateCommandPersmissions } = require('./permissions.js');
 const init = require('./init.js').default;
 const [ commands, status ] = init.init().commands();

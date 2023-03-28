@@ -1,4 +1,5 @@
-const fs = require('fs');
+"use strict";
+const fs = require('node:fs');
 
 function readJSONFile(userFile, flags) {
   let data = fs.readFileSync(userFile, flags);
@@ -11,6 +12,10 @@ function readdirSync(filePath) {
 
 function customWriteFileSync(userFile, data) {
   return fs.writeFileSync(userFile, JSON.stringify(data, null, 4));
+}
+
+function deleteFile(filePath) {
+  return new Promise((resolve, reject) => fs.unlink(filePath, resolve));
 }
 
 function customReadStream(userFile) {
@@ -40,6 +45,7 @@ module.exports = {
   readJSONFile: readJSONFile,
   readdirSync: readdirSync,
   writeFileSync: customWriteFileSync,
+  deleteFile: deleteFile,
   customReadStream: customReadStream,
   customWriteStream: customWriteStream
 }

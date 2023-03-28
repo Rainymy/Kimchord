@@ -14,10 +14,6 @@ const {
 const Cookies = require('./Cookies.js');
 const YT_DLP = require('../API/ytDLPHandler.js');
 
-const { getSaveLocation } = require('./util.js');
-const baseFolder = getSaveLocation();
-console.log("Base save folder: ", "\x1b[33m", baseFolder, "\x1b[0m");
-
 function File_Manager() {
   this.queue = new Map();
   this.modQueue = {
@@ -69,8 +65,9 @@ function File_Manager() {
     return console.log("Error from EventEmitter: ", error);
   });
   
-  this.init = async () => {
-    this.cache = parseLocalFolder(baseFolder);
+  this.init = async (baseFolder) => {
+    this.baseFolder = baseFolder;
+    this.cache = parseLocalFolder(this.baseFolder);
     this.cookies = await Cookies.get();
     
     this.YT_DLP = await YT_DLP.init();
@@ -81,9 +78,9 @@ function File_Manager() {
   
   this.saveLocation = (video) => {
     if (!this.modCache.has(video.id)) {
-      return path.join(baseFolder, `./${video.id}.${video.container}`);
+      return path.join(this.baseFolder, `./${video.id}.${video.container}`);
     }
-    return path.join(baseFolder, `./${this.modCache.get(video.id)[0].file}`);
+    return path.join(this.baseFolder, `./${this.modCache.get(video.id)[0].file}`);
   }
   
   this.checkFileExists = async (filePath) => await checkFileExists(filePath);
@@ -124,7 +121,6 @@ function File_Manager() {
     
     if (this.modQueue.exists(video.id)) {
       const { stream } = this.modQueue.get(video.id);
-      // console.log(stream);
       stream.on("existing_stream", cb);
       
       return console.log("Duplicated request stream: ", video.title);
