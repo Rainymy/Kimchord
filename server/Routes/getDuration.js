@@ -1,4 +1,5 @@
-const util = require('../Components/util.js').init();
+"use strict";
+const { PRESETS } = require('../Components/permission.js');
 
 async function getSongDurationOrDelete(video, GLOBAL_OBJECTS) {
   const { fileManager, youtube } = GLOBAL_OBJECTS;
@@ -8,6 +9,9 @@ async function getSongDurationOrDelete(video, GLOBAL_OBJECTS) {
   const filePath = fileManager.saveLocation(video);
   try { duration = await youtube.getVideoDurationInSeconds(filePath); }
   catch (e) {
+    const metadata = await fileManager.YT_DLP.getMetadata(video.url);
+    duration = metadata.duration;
+    
     const err = fileManager.delete(video);
     if (err.error) { console.log(err); }
     else { console.log("Deleted unreadable file", filePath); }
@@ -17,8 +21,6 @@ async function getSongDurationOrDelete(video, GLOBAL_OBJECTS) {
 }
 
 async function handleSongList(videoList, GLOBAL_OBJECTS) {
-  const { fileManager, youtube } = GLOBAL_OBJECTS;
-  
   const durations = [];
   
   for (let item of videoList) {
@@ -39,12 +41,7 @@ async function handleSongList(videoList, GLOBAL_OBJECTS) {
 }
 
 async function getDuration(req, res, GLOBAL_OBJECTS) {
-  const { username, userId, videoData } = req.body;
-  
-  const { error, comment } = util.validQueries(username, userId, videoData);
-  console.log({ error, comment }, "getDuration");
-  
-  if (error) { return res.send({ error: error, comment: comment }); }
+  const { videoData } = req.body;
   
   const musicList = videoData.type === "playlist" ? videoData.playlist : videoData; 
   
@@ -52,4 +49,12 @@ async function getDuration(req, res, GLOBAL_OBJECTS) {
   return res.send(durations);
 }
 
-module.exports = getDuration;
+module.exports = {
+  method: "post",
+  route: "/getDuration",
+  skipLoad: false,
+  permissions: [
+    PRESETS.PERMISSIONS.QUERY
+  ],
+  main: getDuration
+};

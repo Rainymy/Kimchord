@@ -4,6 +4,9 @@ const ytsr = require('ytsr');
 const ytpl = require('ytpl');
 const { getVideoDurationInSeconds } = require("get-video-duration");
 
+const cache = new Map();
+const CACHE_TIME = 60 * 5;
+
 function YouTube() {
   function removeExtraImgQuery(url) {
     const parseURL = new URL(url);
@@ -41,20 +44,33 @@ function YouTube() {
   async function parseYTDLBasicInfo(videoId) {
     if (!videoId) { return; }
     
+    const cacheInfo = cache.get(videoId);
+    const lastCacheTimeInSecond = (new Date() - cacheInfo?.createTime) / 1000;
+    
+    if (cacheInfo && lastCacheTimeInSecond < CACHE_TIME) {
+      cacheInfo.requestedTime = (new Date()).toLocaleString();
+      return cacheInfo;
+    }
+    
     const videoURL = `https://www.youtube.com/watch?v=${videoId}`;
     
     try {
       const video = await getBasicInfo(videoURL);
       if (!video) { return; }
       
-      return {
+      const dataInfo = {
         url: videoURL,
         id: videoId,
         type: "video",
         title: video.title,
         requestedTime: (new Date()).toLocaleString(),
+        createTime: new Date(),
         thumbnail: video.thumbnail_url
       }
+      
+      cache.set(videoId, dataInfo);
+      
+      return dataInfo;
     }
     catch (e) { return; }
   }
@@ -163,6 +179,7 @@ function YouTube() {
   
   this.searchVideos = async function (input) {
     const filter = await ytsr.getFilters(input);
+    if (!filter) { return []; }
     const filter1 = filter.get("Type").get("Video");
     if (!filter1.url) { return []; }
     

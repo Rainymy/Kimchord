@@ -2,6 +2,7 @@
 const path = require('node:path');
 const EventEmitter = require('node:events');
 
+const logDownload = require('./logDownload.js');
 const {
   makeWriteStream,
   makeDLPStream,
@@ -13,6 +14,29 @@ const {
 
 const Cookies = require('./Cookies.js');
 const YT_DLP = require('../API/ytDLPHandler.js');
+
+const timeoutTimer = 1000 * 60 * 60 * 3;
+
+function cancelDownload(stream) {
+  console.log("cancelDownload", stream);
+  const customError = new Error("Download timeout");
+  customError.myError = true;
+  customError.info = {
+    message: `Cancelling download: Idle timer reached ${timeoutTimer}ms`
+  }
+  
+  return stream.emit("error", customError);
+}
+
+function logDownloadAmount(stream, video) {
+  let dataLength = 0;
+  let metadataLength = 0;
+  
+  stream.on("data", (chunk) => { dataLength += chunk.length; });
+  stream.on("fileSize", (size) => { metadataLength = size; });
+  
+  stream.on("finish", () => { logDownload(video, metadataLength, dataLength); });
+}
 
 function File_Manager() {
   this.queue = new Map();
@@ -33,16 +57,18 @@ function File_Manager() {
     get: (id) => { return this.cache.get(id); },
     has: (id) => { return this.cache.has(id); },
     append: (video) => {
-      const saved = this.modCache.get(video.id);
       const newEntry = this.createDescriptor(video.id, video.container);
       
       console.log([ ...this.queue ]);
       
-      if (!saved) {
+      // create if doesn't exist
+      if (!this.modCache.has(video.id)) {
         this.events.emit("finished", newEntry);
         return this.cache.set(video.id, [ newEntry ]);
       }
       
+      // add if other version exist
+      const saved = this.modCache.get(video.id);
       const notExists = saved.every((cur) => cur.container !== video.container);
       if (notExists) {
         this.events.emit("finished", newEntry);
@@ -107,7 +133,7 @@ function File_Manager() {
     return { error: false, comment: null };
   }
   
-  this.download = async (video, callback) => {
+  this.download = async (video, callback=()=>{}) => {
     const cb = (result) => {
       clearTimeout(video.id);
       
@@ -126,21 +152,13 @@ function File_Manager() {
       return console.log("Duplicated request stream: ", video.title);
     }
     
-    const filePath = this.saveLocation(video);
-    const timeoutTimer = 1000 * 60 * 60 * 30;
-    
     const streamURL = await makeDLPStream(video, this.cookies, cb);
+    if (streamURL.error) { return cb(streamURL); }
+    
+    const filePath = this.saveLocation(video);
     const streamToFile = await makeWriteStream(filePath);
     
-    function cancelDownload() {
-      const customError = new Error("Download timeout");
-      customError.myError = true;
-      customError.info = {
-        message: `Cancelling download: Idle timer reached ${timeoutTimer}ms`
-      }
-      
-      return streamURL.emit("error", customError);
-    }
+    logDownloadAmount(streamURL, video);
     
     const data = {
       id: video.id,
@@ -150,10 +168,13 @@ function File_Manager() {
       stream: streamURL
     }
     
-    setTimeout(cancelDownload, timeoutTimer);
+    setTimeout(cancelDownload, timeoutTimer, streamURL);
     this.modQueue.append(video.id, data);
     
-    return streamURL.pipe(streamToFile);
+    streamURL.on("data", () => { streamURL.emit("ready-to-read"); });
+    streamURL.pipe(streamToFile);
+    
+    return streamURL;
   }
   
   this.liveStream = async (video, callback) => {

@@ -1,4 +1,4 @@
-function codeBlock(text, language) {
+function codeBlock(text="", language) {
   if (language) {
     return '```' + language + '\n' + text + "\n" + '```';
   }

@@ -1,15 +1,6 @@
 "use strict";
 const { server } = require('../config.json');
 
-const remove = require('./Events/remove.js');
-const download = require('./Events/download.js');
-const request = require('./Events/request.js');
-const songsEvent = require('./Events/songsEvent.js');
-const pingEvent = require('./Events/pingEvent.js');
-const parseSearchString = require('./Events/parseSearchString.js');
-const getDuration = require('./Events/getDuration.js');
-const dashboard = require('./Events/dashboard.js');
-
 const connectionWS = require('./Websocket/connection.js');
 const createServerWS = require('./Websocket/createServer.js');
 const closeConnectionWS = require('./Websocket/close.js');
@@ -20,6 +11,7 @@ const app = express().disable("x-powered-by");
 const setMiddlewares = require('./Components/setMiddlewares.js');
 setMiddlewares(app);
 
+const { getAllRoute, loadAllRoutes } = require('./Components/handleRoute.js');
 const { getSaveLocation } = require('./Components/util.js');
 const baseFolder = getSaveLocation();
 
@@ -33,23 +25,8 @@ const GLOBAL_OBJECTS = {
   cookieManager: new Map()
 }
 
-app.get("/", async (req, res) => res.send("Main Page. Server working fine."));
-app.post("/", async (req, res) => res.send("Main Page (POST)"));
-
-app.post("/remove", async (req, res) => await remove(req, res, GLOBAL_OBJECTS));
-app.post("/download", async (req, res) => await download(req, res, GLOBAL_OBJECTS));
-app.post("/request", async (req, res) => await request(req, res, GLOBAL_OBJECTS));
-app.post('/songs', async (req, res) => await songsEvent(req, res, GLOBAL_OBJECTS));
-app.get("/ping", async (req, res) => await pingEvent(req, res, GLOBAL_OBJECTS));
-app.get("/dashboard", async (req, res) => await dashboard(req, res, GLOBAL_OBJECTS));
-
-app.post("/parseSearchString", async (req, res) => {
-  return await parseSearchString(req, res, GLOBAL_OBJECTS);
-});
-
-app.post("/getDuration", async (req, res) => {
-  return await getDuration(req, res, GLOBAL_OBJECTS);
-});
+const routes = getAllRoute();
+loadAllRoutes(app, routes, GLOBAL_OBJECTS);
 
 async function onServerStart() {
   console.log("------------------------------------------------------");

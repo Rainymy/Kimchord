@@ -1,5 +1,5 @@
 "use strict";
-const { existsSync, mkdir, statSync, readdirSync, mkdirSync } = require('node:fs');
+const { existsSync, statSync, readdirSync, mkdirSync } = require('node:fs');
 const { execSync } = require('node:child_process');
 const path = require('node:path');
 
@@ -85,6 +85,8 @@ function isError(e) {
 }
 
 function validQueries(username, userId, videoData, optional_id) {
+  // if "optional_id" = true. "videoData" must be a string.
+  // optional_id for searching.
   if (optional_id) {
     if (!username || !userId || !videoData) {
       return { error: true, comment: "Incorrect Request" };
@@ -94,6 +96,10 @@ function validQueries(username, userId, videoData, optional_id) {
   
   if (!videoData) {
     return { error: true, comment: `Missing metadata: ${videoData}` };
+  }
+  
+  if (typeof videoData === "string") {
+    return { error: true, comment: "Incorrect Request" };
   }
   
   if (videoData.type === "playlist") {

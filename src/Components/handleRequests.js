@@ -17,23 +17,15 @@ function createEmptyReadableStream() {
 async function ping(sendTime) {
   const options = { method: "GET", headers: { "Content-type": "application/json" } }
   
-  const response = await request(`${BASE_URL}/ping?time=${sendTime}`, options);
-  return response;
+  return await request(`${BASE_URL}/ping?time=${sendTime}`, options);
 }
 
 async function parseSearchStringFunction(message, searchString) {
-  const response = await parseSearchString(message, BASE_URL, searchString);
-  return response;
+  return await parseSearchString(message, BASE_URL, searchString);
 }
 
 async function parseRequest(param) {
-  const response = await request(`${BASE_URL}/request`, param);
-  return response;
-}
-
-async function download(param) {
-  const response = await request(`${BASE_URL}/download`, param);
-  return response;
+  return await request(`${BASE_URL}/request`, param);
 }
 
 async function getRequestSong(param) {
@@ -58,7 +50,6 @@ module.exports = {
   ping: ping,
   parseSearchString: parseSearchStringFunction,
   request: parseRequest,
-  download: download,
   getRequestSong: getRequestSong,
   getDuration: getDuration,
   createEmptyReadableStream: createEmptyReadableStream

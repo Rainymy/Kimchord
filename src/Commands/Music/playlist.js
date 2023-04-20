@@ -63,7 +63,7 @@ async function playPlayList(searchString, userId) {
   
   if (data[playlistId]) { return { error: false, playURL: data[playlistId].url } }
   
-  return { error: true, comment: "Playlist doesn't exists!" };
+  return { error: true, comment: "Playlist doesn't exist!" };
 }
 
 async function listPlayList(searchString, userId) {
@@ -98,7 +98,7 @@ async function removePlayList(searchString, userId) {
     return { error: false, comment: "Successfully removed." }
   }
   
-  return { error: true, comment: "Playlist doesn't exists!" };
+  return { error: true, comment: "Playlist doesn't exist!" };
 }
 
 function renamePlayList(searchString, userId) {

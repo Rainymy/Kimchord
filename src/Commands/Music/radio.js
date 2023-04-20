@@ -105,12 +105,7 @@ async function radio(message, basicInfo, searchString, queue) {
       const response = await radioStations.stream(fmLink);
       
       if (response.error) {
-        message.channel.send([
-          "Try again!",
-          '```js',
-          `${response.comment}`,
-          '```'
-        ].join("\n"));
+        message.channel.send(codeBlock(response.comment, "js"));
         
         return createEmptyReadableStream();
       }

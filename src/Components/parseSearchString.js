@@ -28,6 +28,8 @@ async function parseSearchString(message, baseUrl, searchString) {
   }
   request_object.videoData = video;
   
+  delete request_object.inputQuery;
+  
   param.body = JSON.stringify(request_object);
   return [ param, video, false ];
 }

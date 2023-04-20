@@ -8,6 +8,10 @@ function validateCommand(command, prefix) {
   return command.startsWith(prefix) && command.length > prefix.length;
 }
 
+function startsAndEndsWith(string) {
+  return string.startsWith(string) && string.endsWith(string);
+}
+
 function measureText(str, fontSize = 10) {
   const widths = [
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.2796875,
@@ -51,10 +55,10 @@ async function count_performance(tries = 100, cb) {
   };
 }
 
-function durationToString(durationInSeconds) {
+function durationToString(durationInSeconds = 0) {
   const hours = Math.floor(durationInSeconds / 60 / 60).toString().padStart(2, 0);
   const minutes = Math.floor((durationInSeconds/60) % 60).toString().padStart(2, 0);
-  const seconds = Math.round(durationInSeconds % 60).toString().padStart(2, 0);
+  const seconds = Math.floor(durationInSeconds % 60).toString().padStart(2, 0);
   
   return `${hours}:${minutes}:${seconds}`;
 }
@@ -78,6 +82,7 @@ function printToTerminal(customText, error) {
 module.exports = {
   isObject: isObject,
   validateCommand: validateCommand,
+  startsAndEndsWith: startsAndEndsWith,
   measureText: measureText,
   count_performance: count_performance,
   durationToString: durationToString,

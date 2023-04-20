@@ -1,8 +1,12 @@
 "use strict";
 const { PRESETS } = require('./src/Components/permissions.js');
 const { exec_command } = require('./src/Components/switch.js');
-const { printToTerminal, validateCommand } = require('./src/Components/util.js');
-const { updateActivity, callbackFn } = require('./src/Events/activity.js');
+const {
+  printToTerminal,
+  validateCommand,
+  startsAndEndsWith
+} = require('./src/Components/util.js');
+const { callbackFn } = require('./src/Events/activity.js');
 
 const onReady = require('./src/Events/ready.js');
 const voiceStateUpdate = require('./src/Events/voiceStateUpdate.js');
@@ -15,7 +19,7 @@ const { removeAllNotConnectedServer } = require("./src/Components/serverData.js"
 const { credential, server, devs_ids } = require("./config.json");
 
 const chalk = require('chalk');
-const { Client, GatewayIntentBits  } = require('discord.js');
+const { Client } = require('discord.js');
 const client = new Client({ intents: PRESETS.intents });
 
 const queue = new Map();
@@ -58,7 +62,8 @@ client.on("ready", async (event) => {
   loadServerData();
   
   // remove all servers that left while bot was offline
-  if (!client.user.username.endsWith("_dev")) {
+  if (!startsAndEndsWith("<^-^>")) {
+  // if (!client.user.username.endsWith("<^-^>")) {
     const removedServersIDs = await removeAllNotConnectedServer(client);
     
     for (let removedServersID of removedServersIDs) {

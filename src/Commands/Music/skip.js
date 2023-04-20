@@ -18,6 +18,7 @@ function skip(message, basicInfo, arg, queue) {
 module.exports = {
   name: "Skip",
   permissions: [
+    PRESETS.PERMISSIONS.TEXT,
     PRESETS.PERMISSIONS.CONNECT_REQUIRED,
     PRESETS.PERMISSIONS.ROLE_REQUIRED
   ],

@@ -1,8 +1,5 @@
 "use strict";
-const http = require('node:http');
-const https = require('node:https');
 const { PassThrough, Readable } = require('node:stream');
-
 const got = (...args) => import('got').then(({ default: got }) => got(...args));
 
 function isValidPassthrough(headers) {

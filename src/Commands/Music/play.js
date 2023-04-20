@@ -14,8 +14,6 @@ async function main(message, basicInfo, searchString, queue, client) {
     return message.channel.send("`<Search Text>` or `<Youtube Link>`");
   }
   
-  const voiceChannel = message.member.voice.channel;
-  
   /*----------------------- Get url for video -----------------------*/
   const [
     param,, failed
@@ -26,54 +24,13 @@ async function main(message, basicInfo, searchString, queue, client) {
   }
   
   /*--------------------- Get streamable response -------------------*/
-  let sentMsg;
-  
   const requested = await handleRequests.request(param);
   
-  const isPlaylist = requested.type === "playlist";
-  
-  const playListDownload = requested?.playlist?.every(current => current.isFile);
-  const isList = requested.every && requested.every(current => !current.isFile);
-  
-  const songs = requested.type === "playlist" ? requested.playlist : requested;
-  
-  if ((isPlaylist && !playListDownload) || isList ) {
-    sentMsg = await message.channel.send(messageInfo.videoDownloading);
-    
-    const paramCopy = Object.assign({}, param);
-    const skippedSongs = [];
-    
-    for (let i = 0; i < songs.length; i++) {
-      if (songs[i].isFile) { continue; }
-      let idk = JSON.parse(paramCopy.body);
-      idk.videoData = songs[i];
-      paramCopy.body = JSON.stringify(idk);
-      
-      const {
-        error, comment, isLive, video
-      } = await handleRequests.download(paramCopy);
-      
-      if (error && isPlaylist) {
-        skippedSongs.push(messageInfo.skippingDownload(songs[i].title, comment));
-        songs.splice(i, 1);
-        i--;
-      }
-      if (error && !isPlaylist) {
-        return sentMsg.edit(messageInfo.downloadFailed(songs[i].title , comment));
-      }
-      
-      if (isLive) { songs[i].isLive = true; }
-      else { songs[i].duration = video.duration; }
-    }
-    
-    if (skippedSongs.length) {
-      message.channel.send(codeBlock(skippedSongs.join("\n")));
-    }
-    
-    sentMsg.edit("💚 Download finish 💚");
+  if (requested.error) {
+    return message.channel.send("Internal error");
   }
   
-  const songLoading = await message.channel.send(messageInfo.songLoading);
+  const songs = requested.type === "playlist" ? requested.playlist : requested;
   
   for (let i = 0; i < songs.length; i++) {
     let shallowCopy = JSON.parse(JSON.stringify(param));
@@ -86,14 +43,12 @@ async function main(message, basicInfo, searchString, queue, client) {
       const response = await handleRequests.getRequestSong(shallowCopy);
       
       if (response.error) {
-        message.channel.send([
-          "Try again!",
-          '```js',
-          `Encountered error with: ${songs[i].title}`,
-          `id: ${songs[i].id} | url: "${songs[i].url}"`,
-          `Detail of error: ${response.comment}`,
-          '```'
-        ].join("\n"));
+        message.channel.send(
+          codeBlock([
+            `Encountered error with: ${songs[i].title}`,
+            `Detail of error: [ ${response.comment} ]`,
+          ].join("\n"), "js")
+        );
         
         return response.emptyReadableStream;
       }
@@ -102,7 +57,7 @@ async function main(message, basicInfo, searchString, queue, client) {
     }
   }
   
-  songLoading.delete();
+  const isPlaylist = requested.type === "playlist";
   
   if (!isPlaylist) {
     const temp_1 = JSON.parse(param.body);
@@ -117,14 +72,11 @@ async function main(message, basicInfo, searchString, queue, client) {
   }
   
   /*--------- Add the playable stream to queue and play it ---------*/
-  
-  const audioPlayer = createAudioPlayer({ behaviors: { noSubscriber: "pause" } });
-  
   for (let item of songs) {
     const args = {
       video: item,
-      voiceChannel: voiceChannel,
-      audioPlayer: audioPlayer, 
+      voiceChannel: message.member.voice.channel,
+      audioPlayer: createAudioPlayer({ behaviors: { noSubscriber: "pause" } }), 
       queue: queue,
       guild: {
         channel: message.channel,

@@ -1,4 +1,4 @@
-const { getVoiceConnection, joinVoiceChannel } = require('@discordjs/voice');
+const { joinVoiceChannel } = require('@discordjs/voice');
 
 function createConnection(voiceChannel) {
   return joinVoiceChannel({
@@ -8,4 +8,4 @@ function createConnection(voiceChannel) {
   });
 }
 
-module.exports = { getVoiceConnection, createConnection }
+module.exports = { createConnection }
