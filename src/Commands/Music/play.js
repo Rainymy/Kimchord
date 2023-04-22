@@ -44,10 +44,7 @@ async function main(message, basicInfo, searchString, queue, client) {
       
       if (response.error) {
         message.channel.send(
-          codeBlock([
-            `Encountered error with: ${songs[i].title}`,
-            `Detail of error: [ ${response.comment} ]`,
-          ].join("\n"), "js")
+          codeBlock(`Detail of error: [ ${response.comment} ]`, "js")
         );
         
         return response.emptyReadableStream;

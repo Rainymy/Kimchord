@@ -106,16 +106,6 @@ function makeWriteStream(filePath, flags) {
 
 async function makeDLPStream( video, cookies, cb=()=>{} ) {
   const metadata = await DLP.getMetadata(video.url);
-  
-  const hours = Math.floor(metadata.duration / 60 / 60);
-  if (hours >= MAX_ALLOWED_HOUR) {
-    const MAX_HOUR_COMMENT = `Max ${MAX_ALLOWED_HOUR} hours is allowed`;
-    const VIDEO_HOUR_COMMENT = `Video is ${hours} hours long`;
-    
-    const MAX_HOUR_REACHED = `${MAX_HOUR_COMMENT}: ${VIDEO_HOUR_COMMENT}`;
-    return { error: true, comment: MAX_HOUR_REACHED };
-  }
-  
   const readableStream = DLP.createDownload(video.url, video.isLive);
   
   readableStream.on("error", (error) => {

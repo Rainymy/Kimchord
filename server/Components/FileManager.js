@@ -153,7 +153,7 @@ function File_Manager() {
     }
     
     const streamURL = await makeDLPStream(video, this.cookies, cb);
-    if (streamURL.error) { return cb(streamURL); }
+    if (streamURL.error) { return callback(streamURL); }
     
     const filePath = this.saveLocation(video);
     const streamToFile = await makeWriteStream(filePath);

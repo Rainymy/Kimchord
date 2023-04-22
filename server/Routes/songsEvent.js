@@ -18,9 +18,11 @@ async function songsStream(req, res, GLOBAL_OBJECTS) {
   }
   
   if (!videoData.isFile) {
-    console.log("downlaoding in songStream");
     const stream = await download(videoData, GLOBAL_OBJECTS);
-    console.log("after in songStream");
+    
+    if (stream.error) {
+      return res.send(stream);
+    }
     // const directStream = await handleFile.makeDLPStream(videoData);
     // if (directStream.error) { return res.send(directStream); }
   }

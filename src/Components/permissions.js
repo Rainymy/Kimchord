@@ -5,11 +5,14 @@ const PRESETS = {
   music: [ "Connect", "Speak" ],
   channel: [ "SendMessages", "ViewChannel", "EmbedLinks", "AttachFiles" ],
   server_mods: [ "ManageGuild" ],
+  label: {
+    sendText: "SendMessages"
+  },
   PERMISSIONS: {
-    MUSIC: "music",
-    TEXT: "text",
-    CONNECT_REQUIRED: "connect_required",
-    ROLE_REQUIRED: "role_required"
+    MUSIC: 4,
+    TEXT: 1,
+    CONNECT_REQUIRED: 2,
+    ROLE_REQUIRED: 3
   },
   intents: [
     "Guilds",
@@ -41,7 +44,7 @@ function validatePermissions(channel, id, requiredPermissions) {
   const neededPermissions = checkPermissions(channel, id, requiredPermissions);
   const batch = [];
   
-  if (neededPermissions.includes("SendMessages")) {
+  if (neededPermissions.includes(PRESETS.label.sendText)) {
     return { error: true, comment: '"SEND_MESSAGES" needed', stop: true };
   }
   
@@ -100,20 +103,24 @@ function getConnectedVoice(message) {
 function validateCommandPersmissions(message, client, permissions, metadata) {
   if (!permissions) { return; }
   
-  for (let permission of permissions) {
-    if (permission == PRESETS.PERMISSIONS.CONNECT_REQUIRED) {
+  // [ 3, 1, 2, 4 ] => [ 1, 2, 3, 4 ]: small to big.
+  for (let permission of permissions.sort((a, b) => a - b)) {
+    if (permission === PRESETS.PERMISSIONS.CONNECT_REQUIRED) {
       if (!getConnectedVoice(message)) { return [ messageInfo.notInVoiceChannel ]; }
+      continue;
     }
     
-    if (permission == PRESETS.PERMISSIONS.MUSIC) {
+    if (permission === PRESETS.PERMISSIONS.MUSIC) {
       const perms = getVoicePermission(message, client.user.id); 
       
       if (perms.length) {
         return [ messageInfo.permissionNeeded(perms.join(", ")) ];
       }
+      
+      continue;
     }
     
-    if (permission == PRESETS.PERMISSIONS.ROLE_REQUIRED) {
+    if (permission === PRESETS.PERMISSIONS.ROLE_REQUIRED) {
       const guilds_settings = metadata.guilds_settings;
       const REQUIRED_ROLE_NAME = guilds_settings.REQUIRED_MUSIC_ROLE_NAME;
       
@@ -131,14 +138,20 @@ function validateCommandPersmissions(message, client, permissions, metadata) {
           )
         ];
       }
+      
+      continue;
       // if PRESETS.PERMISSIONS.ROLE_REQUIRED - END
     }
     
-    if (permission == PRESETS.PERMISSIONS.TEXT) {
-      const res = validatePermissions(message.channel, client.user.id, PRESETS.channel);
+    if (permission === PRESETS.PERMISSIONS.TEXT) {
+      const res = validatePermissions(
+        message.channel, client.user.id, PRESETS.channel
+      );
       
       if (res.stop || res.error) { return res.stop ? null : [ res.comment ]; }
     }
+    
+    continue;
   }
   
   return [];

@@ -1,5 +1,5 @@
 "use strict";
-const { DOWNLOAD_MAX_ALLOWED_HOURS: MAX_ALLOWED_HOUR } = require('../../config.json');
+const {DOWNLOAD_MAX_ALLOWED_HOURS: MAX_ALLOWED_HOUR} = require('../../config.json');
 const util = require('../Components/util.js').init();
 const { PassThrough } = require('node:stream');
 
@@ -50,7 +50,7 @@ async function download(video, GLOBAL_OBJECTS) {
   const metadata = await fileManager.YT_DLP.getMetadata(video.url);
   
   const [ isValid, errorInfo ] = checkValidMeta(metadata);
-  if (!isValid) { return console.log("download ERROR: ", errorInfo); }
+  if (!isValid) { return errorInfo; }
   
   const combined = { ...video, ...{ container: metadata.ext } };
   
