@@ -122,14 +122,10 @@ function YTDlp() {
     }
   }
   this.createDownload = (url, isLive) => {
-    const args = [];
+    const args = [ url ];
     
-    if (!isLive) { args.push("bestaudio[ext=m4a]") }
-    if (args.length) { args.unshift("-f"); }
-    
+    if (!isLive) { args.push("-f bestaudio[ext=m4a]") }
     if (this.hasCookie) { args.push(`--cookies=${this.cookiePath}`); }
-    
-    args.unshift(url);
     
     const execStream = this.ytdlp.execStream(args);
     

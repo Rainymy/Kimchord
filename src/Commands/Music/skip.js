@@ -7,7 +7,7 @@ const { codeBlock } = require('../../Components/markup.js');
 function skip(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
   
-  if (!serverQueue) {
+  if (!serverQueue || !serverQueue?.songs.length) {
     return message.channel.send(messageInfo.queueIsEmpty);
   }
   

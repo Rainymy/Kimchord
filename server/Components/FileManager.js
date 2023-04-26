@@ -152,7 +152,7 @@ function File_Manager() {
       return console.log("Duplicated request stream: ", video.title);
     }
     
-    const streamURL = await makeDLPStream(video, this.cookies, cb);
+    const streamURL = await makeDLPStream(video, cb);
     if (streamURL.error) { return callback(streamURL); }
     
     const filePath = this.saveLocation(video);
@@ -174,7 +174,7 @@ function File_Manager() {
     streamURL.on("data", () => { streamURL.emit("ready-to-read"); });
     streamURL.pipe(streamToFile);
     
-    return streamURL;
+    return [ streamURL, streamToFile ];
   }
   
   this.liveStream = async (video, callback) => {

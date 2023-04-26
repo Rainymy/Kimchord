@@ -1,7 +1,6 @@
 "use strict";
 const path = require("node:path");
 const fs = require('node:fs');
-const { PassThrough } = require('node:stream');
 
 const { DOWNLOAD_MAX_ALLOWED_HOURS: MAX_ALLOWED_HOUR } = require('../../config.json');
 const DLP = require('../API/ytDLPHandler.js');
@@ -60,11 +59,12 @@ function writeFile(filePath, data, cb) {
 function makeReadStream(filePath) {
   return new Promise(function(resolve, reject) {
     const readFile = fs.createReadStream(filePath, { autoClose: true });
-  
+    
     readFile.on('error', (error) => {
+      console.log("Exit Code: ", error.exitCode);
       console.log("ERROR from makeReadStream: ", error);
       readFile.destroy();
-      resolve(error);
+      resolve({ error: true, comment: "Internal error!" });
     });
     
     readFile.on('close', () => { console.log('Read stream closed'); });
@@ -83,8 +83,6 @@ function makeWriteStream(filePath, flags) {
     streamToFile.on("error", (error) => {
       streamToFile.close();
       
-      if (error.myError) { return console.log(error.info.message); }
-      
       console.log("Caught error in makeWriteStream: ", error);
     });
     
@@ -100,13 +98,18 @@ function makeWriteStream(filePath, flags) {
       if (err) { return console.log("Encountered error <deleting>. ", err); }
     });
     
-    streamToFile.on("ready", () => resolve(streamToFile));
+    resolve(streamToFile);
   });
 }
 
-async function makeDLPStream( video, cookies, cb=()=>{} ) {
+async function makeDLPStream(video, cb=()=>{}) {
   const metadata = await DLP.getMetadata(video.url);
   const readableStream = DLP.createDownload(video.url, video.isLive);
+  
+  const finallyCallback = (returnValue) => {
+    readableStream.emit("existing_stream", returnValue);
+    return cb(returnValue);
+  }
   
   readableStream.on("error", (error) => {
     if (error.myError === false) { console.log("error from YT_DLP", error); }
@@ -122,20 +125,15 @@ async function makeDLPStream( video, cookies, cb=()=>{} ) {
       returnValue = { error: true, comment: error.info.message };
     }
     
-    readableStream.emit("existing_stream", returnValue);
-    return cb(returnValue);
+    return finallyCallback(returnValue);
   });
   
   readableStream.on("finish", () => {
     readableStream.emit("fileSize", metadata.filesize);
     video.duration = metadata.duration;
     
-    const returnValue = { error: false, comment: null, video: video };
-    
-    readableStream.emit("existing_stream", returnValue);
-    return cb(returnValue);
+    return finallyCallback({ error: false, comment: null, video: video });
   });
-  
   
   return readableStream;
 }

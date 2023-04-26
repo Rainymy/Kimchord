@@ -18,10 +18,10 @@ async function exec_command(message, basicInfo, arg, serverQueue, comCall, clien
   if (hasPermission?.length) { return message.channel.send(hasPermission.join("")); }
   
   if (command === "help") {
-    return await commands[command].main(message, basicInfo, arg, status);
+    return commands[command].main(message, basicInfo, arg, status);
   }
   
-  return await commands[command].main(message, basicInfo, arg, serverQueue, client);
+  return commands[command].main(message, basicInfo, arg, serverQueue, client);
 }
 
 module.exports = { exec_command }

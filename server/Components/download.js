@@ -21,28 +21,16 @@ function checkValidMeta(meta) {
   return [ true ];
 }
 
-function waitDownloadFinish(download, video) {
-  return new Promise((resolve, reject) => { download(video, resolve); });
-}
-
-function waitDownloadBegin(download, video) {
-  return new Promise(async function(resolve, reject) {
-    console.log("starting download");
+function waitDownloadStart(download, video) {
+  return new Promise(async (resolve, reject) => {
+    const [ source, destination ] = await download(video);
     
-    const passThrough = new PassThrough();
-    
-    const downloadStream = await download(video);
-    console.log("after download");
-    
-    downloadStream.once("ready-to-read", () => {
-      console.log("Ready to Read now");
-      downloadStream.pipe(passThrough);
-      resolve(downloadStream);
-    });
+    destination.on("ready", () => { resolve("Write stream ready"); });
+    destination.on("error", reject;
   });
 }
 
-async function download(video, GLOBAL_OBJECTS) {
+async function startDownload(video, GLOBAL_OBJECTS) {
   const { fileManager } = GLOBAL_OBJECTS;
   
   console.log("Video Meta: ", video);
@@ -54,8 +42,8 @@ async function download(video, GLOBAL_OBJECTS) {
   
   const combined = { ...video, ...{ container: metadata.ext } };
   
-  // return await waitDownloadBegin(fileManager.download, combined);
-  return await waitDownloadFinish(fileManager.download, combined);
+  await waitDownloadStart(fileManager.download, combined);
+  return;
 }
 
-module.exports = download;
+module.exports = startDownload;

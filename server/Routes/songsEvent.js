@@ -1,10 +1,7 @@
 "use strict";
-const { ReadableStream } = require('node:stream');
-const util = require('../Components/util.js').init();
 const { PRESETS } = require('../Components/permission.js');
-
-const handleFile = require('../Components/handleFile.js');
-const download = require('../Components/download.js');
+const util = require('../Components/util.js').init();
+const startDownload = require('../Components/download.js');
 
 async function songsStream(req, res, GLOBAL_OBJECTS) {
   const { videoData } = req.body;
@@ -18,19 +15,16 @@ async function songsStream(req, res, GLOBAL_OBJECTS) {
   }
   
   if (!videoData.isFile) {
-    const stream = await download(videoData, GLOBAL_OBJECTS);
+    await startDownload(videoData, GLOBAL_OBJECTS);
     
-    if (stream.error) {
-      return res.send(stream);
-    }
-    // const directStream = await handleFile.makeDLPStream(videoData);
-    // if (directStream.error) { return res.send(directStream); }
+    const queue = fileManager.modQueue.get(videoData.id);
+    return queue.stream.pipe(res);
   }
   
   const streamFile = await fileManager.read(videoData);
   
-  if (util.isError(streamFile)) {
-    return res.send({ error: true, comment: streamFile.exitCode });
+  if (streamFile.error) {
+    return res.send({ error: true, comment: streamFile.comment });
   }
   
   if (typeof streamFile.read === "function") {
