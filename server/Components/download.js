@@ -26,7 +26,7 @@ function waitDownloadStart(download, video) {
     const [ source, destination ] = await download(video);
     
     destination.on("ready", () => { resolve("Write stream ready"); });
-    destination.on("error", reject;
+    destination.on("error", reject);
   });
 }
 
