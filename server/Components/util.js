@@ -54,6 +54,31 @@ function getPathFromShortcutLink(pathLink) {
   throw new Error("Shortcuts for Unix/Linux is not supported");
 }
 
+function getFileCount() {
+  try {
+    const dirPath = getSaveLocation();
+    if (!statSync(dirPath).isDirectory()) { return; }
+    
+    const temp = new Map();
+    const info = { count: 0, duplicateCount: 0 };
+    
+    for (let file of readdirSync(dirPath)) {
+      const userSaveBase = path.basename(file, path.extname(file));
+      
+      if (temp.has(userSaveBase)) {
+        info.duplicateCount++;
+        continue;
+      }
+      temp.set(userSaveBase);
+      info.count++;
+    }
+    return info;
+  }
+  catch (e) {
+    console.log(e);
+  }
+}
+
 function getSaveLocation() {
   const isNotValidExt = (ext) => { return !!ext || ext === ".lnk" };
   
@@ -77,11 +102,6 @@ function getSaveLocation() {
   }
   
   return savePath;
-}
-
-function isError(e) {
-  return e && e.stack && e.message && 
-        typeof e.stack === 'string' && typeof e.message === 'string';
 }
 
 function validQueries(username, userId, videoData, optional_id) {
@@ -119,7 +139,7 @@ function validQueries(username, userId, videoData, optional_id) {
 
 module.exports = {
   init: init,
+  getFileCount: getFileCount,
   getSaveLocation: getSaveLocation,
-  isError: isError,
   validQueries: validQueries
 }

@@ -134,7 +134,7 @@ function File_Manager() {
     return { error: false, comment: null };
   }
   
-  this.download = async (video, callback=()=>{}) => {
+  this.download = async (video) => {
     const cb = (result) => {
       clearTimeout(video.id);
       
@@ -142,8 +142,6 @@ function File_Manager() {
       
       if (!result.error) { this.modCache.append(video); }
       else { this.modCache.remove(video.id); }
-      
-      callback(result);
     }
     
     if (this.modQueue.exists(video.id)) {
@@ -155,7 +153,7 @@ function File_Manager() {
     }
     
     const streamURL = await makeDLPStream(video, cb);
-    if (streamURL.error) { return callback(streamURL); }
+    if (streamURL.error) { return []; }
     
     const filePath = this.saveLocation(video);
     const streamToFile = await makeWriteStream(filePath);

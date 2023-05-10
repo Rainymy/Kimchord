@@ -12,7 +12,7 @@ const setMiddlewares = require('./Components/setMiddlewares.js');
 setMiddlewares(app);
 
 const { getAllRoute, loadAllRoutes } = require('./Components/handleRoute.js');
-const { getSaveLocation } = require('./Components/util.js');
+const { getSaveLocation, getFileCount } = require('./Components/util.js');
 const baseFolder = getSaveLocation();
 
 const Youtube = require('./API/youtube.js');
@@ -30,7 +30,10 @@ loadAllRoutes(app, routes, GLOBAL_OBJECTS);
 
 async function onServerStart() {
   console.log("------------------------------------------------------");
-  console.log("Base save folder :", chalk.yellow(baseFolder));
+  console.log("Basic Info");
+  console.log("╠ Base save folder :", chalk.yellow(baseFolder));
+  console.log("╚ Load song count  :", getFileCount());
+  console.log("------------------------------------------------------");
   GLOBAL_OBJECTS.fileManager = await fileManager.init(baseFolder);
   
   const listenURL = `${server.location}:${server.port}`;

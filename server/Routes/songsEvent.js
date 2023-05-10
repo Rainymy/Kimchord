@@ -1,6 +1,5 @@
 "use strict";
 const { PRESETS } = require('../Components/permission.js');
-const util = require('../Components/util.js').init();
 const startDownload = require('../Components/download.js');
 
 async function songsStream(req, res, GLOBAL_OBJECTS) {
@@ -35,7 +34,7 @@ async function songsStream(req, res, GLOBAL_OBJECTS) {
   res.set('content-type', 'audio/mp4');
   res.send(streamFile);
   
-  return directStream.pipe(res);
+  return;
 }
 
 module.exports = {
