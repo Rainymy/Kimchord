@@ -15,7 +15,10 @@ async function songsStream(req, res, GLOBAL_OBJECTS) {
   
   if (!videoData.isFile) {
     const error = await startDownload(videoData, GLOBAL_OBJECTS);
-    console.log("ERROR from startDownload: ", error);
+    if (error) {
+      console.log("ERROR from startDownload: ", error);
+      return res.send({ error: true, comment: "ENCOUNTERED INTERNAL" });
+    }
     
     const queue = fileManager.modQueue.get(videoData.id);
     return queue.stream.pipe(res);
