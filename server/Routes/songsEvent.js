@@ -15,7 +15,8 @@ async function songsStream(req, res, GLOBAL_OBJECTS) {
   }
   
   if (!videoData.isFile) {
-    await startDownload(videoData, GLOBAL_OBJECTS);
+    const error = await startDownload(videoData, GLOBAL_OBJECTS);
+    console.log("ERROR from startDownload: ", error);
     
     const queue = fileManager.modQueue.get(videoData.id);
     return queue.stream.pipe(res);

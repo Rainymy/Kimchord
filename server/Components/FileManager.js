@@ -15,7 +15,8 @@ const {
 const Cookies = require('./Cookies.js');
 const YT_DLP = require('../API/ytDLPHandler.js');
 
-const timeoutTimer = 1000 * 60 * 60 * 3;
+const MINUTE_ms = 1000 * 60;
+const timeoutTimer = MINUTE_ms * 5;
 
 function cancelDownload(stream) {
   console.log("cancelDownload", stream);
@@ -149,7 +150,8 @@ function File_Manager() {
       const { stream } = this.modQueue.get(video.id);
       stream.on("existing_stream", cb);
       
-      return console.log("Duplicated request stream: ", video.title);
+      console.log("Duplicated request stream: ", video.title);
+      return [ null, stream ];
     }
     
     const streamURL = await makeDLPStream(video, cb);
@@ -178,7 +180,7 @@ function File_Manager() {
   }
   
   this.liveStream = async (video, callback) => {
-    return await makeDLPStream(video, this.cookies, callback);
+    return await makeDLPStream(video, callback);
   }
   
   return this;

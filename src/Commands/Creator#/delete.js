@@ -6,9 +6,7 @@ const { parseSearchString } = require('../../Components/parseSearchString.js');
 const messageInfo = require('../../Components/messageInfo.js');
 
 async function deleteSong(message, basicInfo, searchString, queue) {
-  if (!basicInfo.isDev) {
-    return message.channel.send(messageInfo.commandDisabled);
-  }
+  if (!basicInfo.isDev) { return; }
   
   const baseUrl = basicInfo.server.URL;
   
@@ -23,7 +21,7 @@ async function deleteSong(message, basicInfo, searchString, queue) {
     return message.channel.send(messageInfo.doesNotExist);
   }
   
-  console.log(data);
+  console.log("delete data: ", data);
   return message.channel.send(
     messageInfo.ERROR_CODE(data.comment.errno.toString())
   );

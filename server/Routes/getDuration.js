@@ -4,20 +4,21 @@ const { PRESETS } = require('../Components/permission.js');
 async function getSongDurationOrDelete(video, GLOBAL_OBJECTS) {
   const { fileManager, youtube } = GLOBAL_OBJECTS;
   
-  let duration = 0;
-  
   const filePath = fileManager.saveLocation(video);
-  try { duration = await youtube.getVideoDurationInSeconds(filePath); }
-  catch (e) {
+  try {
+    if (video.isFile) {
+      return await youtube.getVideoDurationInSeconds(filePath);
+    }
     const metadata = await fileManager.YT_DLP.getMetadata(video.url);
-    duration = metadata.duration;
-    
+    return metadata.duration;
+  }
+  catch (e) {
     const err = fileManager.delete(video);
     if (err.error) { console.log(err); }
     else { console.log("Deleted unreadable file", filePath); }
   }
   
-  return duration;
+  return 0;
 }
 
 async function handleSongList(videoList, GLOBAL_OBJECTS) {

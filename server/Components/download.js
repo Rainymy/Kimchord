@@ -1,7 +1,10 @@
 "use strict";
-const {DOWNLOAD_MAX_ALLOWED_HOURS: MAX_ALLOWED_HOUR} = require('../../config.json');
-const util = require('../Components/util.js').init();
-const { PassThrough } = require('node:stream');
+const {
+  DOWNLOAD_MAX_ALLOWED_HOURS: MAX_ALLOWED_HOUR
+} = require('../../config.json');
+
+const EventEmitter = require('node:events');
+const downloadCache = new Map();
 
 function checkValidMeta(meta) {
   if (meta.is_live) {
@@ -23,10 +26,33 @@ function checkValidMeta(meta) {
 
 function waitDownloadStart(download, video) {
   return new Promise(async (resolve, reject) => {
+    if (downloadCache.has(video.id)) {
+      const cache = downloadCache.get(video.id);
+      
+      cache.once("ready-cache", (err) => {
+        if (err) { return reject(err); }
+        resolve();
+      });
+      
+      return;
+    }
+    
+    const tempEvent = new EventEmitter();
+    
+    downloadCache.set(video.id, tempEvent);
+    
     const [ source, destination ] = await download(video);
     
-    destination.on("ready", () => { resolve("Write stream ready"); });
-    destination.on("error", reject);
+    const finish = (error) => {
+      tempEvent.emit("ready-cache");
+      downloadCache.delete(video.id);
+      return error ? reject(error) : resolve();
+    }
+    
+    destination.on("ready", finish);
+    destination.on("error", finish);
+    
+    return;
   });
 }
 
@@ -42,8 +68,7 @@ async function startDownload(video, GLOBAL_OBJECTS) {
   
   const combined = { ...video, ...{ container: metadata.ext } };
   
-  await waitDownloadStart(fileManager.download, combined);
-  return;
+  return await waitDownloadStart(fileManager.download, combined);
 }
 
 module.exports = startDownload;
