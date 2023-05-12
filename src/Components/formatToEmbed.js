@@ -1,4 +1,23 @@
+"use strict";
 const { durationToString } = require('./util.js');
+
+function basicEmbed(video, queueLength) {
+  const embedTitle = video.type === "radio"
+    ? `📻🎶 Currently jamming to FM Radio 📻🎶`
+    : `Song Queue: ${durationToString(queueLength)}`;
+  
+  const embedDescription = video.type === "radio"
+    ? video.title 
+    : `Current Song: ${video.title}`;
+  
+  return {
+    title: embedTitle,
+    color: 0x0099ff,
+    description: embedDescription,
+    thumbnail: { url: video.thumbnail },
+    fields: []
+  }
+}
 
 function formatToEmbed(video, noFields=false, songQueue) {
   if (!video) {
@@ -40,4 +59,7 @@ function formatToEmbed(video, noFields=false, songQueue) {
   return [ { embeds: [ embed ] }, embed ];
 }
 
-module.exports = { formatToEmbed }
+module.exports = {
+  formatToEmbed: formatToEmbed,
+  basicEmbed: basicEmbed
+}

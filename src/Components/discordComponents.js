@@ -1,25 +1,9 @@
+"use strict";
 const { durationToString } = require('./util.js');
+const { basicEmbed } = require('./formatToEmbed.js');
 const {
   ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder
 } = require('discord.js');
-
-function basicEmbed(video, queueLength) {
-  const embedTitle = video.type === "radio"
-    ? `📻🎶 Currently jamming to FM Radio 📻🎶`
-    : `Song Queue: ${durationToString(queueLength)}`;
-  
-  const embedDescription = video.type === "radio"
-    ? video.title 
-    : `Current Song: ${video.title}`;
-  
-  return {
-    title: embedTitle,
-    color: 0x0099ff,
-    description: embedDescription,
-    thumbnail: { url: video.thumbnail },
-    fields: []
-  }
-}
 
 function createSongListEmbed(songs, start, perPages=8) {
   if (!songs.length) { return; }

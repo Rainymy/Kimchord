@@ -38,30 +38,11 @@ function parseLocalFolder(baseFolder) {
   return accum;
 }
 
-function readFileSync(filePath) {
-  return fs.readFileSync(filePath);
-}
-
-function writeFile(filePath, data, cb) {
-  return new Promise(async function(resolve, reject) {
-    const stream = await makeWriteStream(filePath);
-    
-    stream.on("finish", (err) => {
-      cb && cb(err);
-      return resolve(err ? false : true);
-    });
-    
-    stream.write(data);
-    stream.end();
-  });
-}
-
 function makeReadStream(filePath) {
   return new Promise(function(resolve, reject) {
     const readFile = fs.createReadStream(filePath, { autoClose: true });
     
     readFile.on('error', (error) => {
-      console.log("Exit Code: ", error.exitCode);
       console.log("ERROR from makeReadStream: ", error);
       readFile.destroy();
       resolve({ error: true, comment: "Internal error!" });
@@ -70,9 +51,7 @@ function makeReadStream(filePath) {
     readFile.on('close', () => { console.log('Read stream closed'); });
     readFile.on('finish', () => { console.log('Read stream Finished'); });
     
-    readFile.on("ready", () => resolve(readFile));
-    
-    return;
+    return resolve(readFile);
   });
 }
 
@@ -142,8 +121,6 @@ module.exports = {
   checkFileExists: checkFileExists,
   deleteFile: deleteFile,
   parseLocalFolder: parseLocalFolder,
-  readFileSync: readFileSync,
-  writeFile: writeFile,
   makeReadStream: makeReadStream,
   makeWriteStream: makeWriteStream,
   makeDLPStream: makeDLPStream

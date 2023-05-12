@@ -1,7 +1,7 @@
 "use strict";
-const { existsSync, statSync, readdirSync, mkdirSync } = require('node:fs');
-const { execSync } = require('node:child_process');
+const fs = require('node:fs');
 const path = require('node:path');
+const { execSync } = require('node:child_process');
 
 const { saveFolder, plugins } = require('../config.json');
 
@@ -15,10 +15,9 @@ function init() {
     ...Object.values(plugins).map(v => path.join(__dirname, "../", v.path)),
   ];
   for (let folder of essentialFolders) {
-    if (existsSync(folder)) { continue; }
+    if (fs.existsSync(folder)) { continue; }
     
-    // in case failure (throw error)
-    const folderPath = mkdirSync(folder, { recursive: true });
+    const folderPath = fs.mkdirSync(folder, { recursive: true });
     console.log(`Directory created successfully! : ${folderPath}`);
   }
   
@@ -57,12 +56,12 @@ function getPathFromShortcutLink(pathLink) {
 function getFileCount() {
   try {
     const dirPath = getSaveLocation();
-    if (!statSync(dirPath).isDirectory()) { return; }
+    if (!fs.statSync(dirPath).isDirectory()) { return; }
     
     const temp = new Map();
     const info = { count: 0, duplicateCount: 0 };
     
-    for (let file of readdirSync(dirPath)) {
+    for (let file of fs.readdirSync(dirPath)) {
       const userSaveBase = path.basename(file, path.extname(file));
       
       if (temp.has(userSaveBase)) {
@@ -84,14 +83,14 @@ function getSaveLocation() {
   
   const savePath = path.normalize(path.resolve(__dirname, saveFolder));
   
-  try { statSync(savePath).isDirectory(); }
+  try { fs.statSync(savePath).isDirectory(); }
   catch (e) {
     const userSaveExt = path.extname(savePath);
     const userSaveBase = path.basename(savePath, userSaveExt);
     
     if (isNotValidExt(userSaveExt)) { return; }
     
-    for (let item of readdirSync(path.dirname(savePath))) {
+    for (let item of fs.readdirSync(path.dirname(savePath))) {
       if (!path.extname(item) || path.extname(item) !== ".lnk") { continue; }
       
       const folderName = path.basename(item, path.extname(item));

@@ -27,26 +27,17 @@ function checkValidMeta(meta) {
 function waitDownloadStart(download, video) {
   return new Promise(async (resolve, reject) => {
     if (downloadCache.has(video.id)) {
-      const cache = downloadCache.get(video.id);
-      
-      cache.once("ready-cache", (err) => {
-        if (err) { return reject(err); }
-        resolve();
-      });
-      
-      return;
+      return downloadCache.get(video.id).once("ready-cache", resolve);
     }
     
-    const tempEvent = new EventEmitter();
-    
-    downloadCache.set(video.id, tempEvent);
+    downloadCache.set(video.id, new EventEmitter());
     
     const [ source, destination ] = await download(video);
     
     const finish = (error) => {
-      tempEvent.emit("ready-cache");
+      downloadCache.get(video.id).emit("ready-cache");
       downloadCache.delete(video.id);
-      return error ? reject(error) : resolve();
+      return resolve(error);
     }
     
     destination.on("ready", finish);

@@ -127,10 +127,8 @@ function YTDlp() {
     if (!isLive) { args.push("-f bestaudio[ext=m4a]") }
     if (this.hasCookie) { args.push(`--cookies=${this.cookiePath}`); }
     
-    const execStream = this.ytdlp.execStream(args);
-    
     const readableStream = new PassThrough();
-    execStream.pipe(readableStream);
+    this.ytdlp.execStream(args).pipe(readableStream);
     
     return readableStream;
   }

@@ -1,3 +1,6 @@
+"use strict";
+const { codeBlock } = require('./markup.js');
+
 const messageInfos = {
   notInVoiceChannel: "I'm sorry but you need to be in a voice channel to play music!",
   permissionNeeded: (permission) => { return `I cannot "${permission}", make sure I have the proper permissions!`; },
@@ -20,6 +23,7 @@ const messageInfos = {
   doesNotExist: "Doesn't exist",
   ERROR_CODE: (code) => { return `ERROR CODE: ${code}` },
   UNEXPECTED_ERROR: "Something went Wrong",
+  errorStreamDetail: (comment, lang="js") => { return codeBlock(`Detail of error: [ ${comment} ]`, lang) },
   commandDisabled: "Sorry this command is not working correctly. (disabled)",
   pingAwait: 'Ping is being appreciated... :bar_chart:',
   songQueueCollectorEnd: "Song queue timer run out"

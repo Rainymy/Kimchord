@@ -43,14 +43,15 @@ async function main(message, basicInfo, searchString, queue, client) {
       const response = await handleRequests.getRequestSong(shallowCopy);
       
       if (response.error) {
-        message.channel.send(
-          codeBlock(`Detail of error: [ ${response.comment} ]`, "js")
-        );
-        
+        message.channel.send(messageInfo.errorStreamDetail(response.comment));
         return response.emptyReadableStream;
       }
       
       return response;
+    }
+    
+    songs[i].requestDelete = async () => {
+      console.log("requested for delete");
     }
   }
   

@@ -1,5 +1,6 @@
-const { existsSync, readFileSync } = require('fs');
-const path = require('path');
+"use strict";
+const fs = require('node:fs');
+const path = require('node:path');
 const { login } = require('./puppy.js');
 const { email, password } = require('../config.json');
 
@@ -7,7 +8,7 @@ function Cookies() {
   this.cookiesPath = path.join(__dirname, "../cookies.json");
   this.netscapeCookiePath = path.join(__dirname, "../netscapeCookie.txt");
   
-  this.exists = () => { return existsSync(this.cookiesPath); }
+  this.exists = () => { return fs.existsSync(this.cookiesPath); }
   
   this.login = () => {
     return new Promise((resolve, reject) => {
@@ -21,7 +22,7 @@ function Cookies() {
   }
   
   this.load = () => {
-    try { return JSON.parse(readFileSync(this.cookiesPath)); }
+    try { return JSON.parse(fs.readFileSync(this.cookiesPath)); }
     catch (e) { return console.log(e); }
   }
   

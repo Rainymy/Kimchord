@@ -135,8 +135,9 @@ function File_Manager() {
   }
   
   this.download = async (video) => {
+    let timeoutID;
     const cb = (result) => {
-      clearTimeout(video.id);
+      clearTimeout(timeoutID);
       
       this.modQueue.remove(video.id);
       
@@ -168,7 +169,7 @@ function File_Manager() {
       stream: streamURL
     }
     
-    setTimeout(cancelDownload, timeoutTimer, streamURL);
+    timeoutID = setTimeout(cancelDownload, timeoutTimer, streamURL);
     this.modQueue.append(video.id, data);
     
     streamURL.on("data", () => { streamURL.emit("ready-to-read"); });

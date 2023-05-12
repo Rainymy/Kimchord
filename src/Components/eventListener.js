@@ -1,21 +1,36 @@
+"use strict";
+const request = require('./request.js');
+
 const { formatToEmbed } = require('./formatToEmbed.js');
+const messageInfos = require('./messageInfo.js');
 
 const music_status = {
   paused: "⏸ Paused the music for you! ⏸",
   resumed: "▶️ Resumed the music for you! ▶️",
-  play: "🎶 Now Playing 🎶"
+  play: "🎶 Now Playing 🎶",
+  default: "🌊 Current music 🌊"
 }
 
-function formatEmbed(songQueue, status) {
-  const currentSong = songQueue[0];
-  const [ container, embed ] = formatToEmbed(currentSong, false, songQueue);
-  if (!embed) { return; }
-  embed.description = music_status[status];
-  
-  return container;
+const audioError = {
+  connection: messageInfos.errorStreamDetail("Lost connection to server"),
+  notPlayable: messageInfos.errorStreamDetail("Unplayable media"),
+  unknown: messageInfos.errorStreamDetail("error from player")
 }
 
 function addEventListener(serverQueue, queue, musicPlayer) {
+  const sendEmbedStatus = (state="default") => {
+    const songQueues = serverQueue.songs;
+    const [ container, embed ] = formatToEmbed(songQueues[0], false, songQueues);
+    
+    if (!embed) { return serverQueue.textChannel.send("No embed"); }
+    embed.description = music_status[state] ?? "";
+    
+    serverQueue.textChannel.send(container)
+      .catch(e => { console.log("At EventListener", e); });
+    
+    return;
+  }
+  
   // Events: idle, autopaused, buffering, paused, playing, error
   serverQueue.audioPlayer.on("idle", async () => {
     serverQueue.songs.shift();
@@ -23,8 +38,10 @@ function addEventListener(serverQueue, queue, musicPlayer) {
     
     const currentSong = await musicPlayer(guild_id, serverQueue.songs[0], queue);
     if (!currentSong) {
-      serverQueue.textChannel.send("No songs in the queue");
-      serverQueue.textChannel.send("Initiating [ Bean Chillin' ] Mode 🍦🥶");
+      serverQueue.textChannel.send([
+        "No songs in the queue", 
+        "Initiating [ Bean Chillin' ] Mode 🍦🥶"
+      ].join("\n"));
       
       serverQueue.timeout.id = setTimeout(() => {
         const inactiveDuration = serverQueue.timeout.duration / 60 / 1000;
@@ -42,31 +59,39 @@ function addEventListener(serverQueue, queue, musicPlayer) {
   });
   
   serverQueue.audioPlayer.on("paused", () => {
-    const embed = formatEmbed(serverQueue.songs, "paused");
-    if (!embed) { return serverQueue.textChannel.send("No embed"); }
-    
-    serverQueue.textChannel.send(embed);
+    return sendEmbedStatus("paused");
   });
   
   serverQueue.audioPlayer.on("playing", (previous) => {
     if (previous.status === "autopaused") { return; }
     const status = previous.status === "paused" ? "resumed" : "play";
     
-    const embed = formatEmbed(serverQueue.songs, status);
-    if (!embed) { return serverQueue.textChannel.send("No embed"); }
-    
-    serverQueue.textChannel.send(embed);
+    sendEmbedStatus(status);
     
     if (status === "play" && serverQueue.songs[0].isLive) {
       serverQueue.textChannel.send(
         "Live stream is in experimental mode!, *May not work properly*"
       );
     }
-    
   });
   
   serverQueue.audioPlayer.on('error', (error) => {
-    serverQueue.textChannel.send(`Error from player: ${error.message}`);
+    sendEmbedStatus();
+    
+    if (error.name === "RequestError") {
+      return serverQueue.textChannel.send(audioError.connection);
+    }
+    
+    if (!serverQueue.audioPlayer.checkPlayable()) {
+      serverQueue.songs?.[0]?.requestDelete();
+      serverQueue.textChannel.send(audioError.notPlayable);
+      return;
+    }
+    
+    console.log("From audioPlayer: ", error);
+    serverQueue.textChannel.send(audioError.unknown);
+    
+    return;
   });
 }
 

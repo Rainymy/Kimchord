@@ -1,4 +1,5 @@
-const { readdirSync, existsSync, mkdir, statSync } = require('node:fs');
+"use strict";
+const fs = require('node:fs');
 const path = require('node:path');
 
 const firstRun = {
@@ -55,15 +56,15 @@ function commands() {
   const status = {};
   let stat;
   
-  for (let [ index, file ] of readdirSync(commandPath).entries()) {
+  for (let [ index, file ] of fs.readdirSync(commandPath).entries()) {
     let relPath = path.join(commandPath, file);
-    if (statSync(relPath).isFile()) {
+    if (fs.statSync(relPath).isFile()) {
       stat = handleAppend(commmand, relPath);
       status[ getFirstOrString(stat.aliases) ] = { ...stat };
       delete status[ getFirstOrString(stat.aliases) ].main;
       continue;
     }
-    for (let sec_file of readdirSync(relPath)) {
+    for (let sec_file of fs.readdirSync(relPath)) {
       stat = handleAppend(commmand, path.join(relPath, sec_file), file);
       status[ getFirstOrString(stat.aliases) ] = { ...stat };
       delete status[ getFirstOrString(stat.aliases) ].main;
@@ -82,14 +83,11 @@ function Start() {
     if (firstRun.hasInited) { return this; }
     
     for (let folder of Object.values(essentialFolders)) {
-      let pathToFolder = path.join(__dirname, folder);
+      const pathToFolder = path.join(__dirname, folder);
       
-      if (!existsSync(pathToFolder)) {
-        mkdir(pathToFolder, (err) => {
-          if (err) { return console.error(err); }
-          console.log(pathToFolder, 'directory created successfully!');
-        });
-      };
+      if (fs.existsSync(pathToFolder)) { continue; };
+      const dirPath = fs.mkdirSync(pathToFolder, { recursive: true });
+      console.log(dirPath, 'directory created successfully!');
     }
     
     firstRun.hasInited = true;

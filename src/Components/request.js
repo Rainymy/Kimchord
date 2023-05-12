@@ -42,8 +42,12 @@ function got_request(urlPath, params) {
       catch (e) { resolve({ error: true, comment: "Unparseable data" }); }
     }
     catch (e) {
-      console.log("catching error in \"got_request\":", e);
-      return resolve({ error: true, comment: e });
+      if (e.code === "ECONNREFUSED" || e.code === "ECONNRESET") {
+        return resolve({ error: true, comment: "Server Down" });
+      }
+      
+      console.log("catching error in \"got_request\":", e.message);
+      return resolve({ error: true, comment: "Unknown Error" });
     }
   });
 }

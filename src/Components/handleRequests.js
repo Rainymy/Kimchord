@@ -1,3 +1,4 @@
+"use strict";
 const request = require('./request.js');
 const { parseSearchString } = require('./parseSearchString.js');
 

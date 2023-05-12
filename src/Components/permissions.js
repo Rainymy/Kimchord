@@ -1,3 +1,4 @@
+"use strict";
 const { codeBlock } = require('./markup.js');
 const messageInfo = require('./messageInfo.js');
 

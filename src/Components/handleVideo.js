@@ -1,6 +1,8 @@
+"use strict";
 const { createConnection } = require('./handleConnection.js');
 const { addEventListener } = require('./eventListener.js');
 const { player } = require('../Components/player.js');
+const { TIMNEOUT_DURATION_MS } = require('../../config.json');
 
 function handleVideo(args) {
   const { video, voiceChannel, audioPlayer, queue, guild } = args;
@@ -20,6 +22,8 @@ function handleVideo(args) {
       pause: null
     },
     stream: video.stream,
+    getStream: null,
+    requestDelete: null,
     ...video
   }
   
@@ -30,9 +34,10 @@ function handleVideo(args) {
     }
     
     clearTimeout(serverQueue.timeout.id);
-    serverQueue.timeout.id = null;
     
+    serverQueue.timeout.id = null;
     serverQueue.songs.push(song);
+    
     player(guild.channel.guild.id, song, queue);
     return [ song, serverQueue.songs ];
   }
@@ -44,7 +49,7 @@ function handleVideo(args) {
     connection: createConnection(voiceChannel),
     songs: [],
     playing: true,
-    timeout: { id: null, duration: 3 * 60 * 1000 }
+    timeout: { id: null, duration: TIMNEOUT_DURATION_MS }
   }
   
   queue.set(guild.channel.guild.id, queueConstruct);
@@ -52,8 +57,8 @@ function handleVideo(args) {
   queueConstruct.songs.push(song);
   
   addEventListener(queueConstruct, queue, player);
+  player(guild.channel.guild.id, song, queue);
   
-  player(guild.channel.guild.id, queueConstruct.songs[0], queue);
   return [];
 }
 

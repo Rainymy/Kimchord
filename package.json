@@ -1,7 +1,7 @@
 {
   "name": "Kimchord",
   "author": "Rainymy",
-  "version": "2.3.6",
+  "version": "2.4.0",
   "description": "A simple Discord music bot",
   "main": "index.js",
   "scripts": {
@@ -13,9 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/voice": "^0.16.0",
-    "bufferutil": "^4.0.7",
     "chalk": "^4.1.2",
-    "compression": "^1.7.4",
     "cookie-parser": "^1.4.6",
     "cookiefile": "^1.0.10",
     "discord.js": "^14.11.0",
@@ -24,13 +22,10 @@
     "get-video-duration": "^4.1.0",
     "got": "^12.6.0",
     "helmet": "^6.2.0",
-    "libsodium-wrappers": "^0.7.11",
-    "puppeteer": "^19.11.1",
+    "puppeteer": "^20.1.2",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "sodium-native": "^3.4.1",
-    "tweetnacl": "^1.0.3",
-    "utf-8-validate": "^5.0.10",
     "ws": "^8.13.0",
     "yt-dlp-wrap": "^2.3.11",
     "ytpl": "^2.3.0",

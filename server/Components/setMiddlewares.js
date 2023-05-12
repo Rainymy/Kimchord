@@ -1,5 +1,5 @@
+"use strict";
 const { server } = require('../../config.json');
-
 const path = require('node:path');
 
 const helmet = require('helmet');

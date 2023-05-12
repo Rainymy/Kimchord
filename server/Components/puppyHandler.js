@@ -1,6 +1,6 @@
 "use strict";
 const cookiefile = require('cookiefile');
-const { writeFile } = require('./handleFile.js');
+const { makeWriteStream } = require('./handleFile.js');
 
 const part1 = "ytd-button-renderer.ytd-consent-bump-v2-lightbox:nth-child(2)";
 const part2 = " > yt-button-shape:nth-child(1) > button:nth-child(1)";
@@ -64,12 +64,22 @@ async function authenticate(page, email, password) {
   return page;
 }
 
+function writeFile(filePath, data) {
+  return new Promise(async function(resolve, reject) {
+    const stream = await makeWriteStream(filePath);
+    
+    stream.on("finish", resolve);
+    
+    stream.write(data);
+    stream.end();
+  });
+}
+
 async function saveCookies(files) {
   const errors = [];
   for (let file of files) {
-    await writeFile(file.path, file.data, (err) => {
-      if (err) { return errors.push(err); }
-    });
+    const error = await writeFile(file.path, file.data);
+    if (error) { errors.push(error); }
   }
   return [ !errors.length, errors ];
 }

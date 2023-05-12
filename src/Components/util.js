@@ -1,4 +1,4 @@
-const { Constants } = require('discord.js');
+"use strict";
 
 function isObject(objVal) {
   return objVal && typeof objVal === 'object' && objVal.constructor === Object;

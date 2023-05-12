@@ -24,14 +24,10 @@ async function np(message, basicInfo, arg, queue) {
   
   const timeNow = Date.now();
   const startAt = serverQueue.songs[0].time.start;
-  const duration = serverQueue.songs[0].duration;
-  if (duration === 0) { duration = startAt; }
-  
-  const progressPercent = (timeNow - startAt) / (duration * 1000);
-  // const timeLeft = ((startAt + (duration * 1000)) - timeNow) / 1000;
   const timePlayed = (timeNow - startAt) / 1000;
+  const duration = serverQueue.songs[0].duration || timePlayed;
   
-  const progress = progressBar(15, progressPercent, "🔥");
+  const progress = progressBar(15, timePlayed / duration, "🔥");
   
   const video = serverQueue.songs[0];
   video.description = makeTextBar(timePlayed, duration, progress);

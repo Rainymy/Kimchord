@@ -4,7 +4,6 @@ const stealth = require('puppeteer-extra-plugin-stealth')();
 puppeteer.use(stealth);
 
 const {
-  sleep,
   authenticate,
   saveCookies,
   generateMovement,
