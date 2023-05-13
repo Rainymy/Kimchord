@@ -4,6 +4,8 @@ const { addEventListener } = require('./eventListener.js');
 const { player } = require('../Components/player.js');
 const { TIMNEOUT_DURATION_MS } = require('../../config.json');
 
+const { createAudioPlayer } = require('@discordjs/voice');
+
 function handleVideo(args) {
   const { video, voiceChannel, audioPlayer, queue, guild } = args;
   const serverQueue = queue.get(guild.channel.guild.id);
@@ -62,4 +64,44 @@ function handleVideo(args) {
   return [];
 }
 
-module.exports = { handleVideo }
+function addSongsToQueue(message, songs, queue) {
+  let data;
+  
+  for (let item of songs) {
+    const args = {
+      video: item,
+      voiceChannel: message.member.voice.channel,
+      audioPlayer: createAudioPlayer({ behaviors: { noSubscriber: "pause" } }), 
+      queue: queue,
+      guild: {
+        channel: message.channel,
+        author: message.author
+      }
+    }
+    
+    data = handleVideo(args);
+  }
+  
+  return data ?? [];
+}
+
+function createPlaylistObject(meta, author) {
+  return {
+    title: `Playlist: ${meta.title}`,
+    description: meta.description,
+    url: meta.playlistURL,
+    thumbnail: meta.thumbnail,
+    data: {
+      itemCount: meta.itemCount,
+      viewCount: meta.views,
+    },
+    duration: meta.playlist.reduce((acc, curr) => acc + curr.duration, 0),
+    requestedBy: author
+  }
+}
+
+module.exports = {
+  addSongsToQueue: addSongsToQueue,
+  handleVideo: handleVideo,
+  createPlaylistObject: createPlaylistObject
+}

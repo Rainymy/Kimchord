@@ -24,6 +24,27 @@ function YTDlp() {
   this.hasCookie = false;
   this.cookiePath = null;
   
+  this.cacheStorage = new Map();
+  this.cache = {
+    has: (id) => {
+      if (!this.cacheStorage.has(id)) { return false; }
+      const cache_temp = this.cacheStorage.get(id);
+      
+      // refresh cache after every 0.5 hour (30 minutes)
+      const diff = (new Date() - cache_temp.cacheStartDate) / 1000 / 60 / 60;
+      if (diff > 0.5) { return false; }
+      
+      return true;
+    },
+    get: (id) => {
+      return this.cacheStorage.get(id);
+    },
+    append: (id, data) => {
+      const combine = { ...data, cacheStartDate: new Date() }
+      return this.cacheStorage.set(id, combine);
+    }
+  }
+  
   this.setCookie = (cookiePath) => {
     if (!cookiePath) { return; }
     
@@ -88,7 +109,6 @@ function YTDlp() {
     
     return fileName !== current;
   }
-  
   this.downloadLatestRelease = async () => {
     const githubReleasesData = await this.getLatestRelease();
     
@@ -134,6 +154,7 @@ function YTDlp() {
   }
   this.getMetadata = async (url) => {
     if (!url) { return; }
+    if (this.cache.has(url)) { return this.cache.get(url); }
     
     const meta = await this.ytdlp.getVideoInfo(url);
     
@@ -143,6 +164,7 @@ function YTDlp() {
       worstFormat.duration = 0;
       worstFormat.is_live = meta.is_live;
       
+      this.cache.append(url, worstFormat);
       return worstFormat;
     }
     
@@ -153,9 +175,9 @@ function YTDlp() {
     bestaudio.duration = this.utils.convertStrongToIntMS(meta.duration_string);
     bestaudio.is_live = meta.is_live;
     
+    this.cache.append(url, bestaudio);
     return bestaudio;
   }
-  
   this.init = async () => {
     if (this.isInit) { return this; }
     
@@ -189,7 +211,6 @@ function YTDlp() {
     
     return this;
   }
-  
   
   return this;
 }

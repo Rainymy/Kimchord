@@ -1,13 +1,8 @@
 "use strict";
-const { handleVideo } = require('../../Components/handleVideo');
-const { formatToEmbed } = require('../../Components/formatToEmbed.js');
 const { PRESETS } = require('../../Components/permissions.js');
-const handleRequests = require('../../Components/handleRequests.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
-
-const { createAudioPlayer } = require('@discordjs/voice');
 
 async function main(message, basicInfo, searchString, queue, client) {
   const serverQueue = queue.get(message.guild.id);

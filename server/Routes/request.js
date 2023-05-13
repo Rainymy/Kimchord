@@ -1,6 +1,17 @@
 "use strict";
 const { PRESETS } = require('../Components/permission.js');
 
+async function getSongDurationOrDelete(video, filePath, GLOBAL_OBJECTS) {
+  const { fileManager, youtube } = GLOBAL_OBJECTS;
+  
+  try { return await youtube.getVideoDurationInSeconds(filePath); }
+  catch (e) {
+    const err = fileManager.delete(video);
+    if (err.error) { console.log(err); }
+    else { console.log("Deleted unreadable file", filePath); }
+  }
+}
+
 async function request(req, res, GLOBAL_OBJECTS) {
   const { videoData } = req.body;
   const { fileManager } = GLOBAL_OBJECTS;
@@ -11,9 +22,16 @@ async function request(req, res, GLOBAL_OBJECTS) {
     const filePath = fileManager.saveLocation(item);
     item.isFile = await fileManager.checkFileExists(filePath);
     
-    const meta = await fileManager.YT_DLP.getMetadata(item.url);
-    item.isLive = meta.is_live;
-    item.duration = meta.duration;
+    if (item.isLive) { continue; }
+    if (item.isFile) {
+      item.duration = await getSongDurationOrDelete(item, filePath, GLOBAL_OBJECTS);
+    }
+    if (!item.duration) {
+      const meta = await fileManager.YT_DLP.getMetadata(item.url);
+      item.ext = meta.ext;
+      item.isLive = meta.is_live;
+      item.duration = meta.duration;
+    }
   }
   
   return res.send(videoData);

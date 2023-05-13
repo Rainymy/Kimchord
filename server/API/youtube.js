@@ -1,5 +1,6 @@
 "use strict";
-const https = require('https');
+const https = require('node:https');
+
 const ytsr = require('ytsr');
 const ytpl = require('ytpl');
 const { getVideoDurationInSeconds } = require("get-video-duration");
@@ -88,7 +89,7 @@ function YouTube() {
     return youtubeValidLinkList.indexOf(hostlink) >= 0;
   }
   
-  function removeTextFormat(inputText) {
+  this.removeTextFormat = function (inputText) {
     if (!inputText) { return inputText; }
     
     let removedText;
@@ -113,7 +114,7 @@ function YouTube() {
       
       if (firstLetter === character && lastLetter === character) {
         const cutString = currentText.substring(1, currentText.length - 1);
-        removedText = removeTextFormat(cutString);
+        removedText = this.removeTextFormat(cutString);
       }
     }
     
@@ -124,13 +125,11 @@ function YouTube() {
     return await getVideoDurationInSeconds(resourcePath);
   }
   
-  this.getYoutubeData = async function (input) {
+  this.getYoutubeData = async function (searchInput) {
+    if (!searchInput) { return []; }
+    
     let video;
     let isValidLink = false;
-    
-    console.log("Parsing: ", input);
-    const searchInput = removeTextFormat(input);
-    console.log("Removed text Format: ", searchInput);
     
     try {
       const parsed_URL = new URL(searchInput);
@@ -142,20 +141,18 @@ function YouTube() {
     }
     catch (e) {
       try {
-        if (!searchInput) { throw "Empty string"; }
         if (isValidLink) { throw "Exiting cause of the valid URL link"; }
         
         const foundVideos = await this.searchVideos(searchInput);
         video = await this.getVideoByID(foundVideos[0]?.id);
       } 
       catch (err) {
-        if (!isValidLink || !searchInput) {
+        if (!isValidLink) {
           console.log(err);
         }
       }
     }
     
-    console.log("Parsed data: ", video ?? `[ Failed to parse - ${searchInput}] `);
     return video ?? [];
   }
   
@@ -205,7 +202,6 @@ function YouTube() {
       delete item.index;
       delete item.shortUrl;
       delete item.thumbnails;
-      delete item.isLive;
       delete item.isPlayable;
       
       item.thumbnail = removeExtraImgQuery(item.bestThumbnail.url);

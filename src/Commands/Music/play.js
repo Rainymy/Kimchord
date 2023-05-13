@@ -1,15 +1,19 @@
 "use strict";
-const { handleVideo } = require('../../Components/handleVideo');
-const { formatToEmbed } = require('../../Components/formatToEmbed.js');
 const { PRESETS } = require('../../Components/permissions.js');
+const messageInfo = require('../../Components/messageInfo.js');
+
 const handleRequests = require('../../Components/handleRequests.js');
 
-const messageInfo = require('../../Components/messageInfo.js');
-const { codeBlock } = require('../../Components/markup.js');
+const {
+  formatToEmbed,
+  createAddPlaylistEmbed
+} = require('../../Components/formatToEmbed.js');
+const {
+  addSongsToQueue,
+  createPlaylistObject
+} = require('../../Components/handleVideo');
 
-const { createAudioPlayer } = require('@discordjs/voice');
-
-async function main(message, basicInfo, searchString, queue, client) {
+async function main(message, basicInfo, searchString, queue) {
   if (!searchString.length) {
     return message.channel.send("`<Search Text>` or `<Youtube Link>`");
   }
@@ -25,7 +29,6 @@ async function main(message, basicInfo, searchString, queue, client) {
   
   /*--------------------- Get streamable response -------------------*/
   const requested = await handleRequests.request(param);
-  
   if (requested.error) {
     return message.channel.send("Internal error");
   }
@@ -40,7 +43,9 @@ async function main(message, basicInfo, searchString, queue, client) {
     shallowCopy.isStream = songs[i].isLive ?? false;
     
     songs[i].getStream = async () => {
+      const loading = await message.channel.send("Song Loading...");
       const response = await handleRequests.getRequestSong(shallowCopy);
+      loading.delete();
       
       if (response.error) {
         message.channel.send(messageInfo.errorStreamDetail(response.comment));
@@ -55,61 +60,28 @@ async function main(message, basicInfo, searchString, queue, client) {
     }
   }
   
-  const isPlaylist = requested.type === "playlist";
-  
-  if (!isPlaylist) {
-    const temp_1 = JSON.parse(param.body);
-    temp_1.videoData = JSON.parse(JSON.stringify(songs));
-    param.body = JSON.stringify(temp_1);
-    
-    const durations = await handleRequests.getDuration(param);
-    
-    for (let i = 0; i < requested.length; i++) {
-      requested[i].duration = durations[i];
-    }
-  }
+  /*--------------- Check for connected voicechannel ----------------*/
+  if (!message.member.voice.channel) { return; }
   
   /*--------- Add the playable stream to queue and play it ---------*/
-  for (let item of songs) {
-    const args = {
-      video: item,
-      voiceChannel: message.member.voice.channel,
-      audioPlayer: createAudioPlayer({ behaviors: { noSubscriber: "pause" } }), 
-      queue: queue,
-      guild: {
-        channel: message.channel,
-        author: message.author
-      }
-    }
+  const [ addedSong, songQueue ] = addSongsToQueue(message, songs, queue);
+  
+  if (requested.type === "playlist") {
+    requested.description = messageInfo.playlistAddedToQueue
+    const addPlayList = createPlaylistObject(requested, message.author);
+    let [ container, embed ] = createAddPlaylistEmbed(addPlayList);
     
-    const [ addedSong, songQueue ] = handleVideo(args);
-    
-    if (!isPlaylist && (addedSong && !(addedSong && songQueue?.length === 1))) {
-      addedSong.description = messageInfo.songAddedToQueue;
-      let [ container, embed ] = formatToEmbed(addedSong, false, songQueue);
-      
-      await message.channel.send(container).catch(err => {
-        console.log("Caught Error in play: ", err);
-      });
-    }
+    return message.channel.send(container).catch(err => {
+      console.log("Caught Error in playlist: ", err);
+    });
   }
   
-  if (isPlaylist) {
-    const addPlayList = {
-      title: `Playlist: ${requested.title}`,
-      description: messageInfo.playlistAddedToQueue,
-      url: requested.playlistURL,
-      thumbnail: requested.thumbnail,
-      duration: requested.playlist.reduce((acc, curr) => acc + curr.duration, 0),
-      requestedBy: message.author
-    }
+  if (addedSong && songQueue?.length > 1) {
+    addedSong.description = messageInfo.songAddedToQueue;
+    let [ container, embed ] = formatToEmbed(addedSong, false, songQueue);
     
-    console.log(addPlayList);
-    
-    let [ container, embed ] = formatToEmbed(addPlayList, false);
-    
-    await message.channel.send(container).catch(err => {
-      console.log("Caught Error in playlist: ", err);
+    return message.channel.send(container).catch(err => {
+      console.log("Caught Error in play: ", err);
     });
   }
   

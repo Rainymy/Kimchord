@@ -1,6 +1,4 @@
 "use strict";
-const request = require('./request.js');
-
 const { formatToEmbed } = require('./formatToEmbed.js');
 const messageInfos = require('./messageInfo.js');
 

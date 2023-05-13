@@ -1,5 +1,7 @@
 "use strict";
 const { durationToString } = require('./util.js');
+const { codeBlock } = require('./markup.js');
+const EMBED_COLOR = 0x0099ff;
 
 function basicEmbed(video, queueLength) {
   const embedTitle = video.type === "radio"
@@ -12,7 +14,7 @@ function basicEmbed(video, queueLength) {
   
   return {
     title: embedTitle,
-    color: 0x0099ff,
+    color: video.color ?? EMBED_COLOR,
     description: embedDescription,
     thumbnail: { url: video.thumbnail },
     fields: []
@@ -26,8 +28,8 @@ function formatToEmbed(video, noFields=false, songQueue) {
   }
   
   const embed = {
-  	color: 0x0099ff,
   	title: video.title,
+    color: video.color ?? EMBED_COLOR,
   	url: video.url,
   	description: video.description,
   	thumbnail: { url: video.thumbnail },
@@ -59,7 +61,42 @@ function formatToEmbed(video, noFields=false, songQueue) {
   return [ { embeds: [ embed ] }, embed ];
 }
 
+function createAddPlaylistEmbed(playlist) {
+  const itemCount = `${playlist.data.itemCount} Videos`;
+  const viewCount = `${playlist.data.viewCount} Views`;
+  
+  const embed = {
+    title: playlist.title,
+    color: playlist.color ?? EMBED_COLOR,
+    url: playlist.url,
+    description: playlist.description,
+    thumbnail: { url: playlist.thumbnail },
+    fields: [
+      {
+        name: "Duration",
+        value: durationToString(playlist.duration),
+        inline: true
+      },
+      // a padding to separate more
+      { name: "\u200B", value: "\u200B", inline: true },
+      {
+        name: "Info",
+        value: `[ ${itemCount} - ${viewCount} ]`,
+        inline: true
+      },
+    ],
+    timestamp: new Date(),
+    footer: {
+  		text: `Requested by: ${playlist.requestedBy.username}`,
+  		icon_url: playlist.requestedBy.displayAvatarURL({ dynamic: true }),
+  	},
+  }
+  
+  return [ { embeds: [ embed ] }, embed ];
+}
+
 module.exports = {
+  basicEmbed: basicEmbed,
   formatToEmbed: formatToEmbed,
-  basicEmbed: basicEmbed
+  createAddPlaylistEmbed: createAddPlaylistEmbed
 }

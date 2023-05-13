@@ -43,15 +43,10 @@ async function getRequestSong(param) {
   return response;
 }
 
-async function getDuration(param) {
-  return await request(`${BASE_URL}/getDuration`, param);
-}
-
 module.exports = {
   ping: ping,
   parseSearchString: parseSearchStringFunction,
   request: parseRequest,
   getRequestSong: getRequestSong,
-  getDuration: getDuration,
   createEmptyReadableStream: createEmptyReadableStream
 }

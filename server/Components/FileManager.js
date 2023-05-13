@@ -60,7 +60,7 @@ function File_Manager() {
     append: (video) => {
       const newEntry = this.createDescriptor(video.id, video.container);
       
-      console.log([ ...this.queue ]);
+      console.log("Stuck: ", [ ...this.queue ]);
       
       // create if doesn't exist
       if (!this.modCache.has(video.id)) {
