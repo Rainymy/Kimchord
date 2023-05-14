@@ -42,6 +42,11 @@ async function startDownload(video, GLOBAL_OBJECTS) {
     return { error: true, comment: MAX_HOUR_REACHED };
   }
   
+  if (!video.ext) {
+    const metadata = await fileManager.YT_DLP.getMetadata(video.url);
+    video.ext = metadata.ext;
+  }
+  
   const combined = { ...video, container: video.ext };
   return await waitDownloadStart(fileManager.download, combined);
 }
