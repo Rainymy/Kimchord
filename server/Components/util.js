@@ -47,10 +47,11 @@ function getPathFromShortcutLink(pathLink) {
   }
   
   if (process.platform === "darwin") {
-    throw new Error("Shortcut for MacOS is not supported");
+    console.log(new Error("Shortcut for MacOS is not supported"));
+    return;
   }
   
-  throw new Error("Shortcuts for Unix/Linux is not supported");
+  console.log(new Error("Shortcuts for Unix/Linux is not supported"));
 }
 
 function getFileCount() {

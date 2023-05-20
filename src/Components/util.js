@@ -8,8 +8,8 @@ function validateCommand(command, prefix) {
   return command.startsWith(prefix) && command.length > prefix.length;
 }
 
-function startsAndEndsWith(string) {
-  return string.startsWith(string) && string.endsWith(string);
+function startsAndEndsWith(string, pattern) {
+  return string.startsWith(pattern) && string.endsWith(pattern);
 }
 
 function measureText(str, fontSize = 10) {

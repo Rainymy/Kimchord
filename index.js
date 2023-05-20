@@ -62,8 +62,7 @@ client.on("ready", async (event) => {
   loadServerData();
   
   // remove all servers that left while bot was offline
-  if (!startsAndEndsWith("<^-^>")) {
-  // if (!client.user.username.endsWith("<^-^>")) {
+  if (!startsAndEndsWith(client.user.username, "<^-^>")) {
     const removedServersIDs = await removeAllNotConnectedServer(client);
     
     for (let removedServersID of removedServersIDs) {

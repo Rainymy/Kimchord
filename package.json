@@ -1,13 +1,12 @@
 {
   "name": "Kimchord",
   "author": "Rainymy",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "A simple Discord music bot",
   "main": "index.js",
   "scripts": {
     "live": "node .",
-    "server": "node ./server/index.js",
-    "update": "node ./.update/update.js"
+    "server": "node ./server/index.js"
   },
   "keywords": [],
   "license": "MIT",
