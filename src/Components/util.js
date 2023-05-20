@@ -1,4 +1,5 @@
 "use strict";
+const { Readable } = require('node:stream');
 
 function isObject(objVal) {
   return objVal && typeof objVal === 'object' && objVal.constructor === Object;
@@ -10,6 +11,14 @@ function validateCommand(command, prefix) {
 
 function startsAndEndsWith(string, pattern) {
   return string.startsWith(pattern) && string.endsWith(pattern);
+}
+
+function createEmptyReadableStream() {
+  const emptyStream = new Readable();
+  emptyStream.push("");
+  emptyStream.push(null);
+  
+  return emptyStream;
 }
 
 function measureText(str, fontSize = 10) {
@@ -64,10 +73,6 @@ function durationToString(durationInSeconds = 0) {
 }
 
 function printToTerminal(customText, error) {
-  // if (error.code === Constants.APIErrors.MISSING_ACCESS) {
-  //   return console.log("Kicked from server or MISSING_ACCESS");
-  // }
-  
   if (error.code === 50001) {
     return console.log("Disconnected by a user");
   }
@@ -83,6 +88,7 @@ module.exports = {
   isObject: isObject,
   validateCommand: validateCommand,
   startsAndEndsWith: startsAndEndsWith,
+  createEmptyReadableStream: createEmptyReadableStream,
   measureText: measureText,
   count_performance: count_performance,
   durationToString: durationToString,

@@ -1,6 +1,5 @@
 "use strict";
 const path = require('node:path');
-const EventEmitter = require('node:events');
 
 const logDownload = require('./logDownload.js');
 const {
@@ -42,16 +41,10 @@ function logDownloadAmount(stream, video) {
 function File_Manager() {
   this.queue = new Map();
   this.modQueue = {
-    get: (id) => { return this.queue.get(id); },
+    get:    (id) => { return this.queue.get(id); },
     exists: (id) => { return this.queue.has(id); },
-    append: (id, stream) => {
-      this.events.emit("downloading", stream);
-      return this.queue.set(id, stream);
-    },
-    remove: (id) => {
-      this.events.emit("downloaded", this.modQueue.get(id));
-      return this.queue.delete(id);
-    }
+    append: (id, stream) => { return this.queue.set(id, stream); },
+    remove: (id) => { return this.queue.delete(id); }
   }
   this.cache;
   this.modCache = {
@@ -64,17 +57,13 @@ function File_Manager() {
       
       // create if doesn't exist
       if (!this.modCache.has(video.id)) {
-        this.events.emit("finished", newEntry);
         return this.cache.set(video.id, [ newEntry ]);
       }
       
       // add if other version exist
       const saved = this.modCache.get(video.id);
       const notExists = saved.every((cur) => cur.container !== video.container);
-      if (notExists) {
-        this.events.emit("finished", newEntry);
-        saved.push(newEntry);
-      }
+      if (notExists) { saved.push(newEntry); }
       
       return;
     },
@@ -87,10 +76,6 @@ function File_Manager() {
   }
   
   this.cookies;
-  this.events = new EventEmitter();
-  this.events.on("error", (error) => {
-    return console.log("Error from EventEmitter: ", error);
-  });
   
   this.init = async (baseFolder) => {
     this.baseFolder = baseFolder;
@@ -107,7 +92,10 @@ function File_Manager() {
     if (!this.modCache.has(video.id)) {
       return path.join(this.baseFolder, `./${video.id}.${video.container}`);
     }
-    return path.join(this.baseFolder, `./${this.modCache.get(video.id)[0].file}`);
+    const ext = this.modCache.get(video.id)[0].file;
+    if (typeof ext === "undefined") { console.log("WARNING NO FILE EXTENSION"); }
+    
+    return path.join(this.baseFolder, `./${ext}`);
   }
   
   this.checkFileExists = async (filePath) => await checkFileExists(filePath);

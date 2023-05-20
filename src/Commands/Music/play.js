@@ -2,8 +2,11 @@
 const { PRESETS } = require('../../Components/permissions.js');
 const messageInfo = require('../../Components/messageInfo.js');
 
-const handleRequests = require('../../Components/handleRequests.js');
-
+const {
+  handleRequests,
+  softCloneRequest,
+  modifyRequestBody
+} = require('../../Components/handleRequests.js');
 const {
   formatToEmbed,
   createAddPlaylistEmbed
@@ -23,9 +26,8 @@ async function main(message, basicInfo, searchString, queue) {
     param,, failed
   ] = await handleRequests.parseSearchString(message, searchString);
   
-  if (failed) {
-    return message.channel.send(messageInfo.videoNotFoundOrAvailable);
-  }
+  if (typeof failed === "string") { return message.channel.send(failed); }
+  if (failed) { return message.channel.send(messageInfo.videoNotFoundOrAvailable); }
   
   /*--------------------- Get streamable response -------------------*/
   const requested = await handleRequests.request(param);
@@ -36,15 +38,11 @@ async function main(message, basicInfo, searchString, queue) {
   const songs = requested.type === "playlist" ? requested.playlist : requested;
   
   for (let i = 0; i < songs.length; i++) {
-    let shallowCopy = JSON.parse(JSON.stringify(param));
-    const temp = JSON.parse(shallowCopy.body);
-    temp.videoData = songs[i];
-    shallowCopy.body = JSON.stringify(temp);
-    shallowCopy.isStream = songs[i].isLive ?? false;
+    const newParam = modifyRequestBody(softCloneRequest(param), songs[i]);
     
     songs[i].getStream = async () => {
       const loading = await message.channel.send("Song Loading...");
-      const response = await handleRequests.getRequestSong(shallowCopy);
+      const response = await handleRequests.getRequestSong(newParam);
       loading.delete();
       
       if (response.error) {

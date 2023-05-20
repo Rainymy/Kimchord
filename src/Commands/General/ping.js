@@ -1,5 +1,5 @@
 "use strict";
-const handleRequests = require('../../Components/handleRequests.js');
+const { handleRequests } = require('../../Components/handleRequests.js');
 const { PRESETS } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');

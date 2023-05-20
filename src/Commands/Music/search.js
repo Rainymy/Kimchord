@@ -1,14 +1,18 @@
 "use strict";
-const { formatToEmbed } = require('../../Components/formatToEmbed.js');
-const { parseSearchString } = require('../../Components/parseSearchString.js');
 const { PRESETS } = require('../../Components/permissions.js');
+
+const { formatToEmbed } = require('../../Components/formatToEmbed.js');
+const { handleRequests } = require('../../Components/handleRequests.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
 
 async function searchVideo(message, basicInfo, searchString, queue) {
-  const baseUrl = basicInfo.server.URL;
-  const [, video, failed] = await parseSearchString(message, baseUrl, searchString);
+  const [
+    , video, failed
+  ] = await handleRequests.parseSearchString(message, searchString);
+  
+  if (typeof failed === "string") { return message.channel.send(failed); }
   if (failed) { return message.channel.send(messageInfo.foundNoSearchResults); }
   
   video[0].requestedBy = message.author;

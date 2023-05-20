@@ -1,19 +1,9 @@
 "use strict";
 const request = require('./request.js');
-const { parseSearchString } = require('./parseSearchString.js');
+const { createEmptyReadableStream, isObject } = require('./util.js');
 
 const { server } = require("../../config.json");
-const { Readable } = require('node:stream');
-
 const BASE_URL = `${server.location}:${server.port}`;
-
-function createEmptyReadableStream() {
-  const emptyStream = new Readable();
-  emptyStream.push("");
-  emptyStream.push(null);
-  
-  return emptyStream;
-}
 
 async function ping(sendTime) {
   const options = { method: "GET", headers: { "Content-type": "application/json" } }
@@ -21,8 +11,23 @@ async function ping(sendTime) {
   return await request(`${BASE_URL}/ping?time=${sendTime}`, options);
 }
 
-async function parseSearchStringFunction(message, searchString) {
-  return await parseSearchString(message, BASE_URL, searchString);
+async function parseSearchString(message, searchString) {
+  const [param, request_object] = createRequestParam(message.author, searchString);
+  
+  const response = await request(`${BASE_URL}/parseSearchString`, param);
+  
+  if (response.error) { return [ null, null, response.comment ]; }
+  if (!isObject(response) && !response?.length) { return [ null, null, true ]; }
+  
+  const video = response.type === "playlist" ? response : [ response ];
+  
+  request_object.videoData = video;
+  delete request_object.inputQuery;
+  
+  param.body = JSON.stringify(request_object);
+  return [ param, video, false ];
+  
+  return res;
 }
 
 async function parseRequest(param) {
@@ -43,10 +48,53 @@ async function getRequestSong(param) {
   return response;
 }
 
+async function deleteRequest(param) {
+  const data = await request(`${BASE_URL}/remove`, param);
+  
+  if (!data.error) { return data.comment }
+  if (data.comment.errno === (-4058)) { return data.comment.errno; }
+  
+  return data.comment;
+}
+
+function createRequestParam(author, searchString) {
+  const request_object = {
+    username: author.username,
+    userId: author.id,
+    inputQuery: searchString
+  }
+  
+  const param = {
+    method: "POST",
+    headers: { "Content-type": "application/json" },
+    body: JSON.stringify(request_object)
+  }
+  
+  return [ param, request_object ];
+}
+
+function softCloneRequest(param) {
+  return JSON.parse(JSON.stringify(param));
+}
+
+function modifyRequestBody(oldParam, param) {
+  const temp = JSON.parse(oldParam.body);
+  temp.videoData = param;
+  oldParam.body = temp;
+  oldParam.isStream = param?.isLive ?? false;
+  
+  return oldParam;
+}
+
 module.exports = {
-  ping: ping,
-  parseSearchString: parseSearchStringFunction,
-  request: parseRequest,
-  getRequestSong: getRequestSong,
-  createEmptyReadableStream: createEmptyReadableStream
+  handleRequests: {
+    ping: ping,
+    parseSearchString: parseSearchString,
+    request: parseRequest,
+    getRequestSong: getRequestSong,
+    deleteRequest: deleteRequest
+  },
+  createEmptyReadableStream: createEmptyReadableStream,
+  softCloneRequest: softCloneRequest,
+  modifyRequestBody: modifyRequestBody
 }

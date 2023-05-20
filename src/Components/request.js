@@ -19,7 +19,10 @@ function isValidPassthrough(headers) {
 
 function got_request(urlPath, params) {
   const requestBody = params?.body ?? '{ "method": "get" }';
-  const request_data = { json: JSON.parse(requestBody), ...params }
+  const request_data = {
+    json: (typeof requestBody === "string") ? JSON.parse(requestBody) : requestBody,
+    ...params
+  }
   
   if (request_data.method.toLowerCase() === "get") { delete request_data.json; }
   delete request_data.body;
