@@ -21,7 +21,7 @@
     "get-video-duration": "^4.1.0",
     "got": "^12.6.0",
     "helmet": "^6.2.0",
-    "puppeteer": "^20.1.2",
+    "puppeteer": "^20.2.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "sodium-native": "^3.4.1",
