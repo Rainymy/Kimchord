@@ -74,11 +74,10 @@ function YTDlp() {
       
       if (correctDateFormat) {
         this.version = fileName;
-        return fileName;
       }
     }
     
-    return null;
+    return this.version;
   }
   this.getPlatformExecutable = () => {
     const opsys = process.platform;

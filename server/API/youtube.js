@@ -1,7 +1,7 @@
 "use strict";
 const https = require('node:https');
 
-const ytsr = require('alternative-ytsr');
+const ytsr = require('ytsr');
 const ytpl = require('ytpl');
 const { getVideoDurationInSeconds } = require("get-video-duration");
 
