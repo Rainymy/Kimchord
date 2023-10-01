@@ -1,33 +1,31 @@
 "use strict";
 const request = require('./request.js');
-const { createEmptyReadableStream, isObject } = require('./util.js');
+const { createEmptyReadableStream, isObject } = require('../util/util.js');
 
-const { server } = require("../../config.json");
+const { server } = require("../../../config.json");
 const BASE_URL = `${server.location}:${server.port}`;
 
 async function ping(sendTime) {
   const options = { method: "GET", headers: { "Content-type": "application/json" } }
-  
+
   return await request(`${BASE_URL}/ping?time=${sendTime}`, options);
 }
 
 async function parseSearchString(message, searchString) {
   const [param, request_object] = createRequestParam(message.author, searchString);
-  
+
   const response = await request(`${BASE_URL}/parseSearchString`, param);
-  
+
   if (response.error) { return [ null, null, response.comment ]; }
   if (!isObject(response) && !response?.length) { return [ null, null, true ]; }
-  
+
   const video = response.type === "playlist" ? response : [ response ];
-  
+
   request_object.videoData = video;
   delete request_object.inputQuery;
-  
+
   param.body = JSON.stringify(request_object);
   return [ param, video, false ];
-  
-  return res;
 }
 
 async function parseRequest(param) {
@@ -36,7 +34,7 @@ async function parseRequest(param) {
 
 async function getRequestSong(param) {
   const response = await request(`${BASE_URL}/songs`, param);
-  
+
   if (response.error) {
     return {
       error: true,
@@ -44,16 +42,16 @@ async function getRequestSong(param) {
       emptyReadableStream: createEmptyReadableStream()
     }
   }
-  
+
   return response;
 }
 
 async function deleteRequest(param) {
   const data = await request(`${BASE_URL}/remove`, param);
-  
+
   if (!data.error) { return data.comment }
   if (data.comment.errno === (-4058)) { return data.comment.errno; }
-  
+
   return data.comment;
 }
 
@@ -63,13 +61,13 @@ function createRequestParam(author, searchString) {
     userId: author.id,
     inputQuery: searchString
   }
-  
+
   const param = {
     method: "POST",
     headers: { "Content-type": "application/json" },
     body: JSON.stringify(request_object)
   }
-  
+
   return [ param, request_object ];
 }
 
@@ -82,7 +80,7 @@ function modifyRequestBody(oldParam, param) {
   temp.videoData = param;
   oldParam.body = temp;
   oldParam.isStream = param?.isLive ?? false;
-  
+
   return oldParam;
 }
 

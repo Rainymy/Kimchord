@@ -7,7 +7,7 @@ async function play(guild_id, song, queue) {
   if (!song) { return; }
   
   const player = serverQueue.audioPlayer;
-  song.time.start = Date.now();
+  song.time.start = song.time.last_current ?? Date.now();
   
   const stream = await song.getStream();
   

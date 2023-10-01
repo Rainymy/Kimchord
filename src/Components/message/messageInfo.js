@@ -1,5 +1,5 @@
 "use strict";
-const { codeBlock } = require('./markup.js');
+const { codeBlock } = require('../embed/markup.js');
 
 const messageInfos = {
   notInVoiceChannel: "I'm sorry but you need to be in a voice channel to play music!",

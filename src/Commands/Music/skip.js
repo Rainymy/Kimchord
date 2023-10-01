@@ -1,16 +1,16 @@
 "use strict";
-const { PRESETS } = require('../../Components/permissions.js');
+const { PRESETS } = require('../../Components/permission/permissions.js');
 
-const messageInfo = require('../../Components/messageInfo.js');
-const { codeBlock } = require('../../Components/markup.js');
+const messageInfo = require('../../Components/message/messageInfo.js');
+const { codeBlock } = require('../../Components/embed/markup.js');
 
 function skip(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
-  
+
   if (!serverQueue || !serverQueue?.songs.length) {
     return message.channel.send(messageInfo.queueIsEmpty);
   }
-  
+
   serverQueue.audioPlayer.stop();
   return message.channel.send(messageInfo.skippingSong);
 }

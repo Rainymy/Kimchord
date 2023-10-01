@@ -39,21 +39,21 @@ function logDownloadAmount(stream, video) {
 }
 
 function File_Manager() {
-  this.queue = new Map();
+  this.queue = new Map(); // currently downloading
   this.modQueue = {
     get:    (id) => { return this.queue.get(id); },
     exists: (id) => { return this.queue.has(id); },
     append: (id, stream) => { return this.queue.set(id, stream); },
     remove: (id) => { return this.queue.delete(id); }
   }
-  this.cache;
+  this.cache; // parse folder files
   this.modCache = {
     get: (id) => { return this.cache.get(id); },
     has: (id) => { return this.cache.has(id); },
     append: (video) => {
       const newEntry = this.createDescriptor(video.id, video.container);
       
-      console.log("Stuck: ", [ ...this.queue ]);
+      console.log("Stuck: ", [ ...this.queue ]); // <debugging purpose>
       
       // create if doesn't exist
       if (!this.modCache.has(video.id)) {
@@ -88,6 +88,8 @@ function File_Manager() {
     return this;
   }
   
+  this.getFileInfoById = (id) => this.modCache.get(id);
+  
   this.saveLocation = (video) => {
     if (!this.modCache.has(video.id)) {
       return path.join(this.baseFolder, `./${video.id}.${video.container}`);
@@ -104,11 +106,11 @@ function File_Manager() {
     return { name: name, file: `${name}.${container}`, container: container }
   }
   
+  this.readFile = async (filePath) => {
+    return await makeReadStream(filePath);
+  }
   this.read = async (video) => {
-    const filePath = this.saveLocation(video);
-    const stream = await makeReadStream(filePath);
-    
-    return stream;
+    return await makeReadStream(this.saveLocation(video));
   }
   
   this.delete = async (video) => {

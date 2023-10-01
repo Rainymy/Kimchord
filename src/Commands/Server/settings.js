@@ -1,24 +1,25 @@
-const messageInfo = require('../../Components/messageInfo.js');
-const { codeBlock } = require('../../Components/markup.js');
-const { saveServerData } = require('../../Components/serverData.js');
+"use strict";
+const messageInfo = require('../../Components/message/messageInfo.js');
+const { codeBlock } = require('../../Components/embed/markup.js');
+const { saveServerData } = require('../../Components/startup/serverData.js');
 const {
   PRESETS,
   validateUserPermissions
-} = require('../../Components/permissions.js');
+} = require('../../Components/permission/permissions.js');
 
 function helpText(serverPrefix, settingsName) {
   if (settingsName === "prefix") {
     return `${serverPrefix}settings ${settingsName} <PREFIX>`
   }
-  
+
   if (settingsName === "required_music_role_name") {
     return `${serverPrefix}settings ${settingsName} <ROLE NAME>`
   }
-  
+
   if (settingsName === "require_music_role") {
     return `${serverPrefix}settings ${settingsName} <True|False>`
   }
-  
+
   return `${serverPrefix}settings <SETTINGS NAME> <VALUE>`;
 }
 
@@ -27,11 +28,11 @@ async function settings(message, basicInfo, arg, queue) {
   const availableSettings = [
     "prefix", "required_music_role_name", "require_music_role"
   ];
-  
+
   for (let [ index, setting ] of availableSettings.entries()) {
     batch.push(`╠ ${index + 1}. ${setting}`);
   }
-  
+
   if (!arg) {
     return message.channel.send(
       codeBlock(
@@ -40,14 +41,14 @@ async function settings(message, basicInfo, arg, queue) {
       )
     );
   }
-  
+
   const hasPermission = validateUserPermissions(message.member, PRESETS.server_mods);
   if (hasPermission.error) { return message.channel.send(hasPermission.comment); }
-  
+
   const args = arg.trim().split(" ");
   const settingsName = args.shift().toLowerCase().trim();
   const searchString = args.join(" ").trim();
-  
+
   if (settingsName === "prefix") {
     if (!searchString) {
       return message.channel.send(
@@ -60,17 +61,17 @@ async function settings(message, basicInfo, arg, queue) {
         )
       );
     }
-    
+
     const data = basicInfo.guilds_settings;
     data.prefix = searchString;
-    
+
     await saveServerData(message.guild.id, data);
-    
+
     return message.channel.send(
       codeBlock(`Server prefix changed to: ${searchString}`)
     );
   }
-  
+
   if (settingsName === "required_music_role_name") {
     if (!searchString) {
       return message.channel.send(
@@ -83,7 +84,7 @@ async function settings(message, basicInfo, arg, queue) {
         )
       );
     }
-    
+
     if (searchString === basicInfo.guilds_settings.REQUIRED_MUSIC_ROLE_NAME) {
       return message.channel.send(
         codeBlock(
@@ -91,17 +92,17 @@ async function settings(message, basicInfo, arg, queue) {
         )
       );
     }
-    
+
     const data = basicInfo.guilds_settings;
     data["required_music_role_name".toUpperCase()] = searchString;
-    
+
     await saveServerData(message.guild.id, data);
-    
+
     return message.channel.send(
       codeBlock(`Required_music_role_name changed to: ${searchString}`)
     );
   }
-  
+
   if (settingsName === "require_music_role") {
     if (!searchString) {
       return message.channel.send(
@@ -114,7 +115,7 @@ async function settings(message, basicInfo, arg, queue) {
         )
       );
     }
-    
+
     let trueOrFalse;
     if (searchString === "true") { trueOrFalse = true; }
     if (searchString === "false") { trueOrFalse = false; }
@@ -123,7 +124,7 @@ async function settings(message, basicInfo, arg, queue) {
         codeBlock(helpText(basicInfo.prefix, settingsName), "py")
       );
     }
-    
+
     if (trueOrFalse === basicInfo.guilds_settings.REQUIRE_MUSIC_ROLE) {
       return message.channel.send(
         codeBlock(
@@ -131,21 +132,21 @@ async function settings(message, basicInfo, arg, queue) {
         )
       );
     }
-    
+
     const data = basicInfo.guilds_settings;
     data["require_music_role".toUpperCase()] = trueOrFalse;
-    
+
     await saveServerData(message.guild.id, data);
-    
+
     return message.channel.send(
       codeBlock(`Required_music_role_name changed to: ${searchString}`)
     );
   }
-  
+
   return message.channel.send(
     codeBlock(
       [ helpText(basicInfo.prefix), `${batch.join("\n")}` ].join("\n"),
-      "scala" 
+      "scala"
     )
   );
 }

@@ -1,14 +1,14 @@
 "use strict";
-const { PRESETS } = require('../../Components/permissions.js');
+const { PRESETS } = require('../../Components/permission/permissions.js');
 
-const messageInfo = require('../../Components/messageInfo.js');
-const { codeBlock } = require('../../Components/markup.js');
+const messageInfo = require('../../Components/message/messageInfo.js');
+const { codeBlock } = require('../../Components/embed/markup.js');
 
 function leave(message, basicInfo, arg, queue) {
   const serverQueue = queue.get(message.guild.id);
-  
+
   if (!serverQueue) { return message.channel.send(messageInfo.queueIsEmpty); }
-  
+
   serverQueue.songs.length = 0;
   serverQueue.audioPlayer.stop();
   clearTimeout(serverQueue.timeout.id);

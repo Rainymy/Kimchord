@@ -1,6 +1,11 @@
 "use strict";
+const path = require('node:path');
+
 const { PRESETS } = require('../Components/permission.js');
 const startDownload = require('../Components/download.js');
+const { getSaveLocation, getTempLocation } = require('../Components/util.js');
+
+const Fastforward = require('kimchord-fastforward');
 
 async function songsStream(req, res, GLOBAL_OBJECTS) {
   const { videoData } = req.body;
@@ -14,7 +19,7 @@ async function songsStream(req, res, GLOBAL_OBJECTS) {
   }
   
   if (!videoData.isFile) {
-    console.log("Video Meta: ", videoData);
+    console.log("[isFile] Video Meta: ", videoData);
     const data = await startDownload(videoData, GLOBAL_OBJECTS);
     
     if (data?.error) {
@@ -27,6 +32,60 @@ async function songsStream(req, res, GLOBAL_OBJECTS) {
     
     const queue = fileManager.modQueue.get(videoData.id);
     return queue.stream.pipe(res);
+  }
+  
+  if (videoData.streamModification.isSkipping) {
+    const fast = new Fastforward();
+    
+    const skipToTime = Math.floor(videoData.streamModification.skip);
+    if (videoData.duration <= skipToTime) {
+      return res.send({
+        error: true, comment: "audio duration is short than skip time"
+      });
+    }
+    
+    let skipTime;
+    if (videoData.streamModification.isSkipRelative) {
+      skipTime = Math.floor((Date.now() - videoData.time.start) / 1000);
+    }
+    else {
+      skipTime = skipToTime;
+    }
+    
+    fast.setSkipTo(skipTime);
+    
+    const fileInfo = fileManager.getFileInfoById(videoData.id)[0];
+    
+    const outputFile = `${fileInfo.name}-${skipTime}.mp3`;
+    fast.setFileName(`${fileInfo.file}`);
+    fast.setOutFileName(outputFile);
+    
+    fast.setInputFolder(getSaveLocation());
+    fast.setOutputFolder(getTempLocation());
+    
+    fast.setDefaultConfig();
+    
+    console.log("-------------------------".repeat(2));
+    const fast_res = await fast.run();
+    console.log("-------------------------".repeat(2));
+    console.log(fast_res);
+    console.log("-------------------------".repeat(2));
+    
+    const readOutputFile = path.join(getTempLocation(), outputFile);
+    const streamFile = await fileManager.readFile(readOutputFile);
+    
+    if (streamFile.error) {
+      return res.send({ error: true, comment: streamFile.comment });
+    }
+    
+    if (typeof streamFile.read === "function") {
+      return streamFile.pipe(res);
+    }
+    
+    res.set('content-type', 'audio/mp4');
+    res.send(streamFile);
+    
+    return;
   }
   
   const streamFile = await fileManager.read(videoData);

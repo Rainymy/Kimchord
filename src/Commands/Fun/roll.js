@@ -1,5 +1,5 @@
 "use strict";
-const { PRESETS } = require('../../Components/permissions.js');
+const { PRESETS } = require('../../Components/permission/permissions.js');
 
 function roll(message, basicInfo, arg, queue) {
   const randomNumber = Math.floor(Math.random() * 100) + 1;

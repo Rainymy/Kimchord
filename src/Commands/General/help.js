@@ -2,8 +2,8 @@
 const path = require('node:path');
 const { readdirSync } = require('node:fs');
 
-const { PRESETS } = require('../../Components/permissions.js');
-const { createDropdown } = require('../../Components/discordComponents.js');
+const { PRESETS } = require('../../Components/permission/permissions.js');
+const { createDropdown } = require('../../Components/embed/discordComponents.js');
 
 const categories = {};
 
@@ -22,7 +22,7 @@ function createEmbed(selected_id, message) {
     name: "\u200B",
     value: "Select category from dropdown below."
   }
-  
+
   return {
     color: 0x0099ff,
     title: selected_id ? categories[selected_id].label : "Help Center",
@@ -31,7 +31,7 @@ function createEmbed(selected_id, message) {
       ...(selected_id ? [] : [placeholder])
     ],
     footer: {
-      text: message.author.username,
+      text: message.author.globalName,
       icon_url: message.author.displayAvatarURL({ dynamic: true }),
     },
   }
@@ -43,19 +43,19 @@ function makeEmbed(newEmbed, options) {
 
 async function help(message, basicInfo, arg, commands) {
   const embed = createEmbed(undefined, message);
-  
+
   const options = [];
   for (let category in categories) { options.push(categories[category]); }
-  
+
   const sentMessage = await message.channel.send(makeEmbed(embed, options));
-  
+
   const collector = sentMessage.createMessageComponentCollector({
     time: 5 * 60 * 1000
   });
-  
+
   collector.on("collect", async interaction => {
     const newEmbed = createEmbed(interaction.values[0], message);
-  
+
     let index = 1;
     let valueText;
     for (let command in commands) {
@@ -68,16 +68,16 @@ async function help(message, basicInfo, arg, commands) {
         });
       }
     }
-  
+
     for (let option of options) {
       option.default = option.value === interaction.values[0];
     }
-  
+
     interaction.update(makeEmbed(newEmbed, options));
   });
-  
+
   collector.on('end', async collected => {
-    try { await sentMessage.edit("Time out"); } 
+    try { await sentMessage.edit("Time out"); }
     catch (e) { console.log("Message deleted before collector timeout."); }
   });
 }

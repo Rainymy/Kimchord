@@ -1,5 +1,6 @@
 {
   "saveFolder": "../Songs",
+  "tempFolder": "../temp-fastforward",
   "plugins": {
     "YTDLP": {
       "path": "./plugins/yt_dlp/",

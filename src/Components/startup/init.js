@@ -9,29 +9,29 @@ const firstRun = {
 }
 
 const essentialFolders = {
-  playlistFolder: "../playlistFolder",
-  guilds_settings: "../guilds_settings"
+  playlistFolder: "../../playlistFolder",
+  guilds_settings: "../../guilds_settings"
 };
 
 function handleFile(filePath) {
   const commandFunction = require(filePath);
   const commmand = [];
-  
+
   if (Array.isArray(commandFunction.aliases)) {
     for (let alias of commandFunction.aliases) { commmand.push(commandFunction); }
     return commmand;
   }
-  
+
   commmand.push(commandFunction);
   return commmand;
 }
 
 function handleAppend(command, location, insideFolder) {
   if (path.extname(location) !== ".js") { return; }
-  
+
   const listOfCommands = handleFile(location);
   if (insideFolder) {for (let wow of listOfCommands) {wow.category = insideFolder;}}
-  
+
   for (let [ i, times ] of listOfCommands.entries()) {
     if (Array.isArray(times.aliases)) {
       command[times.aliases[i]] = times;
@@ -39,7 +39,7 @@ function handleAppend(command, location, insideFolder) {
     }
     command[times.aliases] = times;
   }
-  
+
   return listOfCommands[0];
 }
 
@@ -49,13 +49,13 @@ function getFirstOrString(aliases) {
 
 function commands() {
   if (firstRun.hasCachedCommands) { return firstRun.cachedCommands; }
-  
-  const commandPath = path.join(__dirname, "../Commands");
-  
+
+  const commandPath = path.join(__dirname, "../../Commands");
+
   const commmand = {};
   const status = {};
   let stat;
-  
+
   for (let [ index, file ] of fs.readdirSync(commandPath).entries()) {
     let relPath = path.join(commandPath, file);
     if (fs.statSync(relPath).isFile()) {
@@ -71,7 +71,7 @@ function commands() {
       delete status[ getFirstOrString(stat.aliases) ].permissions;
     }
   }
-  
+
   firstRun.hasCachedCommands = true;
   firstRun.cachedCommands = [ commmand, status ];
   return firstRun.cachedCommands;
@@ -81,15 +81,15 @@ function Start() {
   this.commands = commands;
   this.init = () => {
     if (firstRun.hasInited) { return this; }
-    
+
     for (let folder of Object.values(essentialFolders)) {
       const pathToFolder = path.join(__dirname, folder);
-      
+
       if (fs.existsSync(pathToFolder)) { continue; };
       const dirPath = fs.mkdirSync(pathToFolder, { recursive: true });
       console.log(dirPath, 'directory created successfully!');
     }
-    
+
     firstRun.hasInited = true;
     return this;
   }

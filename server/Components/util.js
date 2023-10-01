@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { execSync } = require('node:child_process');
 
-const { saveFolder, plugins } = require('../config.json');
+const { saveFolder, tempFolder, plugins } = require('../config.json');
 
 let initialized = false;
 
@@ -12,7 +12,8 @@ function init() {
   
   const essentialFolders = [
     getSaveLocation(),
-    ...Object.values(plugins).map(v => path.join(__dirname, "../", v.path)),
+    getTempLocation(),
+    ...getPluginLocation(plugins),
   ];
   for (let folder of essentialFolders) {
     if (fs.existsSync(folder)) { continue; }
@@ -79,10 +80,17 @@ function getFileCount() {
   }
 }
 
-function getSaveLocation() {
+function getPluginLocation() {
+  return Object.values(plugins).map(v => path.join(__dirname, "../", v.path));
+}
+
+function getSaveLocation() { return getLocation(saveFolder); }
+function getTempLocation() { return getLocation(tempFolder); }
+
+function getLocation(locationPath) {
   const isNotValidExt = (ext) => { return !!ext || ext === ".lnk" };
   
-  const savePath = path.normalize(path.resolve(__dirname, saveFolder));
+  const savePath = path.normalize(path.resolve(__dirname, locationPath));
   
   try { fs.statSync(savePath).isDirectory(); }
   catch (e) {
@@ -141,5 +149,6 @@ module.exports = {
   init: init,
   getFileCount: getFileCount,
   getSaveLocation: getSaveLocation,
+  getTempLocation: getTempLocation,
   validQueries: validQueries
 }
