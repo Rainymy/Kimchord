@@ -1,4 +1,4 @@
-const { durationToString } = require('./util.js');
+const { durationToString } = require('./timeUtil.js');
 
 function progressBar(lineLength, progressPercent, indicator="🔥", line="-") {
   let progressText = "".padStart(lineLength, line).split("");

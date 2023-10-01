@@ -38,9 +38,9 @@ async function main(message, basicInfo, searchString, queue) {
   const songs = requested.type === "playlist" ? requested.playlist : requested;
   
   for (let i = 0; i < songs.length; i++) {
-    const newParam = modifyRequestBody(softCloneRequest(param), songs[i]);
-    
-    songs[i].getStream = async () => {
+    songs[i].getStream = async function () {
+      const newParam = modifyRequestBody(softCloneRequest(param), this);
+      
       const loading = await message.channel.send("Song Loading...");
       const response = await handleRequests.getRequestSong(newParam);
       loading.delete();
@@ -53,7 +53,7 @@ async function main(message, basicInfo, searchString, queue) {
       return response;
     }
     
-    songs[i].requestDelete = async () => {
+    songs[i].requestDelete = async function () {
       console.log("requested for delete");
     }
   }

@@ -26,8 +26,6 @@ async function parseSearchString(message, searchString) {
   
   param.body = JSON.stringify(request_object);
   return [ param, video, false ];
-  
-  return res;
 }
 
 async function parseRequest(param) {

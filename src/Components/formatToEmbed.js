@@ -1,5 +1,5 @@
 "use strict";
-const { durationToString } = require('./util.js');
+const { durationToString } = require('./timeUtil.js');
 const { codeBlock } = require('./markup.js');
 const EMBED_COLOR = 0x0099ff;
 
@@ -21,6 +21,20 @@ function basicEmbed(video, queueLength) {
   }
 }
 
+function createAvatarEmbed(message, target) {
+  if (!target) { target = message; }
+  
+  return {
+    color: EMBED_COLOR,
+    title: `${target.globalName}'s Avatar`,
+    image: { url: target.displayAvatarURL({ dynamic: true, size: 1024 }) },
+    footer: {
+      text: `Requested by: ${message.globalName}`,
+      icon_url: `${message.displayAvatarURL({ dynamic: true })}`
+    }
+  }
+}
+
 function formatToEmbed(video, noFields=false, songQueue) {
   if (!video) {
     console.trace(`Video value is: ${video}`);
@@ -36,7 +50,7 @@ function formatToEmbed(video, noFields=false, songQueue) {
     fields: [],
   	timestamp: new Date(),
   	footer: {
-  		text: `Requested by: ${video.requestedBy.username}`,
+  		text: `Requested by: ${video.requestedBy.globalName}`,
   		icon_url: video.requestedBy.displayAvatarURL({ dynamic: true }),
   	},
   }
@@ -87,7 +101,7 @@ function createAddPlaylistEmbed(playlist) {
     ],
     timestamp: new Date(),
     footer: {
-  		text: `Requested by: ${playlist.requestedBy.username}`,
+  		text: `Requested by: ${playlist.requestedBy.globalName}`,
   		icon_url: playlist.requestedBy.displayAvatarURL({ dynamic: true }),
   	},
   }
@@ -97,6 +111,7 @@ function createAddPlaylistEmbed(playlist) {
 
 module.exports = {
   basicEmbed: basicEmbed,
+  createAvatarEmbed: createAvatarEmbed,
   formatToEmbed: formatToEmbed,
   createAddPlaylistEmbed: createAddPlaylistEmbed
 }

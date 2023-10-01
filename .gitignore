@@ -9,6 +9,7 @@ yarn-error.log*
 node_modules_old
 /server/cookies_old.json
 /server/config_push.json
+/server/temp-fastforward
 /config_push.json
 
 # Custom ignore

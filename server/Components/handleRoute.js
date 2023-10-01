@@ -47,7 +47,10 @@ function loadAllRoutes(server, routes, GLOBAL_OBJECTS) {
       console.log({ error, comment }, route.route);
       if (error) { return res.send({ error: error, comment: comment }); }
       
-      return await main(req, res, GLOBAL_OBJECTS);
+      try { await main(req, res, GLOBAL_OBJECTS); }
+      catch (e) { res.send({ error: true, comment: "INTERNAL ERROR" }) }
+      
+      return;
     });
   }
   

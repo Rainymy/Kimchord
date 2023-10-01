@@ -1,5 +1,5 @@
 "use strict";
-const { durationToString } = require('./util.js');
+const { durationToString } = require('./timeUtil.js');
 const { basicEmbed } = require('./formatToEmbed.js');
 const {
   ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder

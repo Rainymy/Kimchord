@@ -20,10 +20,15 @@ function handleVideo(args) {
     requestedBy: guild.author,
     time: {
       requestedAt: Date.now(),
+      last_current: null,
       start: null,
       pause: null
     },
-    stream: video.stream,
+    streamModification: {
+      isSkipping: false,
+      isSkipRelative: null,
+      skip: 0
+    },
     getStream: null,
     requestDelete: null,
     ...video

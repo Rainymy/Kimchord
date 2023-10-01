@@ -3,20 +3,7 @@ const { PRESETS } = require('../../Components/permissions.js');
 
 const messageInfo = require('../../Components/messageInfo.js');
 const { codeBlock } = require('../../Components/markup.js');
-
-function createAvatarEmbed(message, target) {
-  if (!target) { target = message; }
-  
-  return {
-    color: 0x0099ff,
-    title: `${target.username}'s Avatar`,
-    image: { url: target.displayAvatarURL({ dynamic: true, size: 1024 }) },
-    footer: {
-      text: `Requested by: ${message.username}`,
-      icon_url: `${message.displayAvatarURL({ dynamic: true })}`
-    }
-  }
-}
+const { createAvatarEmbed } = require('../../Components/formatToEmbed.js');
 
 async function avatar(message, basicInfo, arg, queue, client) {
   const targetMember = message.mentions.members.first();
@@ -39,7 +26,9 @@ async function avatar(message, basicInfo, arg, queue, client) {
   
   if (arg) {
     return message.channel.send(
-      codeBlock("User not Found - use mention (@user) for accurate search", "java")
+      codeBlock(
+        "User not Found - use mention (@user) for accurate search", "java"
+      )
     );
   }
   

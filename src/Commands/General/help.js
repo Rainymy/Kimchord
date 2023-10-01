@@ -31,7 +31,7 @@ function createEmbed(selected_id, message) {
       ...(selected_id ? [] : [placeholder])
     ],
     footer: {
-      text: message.author.username,
+      text: message.author.globalName,
       icon_url: message.author.displayAvatarURL({ dynamic: true }),
     },
   }
