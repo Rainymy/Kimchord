@@ -1,5 +1,4 @@
 "use strict";
-const { server } = require('../../config.json');
 const path = require('node:path');
 
 const helmet = require('helmet');
@@ -7,16 +6,16 @@ const express = require('express');
 
 const cookieParser = require('cookie-parser');
 
-function setMiddlewares(app) {
+function setMiddlewares(app, serverConfig) {
   app.use(cookieParser());
-  
+
   app.use(helmet.contentSecurityPolicy({
     directives: {
       "script-src": [
         "'self'",
         "'unsafe-inline'",
         "'unsafe-eval'",
-        `${server.location}:${server.port}`,
+        `${serverConfig.location}:${serverConfig.port}`,
         "https://cdn.skypack.dev",
         "https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"
       ]
@@ -35,10 +34,10 @@ function setMiddlewares(app) {
   app.use(helmet.permittedCrossDomainPolicies());
   app.use(helmet.referrerPolicy());
   app.use(helmet.xssFilter());
-  
+
   app.use(express.static(path.join(__dirname, "../")));
   app.use(express.json());
-  
+
   return app;
 }
 

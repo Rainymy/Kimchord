@@ -1,6 +1,6 @@
 "use strict";
 const cookiefile = require('cookiefile');
-const { makeWriteStream } = require('./handleFile.js');
+const { makeWriteStream } = require('../fs/handleFile.js');
 
 const part1 = "ytd-button-renderer.ytd-consent-bump-v2-lightbox:nth-child(2)";
 const part2 = " > yt-button-shape:nth-child(1) > button:nth-child(1)";
@@ -16,7 +16,7 @@ function waitUntilToken(page) {
   return new Promise(function(resolve, reject) {
     page.on('request', interceptedRequest => {
       const headers = interceptedRequest.headers();
-      
+
       if (!headers["x-youtube-identity-token"]) { return; }
       resolve(headers["x-youtube-identity-token"]);
     });
@@ -25,19 +25,19 @@ function waitUntilToken(page) {
 
 function parseToNetscape(cookieJSON) {
   let netscapeCookie = "# Netscape HTTP Cookie File\n\n";
-  
+
   const shallowCopy = JSON.parse(JSON.stringify(cookieJSON));
-  
+
   for (let sites of shallowCopy) {
     sites.httpOnly = false;
-    
+
     const cookie = new cookiefile.Cookie(sites);
     const copy = cookie.toString().split("\t")
     copy[1] = "TRUE";
-    
+
     netscapeCookie += copy.join("\t");
   }
-  
+
   return netscapeCookie;
 }
 
@@ -48,28 +48,28 @@ async function authenticate(page, email, password) {
 
   await page.type("#identifierId", email);
   await page.click("#identifierNext");
-  
+
   await page.waitForSelector("#password", { visible: true, hidden: false, });
-  
+
   await page.type(
     "#password > div.aCsJod.oJeWuf > div > div.Xb9hP > input", password
   );
-  
+
   await sleep(1000);
   await page.click("#passwordNext > div > button");
-  
+
   await sleep(1000);
   await page.goto("https://www.youtube.com/", { waitUntil: "networkidle2", });
-  
+
   return page;
 }
 
 function writeFile(filePath, data) {
   return new Promise(async function(resolve, reject) {
     const stream = await makeWriteStream(filePath);
-    
+
     stream.on("finish", resolve);
-    
+
     stream.write(data);
     stream.end();
   });
@@ -98,7 +98,7 @@ async function isLoggedIn(page) {
 async function generateMovement(page) {
   const row = "ytd-rich-grid-row.style-scope:nth-child(2) > div:nth-child(1)";
   const childRow = await page.$$(`${row} > :nth-of-type(n)`);
-  
+
   for await (let child of childRow) {
     if (page.isClosed()) { break; }
     await child.hover();

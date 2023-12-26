@@ -1,22 +1,22 @@
 "use strict";
 const { server } = require('../config.json');
 
-const connectionWS = require('./Websocket/connection.js');
-const createServerWS = require('./Websocket/createServer.js');
-const closeConnectionWS = require('./Websocket/close.js');
+const connectionWS = require('./Web/Websocket/connection.js');
+const createServerWS = require('./Web/Websocket/createServer.js');
+const closeConnectionWS = require('./Web/Websocket/close.js');
 
 const chalk = require('chalk');
 const express = require('express');
 const app = express().disable("x-powered-by");
-const setMiddlewares = require('./Components/setMiddlewares.js');
-setMiddlewares(app);
+const setMiddlewares = require('./Web/Component/setMiddlewares.js');
+setMiddlewares(app, server);
 
-const { getAllRoute, loadAllRoutes } = require('./Components/handleRoute.js');
-const { getSaveLocation, getFileCount } = require('./Components/util.js');
+const { getAllRoute, loadAllRoutes } = require('./Component/startup/handleRoute.js');
+const { getSaveLocation, getFileCount } = require('./Component/util/util.js');
 const baseFolder = getSaveLocation();
 
 const Youtube = require('./API/youtube.js');
-const File_Manager = require('./Components/FileManager.js');
+const File_Manager = require('./Component/fs/FileManager.js');
 const fileManager = new File_Manager();
 
 const GLOBAL_OBJECTS = {
@@ -35,7 +35,7 @@ async function onServerStart() {
   console.log("╚ Load song count  :", getFileCount());
   console.log("------------------------------------------------------");
   GLOBAL_OBJECTS.fileManager = await fileManager.init(baseFolder);
-  
+
   const listenURL = `${server.location}:${server.port}`;
   const webURL = `${listenURL}/dashboard`;
   console.log("------------------------------------------------------");

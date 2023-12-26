@@ -1,9 +1,9 @@
 "use strict";
-const { PRESETS } = require('../Components/permission.js');
+const { PRESETS } = require('../Component/util/permission.js');
 
 async function getSongDurationOrDelete(video, filePath, GLOBAL_OBJECTS) {
   const { fileManager, youtube } = GLOBAL_OBJECTS;
-  
+
   try { return await youtube.getVideoDurationInSeconds(filePath); }
   catch (e) {
     const err = fileManager.delete(video);
@@ -15,13 +15,13 @@ async function getSongDurationOrDelete(video, filePath, GLOBAL_OBJECTS) {
 async function request(req, res, GLOBAL_OBJECTS) {
   const { videoData } = req.body;
   const { fileManager } = GLOBAL_OBJECTS;
-  
+
   const songList = videoData.type === "playlist" ? videoData.playlist : videoData;
-  
+
   for (let item of songList) {
     const filePath = fileManager.saveLocation(item);
     item.isFile = await fileManager.checkFileExists(filePath);
-    
+
     if (item.isLive) { continue; }
     if (item.isFile) {
       item.duration = await getSongDurationOrDelete(item, filePath, GLOBAL_OBJECTS);
@@ -33,7 +33,7 @@ async function request(req, res, GLOBAL_OBJECTS) {
       item.duration = meta.duration;
     }
   }
-  
+
   return res.send(videoData);
 }
 

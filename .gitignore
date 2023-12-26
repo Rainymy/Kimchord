@@ -10,9 +10,10 @@ node_modules_old
 /server/cookies_old.json
 /server/config_push.json
 /server/temp-fastforward
+/server/Songs
 /config_push.json
 
-# Custom ignore
+# Production Custom ignore
 TODOs.txt
 /config.json
 .update/NEW_UPDATE

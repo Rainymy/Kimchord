@@ -2,36 +2,36 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { login } = require('./puppy.js');
-const { email, password } = require('../config.json');
+const { email, password } = require('../../config.json');
 
 function Cookies() {
   this.cookiesPath = path.join(__dirname, "../cookies.json");
   this.netscapeCookiePath = path.join(__dirname, "../netscapeCookie.txt");
-  
+
   this.exists = () => { return fs.existsSync(this.cookiesPath); }
-  
+
   this.login = () => {
     return new Promise((resolve, reject) => {
       const cookiePaths = {
         json: this.cookiesPath,
         netscape: this.netscapeCookiePath
       }
-      
+
       return login(email, password, cookiePaths).then(resolve).catch(reject);
     });
   }
-  
+
   this.load = () => {
     try { return JSON.parse(fs.readFileSync(this.cookiesPath)); }
     catch (e) { return console.log(e); }
   }
-  
+
   this.get = async () => {
     console.log("------------------------------------------------------");
     console.log("Checking Cookies...");
-    
+
     let cookie;
-    
+
     try {
       if (this.exists()) {
         console.log("loading Cookies...");
@@ -40,7 +40,7 @@ function Cookies() {
       else {
         console.log("Generating Cookie");
         const [ auth, error ] = await this.login();
-        
+
         if (auth === false) {
           console.log(`Login detail - ${(!email ? "Email":"Password")} is missing.`);
         }
@@ -59,13 +59,13 @@ function Cookies() {
     catch (e) {
       console.log("Error (catch) on Cookies.", e);
     }
-    
+
     if (cookie) { console.log("Cookies Ready!"); }
-    
+
     console.log("------------------------------------------------------");
     return cookie;
   }
-  
+
   return this;
 }
 
