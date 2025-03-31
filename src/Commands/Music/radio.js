@@ -1,6 +1,6 @@
 "use strict";
 const { handleVideo } = require('../../Components/handler/handleVideo.js');
-const { createAudioPlayer } = require('@discordjs/voice');
+const { createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
 const { PRESETS } = require('../../Components/permission/permissions.js');
 const radioInfo = require('../../Components/handler/radioStations.js');
 const { createEmptyReadableStream } = require('../../Components/handler/handleRequests.js');
@@ -56,7 +56,7 @@ async function radio(message, basicInfo, searchString, queue) {
 
     for (let j = 0; j < right.length; j++) {
       if (!right[j]) { right[j] = placeholderTitle; }
-      if (!left[j])  {  left[j] = placeholderTitle; }
+      if (!left[j]) { left[j] = placeholderTitle; }
 
       delta = (expandRate * longestTextSize) - measureText(right[j]);
       right[j] = expandStringFromSide(right[j], delta / widthOfSpace);
@@ -76,14 +76,14 @@ async function radio(message, basicInfo, searchString, queue) {
   const nameByShort = radioStations.shorts?.[lowerCaseSearch];
   const nameByLong = radioStations.cache?.[lowerCaseSearch]?.name?.toLowerCase();
 
-  let stationName = nameByShort ? nameByShort: nameByLong;
+  let stationName = nameByShort ? nameByShort : nameByLong;
   if (!stationName) {
     message.channel.send([
       "FM Radio station name not found.",
       'Defaulting to `Lugna Favoriter`',
       [
         `type ${basicInfo.prefix}`,
-        `\`${(this.aliases.join && this.aliases.join("|"))?? this.aliases} list\``,
+        `\`${(this.aliases.join && this.aliases.join("|")) ?? this.aliases} list\``,
         " to se available stations"
       ].join("")
     ].join("\n"));
@@ -118,7 +118,7 @@ async function radio(message, basicInfo, searchString, queue) {
   const args = {
     video: video,
     voiceChannel: voiceChannel,
-    audioPlayer: createAudioPlayer({ behaviors: { noSubscriber: "pause"} }),
+    audioPlayer: createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Pause } }),
     queue: queue,
     guild: {
       channel: message.channel,
@@ -127,7 +127,7 @@ async function radio(message, basicInfo, searchString, queue) {
   }
 
   console.log("User listening to radio");
-  const [ addedSong, songQueue ] = handleVideo(args);
+  const [addedSong, songQueue] = handleVideo(args);
 
   if (addedSong) {
     addedSong.description = messageInfo.songAddedToQueue;
@@ -147,6 +147,6 @@ module.exports = {
     PRESETS.PERMISSIONS.CONNECT_REQUIRED,
     PRESETS.PERMISSIONS.ROLE_REQUIRED
   ],
-  aliases: [ "radio", "fm" ],
+  aliases: ["radio", "fm"],
   main: radio
 }
