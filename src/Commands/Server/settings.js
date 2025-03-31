@@ -29,14 +29,14 @@ async function settings(message, basicInfo, arg, queue) {
     "prefix", "required_music_role_name", "require_music_role"
   ];
 
-  for (let [ index, setting ] of availableSettings.entries()) {
+  for (let [index, setting] of availableSettings.entries()) {
     batch.push(`╠ ${index + 1}. ${setting}`);
   }
 
   if (!arg) {
     return message.channel.send(
       codeBlock(
-        [ `Available settings are: `, `${ batch.join("\n") }` ].join("\n"),
+        [`Available settings are: `, `${batch.join("\n")}`].join("\n"),
         "scala"
       )
     );
@@ -145,17 +145,20 @@ async function settings(message, basicInfo, arg, queue) {
 
   return message.channel.send(
     codeBlock(
-      [ helpText(basicInfo.prefix), `${batch.join("\n")}` ].join("\n"),
+      [helpText(basicInfo.prefix), `${batch.join("\n")}`].join("\n"),
       "scala"
     )
   );
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Settings",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
   ],
   aliases: "settings",
   main: settings
-};
+}
+
+module.exports = command;

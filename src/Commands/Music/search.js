@@ -16,13 +16,14 @@ async function searchVideo(message, basicInfo, searchString, queue) {
   if (failed) { return message.channel.send(messageInfo.foundNoSearchResults); }
 
   video[0].requestedBy = message.author;
-  const [ container, embed ] = formatToEmbed(video[0], true);
+  const [container, embed] = formatToEmbed(video[0], true);
   embed.description = messageInfo.foundSearchResult;
 
   return message.channel.send(container);
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Search",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -30,3 +31,5 @@ module.exports = {
   aliases: ["search"],
   main: searchVideo
 }
+
+module.exports = command;

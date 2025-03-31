@@ -9,19 +9,19 @@ async function avatar(message, basicInfo, arg, queue, client) {
   const targetMember = message.mentions.members.first();
   if (targetMember) {
     const embed = createAvatarEmbed(message.author, targetMember.user);
-    return await message.channel.send({ embeds: [ embed ] });
+    return await message.channel.send({ embeds: [embed] });
   }
 
   const fetchedUser = message.guild.members.cache.get(arg);
   if (fetchedUser && parseInt(arg).toString().length === 18) {
     const embed = createAvatarEmbed(message.author, fetchedUser.user);
-    return await message.channel.send({ embeds: [ embed ] });
+    return await message.channel.send({ embeds: [embed] });
   }
 
   const userWithName = client.users.cache.find(user => user.username === arg);
   if (userWithName) {
     const embed = createAvatarEmbed(message.author, userWithName);
-    return await message.channel.send({ embeds: [ embed ] });
+    return await message.channel.send({ embeds: [embed] });
   }
 
   if (arg) {
@@ -33,10 +33,11 @@ async function avatar(message, basicInfo, arg, queue, client) {
   }
 
   const embed = createAvatarEmbed(message.author);
-  return await message.channel.send({ embeds: [ embed ] });
+  return await message.channel.send({ embeds: [embed] });
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Avatar",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -44,3 +45,5 @@ module.exports = {
   aliases: "avatar",
   main: avatar
 }
+
+module.exports = command;

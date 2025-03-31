@@ -38,7 +38,7 @@ function createEmbed(selected_id, message) {
 }
 
 function makeEmbed(newEmbed, options) {
-  return { embeds: [ newEmbed ], components: [ createDropdown(options) ] }
+  return { embeds: [newEmbed], components: [createDropdown(options)] }
 }
 
 async function help(message, basicInfo, arg, commands) {
@@ -82,11 +82,14 @@ async function help(message, basicInfo, arg, commands) {
   });
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule}  */
+const command = {
   name: "Help",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
   ],
   aliases: "help",
   main: help
-};
+}
+
+module.exports = command;

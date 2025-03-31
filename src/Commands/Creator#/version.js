@@ -13,7 +13,8 @@ async function getBotVersion(message, basicInfo, arg, queue, client) {
   message.channel.send(codeBlock(`version: ${version}`, "js"));
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Version",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -22,3 +23,5 @@ module.exports = {
   main: getBotVersion,
   isHidden: true
 }
+
+module.exports = command;

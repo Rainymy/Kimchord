@@ -20,7 +20,8 @@ function leaveServer(message, basicInfo, arg, queue, client) {
   );
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "leaveServer",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -29,3 +30,5 @@ module.exports = {
   main: leaveServer,
   isHidden: true
 }
+
+module.exports = command;

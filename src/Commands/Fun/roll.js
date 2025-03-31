@@ -6,7 +6,8 @@ function roll(message, basicInfo, arg, queue) {
   return message.channel.send(`You rolled ${randomNumber}`);
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Roll 1-100",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -14,3 +15,5 @@ module.exports = {
   aliases: ["roll"],
   main: roll
 }
+
+module.exports = command;

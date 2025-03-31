@@ -1,12 +1,11 @@
 const { durationToString } = require('../util/timeUtil.js');
 
-function progressBar(lineLength, progressPercent, indicator="🔥", line="-") {
+function progressBar(lineLength, progressPercent, indicator = "🔥", line = "-") {
   let progressText = "".padStart(lineLength, line).split("");
 
   progressText[Math.floor(progressText.length * progressPercent)] = indicator
-  progressText = progressText.join("");
 
-  return progressText;
+  return progressText.join("");
 }
 
 function makeTextBar(timePlayed, duration, progress) {

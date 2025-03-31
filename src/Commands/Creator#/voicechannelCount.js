@@ -28,12 +28,15 @@ function voiceCount(message, basicInfo, arg, queue, client) {
   return message.channel.send(codeBlock(servers.join("\n"), "scala"));
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Bot voice count",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
   ],
-  aliases: [ "voicecount" ],
+  aliases: ["voicecount"],
   main: voiceCount,
   isHidden: true
 }
+
+module.exports = command;

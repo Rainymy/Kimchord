@@ -47,7 +47,8 @@ async function main(message, basicInfo, searchString, queue) {
   serverQueue.audioPlayer.stop();
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Fastforward",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -58,3 +59,5 @@ module.exports = {
   aliases: ["ff", "fastforward", "fast"],
   main: main
 }
+
+module.exports = command;

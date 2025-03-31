@@ -12,7 +12,7 @@ async function logEveryServerName(message, basicInfo, arg, queue, client) {
   client.guilds.cache.forEach((guild, serverId) => {
     let guildName = guild.name.padStart(28, " ");
     let text = `${guildName} || ${((++index) + "").padEnd(2)} || ${serverId}`;
-    serverNames.push( text );
+    serverNames.push(text);
   });
 
   if (serverNames.join("\n").length < textCharLimit) {
@@ -35,7 +35,8 @@ async function logEveryServerName(message, basicInfo, arg, queue, client) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "List server names",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -43,4 +44,6 @@ module.exports = {
   aliases: "logserver",
   main: logEveryServerName,
   isHidden: true
-};
+}
+
+module.exports = command;

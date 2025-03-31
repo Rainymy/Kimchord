@@ -18,7 +18,8 @@ function hideServerSize(message, basicInfo, arg, queue, client) {
   return basicInfo.cb(client, "customActivity", arg);
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Hide Server Size",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -27,3 +28,5 @@ module.exports = {
   main: hideServerSize,
   isHidden: true
 }
+
+module.exports = command;

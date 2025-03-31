@@ -9,7 +9,7 @@ async function deleteSong(message, basicInfo, searchString, queue) {
   if (!basicInfo.isDev) { return; }
 
   const [
-    param,, failed
+    param, , failed
   ] = await handleRequests.parseSearchString(message, searchString);
 
   if (typeof failed === "string") { return message.channel.send(failed); }
@@ -25,11 +25,11 @@ async function deleteSong(message, basicInfo, searchString, queue) {
     return message.channel.send(messageInfo.doesNotExist);
   }
 
-  console.log("delete data: ", data);
   return message.channel.send(messageInfo.ERROR_CODE(result.errno.toString()));
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Delete",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -38,3 +38,5 @@ module.exports = {
   main: deleteSong,
   isHidden: true
 }
+
+module.exports = command;

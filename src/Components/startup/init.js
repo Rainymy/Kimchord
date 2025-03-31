@@ -2,6 +2,10 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
+/**
+* @typedef {import("../../Commands/CommandModule").CommandModule} CommandModule
+*/
+
 const firstRun = {
   hasInited: false,
   hasCachedCommands: false,
@@ -13,12 +17,18 @@ const essentialFolders = {
   guilds_settings: "../../guilds_settings"
 };
 
+/**
+* @param {String} filePath
+* @returns
+*/
 function handleFile(filePath) {
   const commandFunction = require(filePath);
   const commmand = [];
 
   if (Array.isArray(commandFunction.aliases)) {
-    for (let alias of commandFunction.aliases) { commmand.push(commandFunction); }
+    for (let alias of commandFunction.aliases) {
+      commmand.push(commandFunction);
+    }
     return commmand;
   }
 
@@ -30,9 +40,13 @@ function handleAppend(command, location, insideFolder) {
   if (path.extname(location) !== ".js") { return; }
 
   const listOfCommands = handleFile(location);
-  if (insideFolder) {for (let wow of listOfCommands) {wow.category = insideFolder;}}
+  if (insideFolder) {
+    for (let wow of listOfCommands) {
+      wow.category = insideFolder;
+    }
+  }
 
-  for (let [ i, times ] of listOfCommands.entries()) {
+  for (let [i, times] of listOfCommands.entries()) {
     if (Array.isArray(times.aliases)) {
       command[times.aliases[i]] = times;
       continue;
@@ -43,6 +57,10 @@ function handleAppend(command, location, insideFolder) {
   return listOfCommands[0];
 }
 
+/**
+* @param {String|String[]} aliases
+* @returns {String}
+*/
 function getFirstOrString(aliases) {
   return Array.isArray(aliases) ? aliases[0] : aliases;
 }
@@ -56,24 +74,24 @@ function commands() {
   const status = {};
   let stat;
 
-  for (let [ index, file ] of fs.readdirSync(commandPath).entries()) {
+  for (const file of fs.readdirSync(commandPath)) {
     let relPath = path.join(commandPath, file);
     if (fs.statSync(relPath).isFile()) {
       stat = handleAppend(commmand, relPath);
-      status[ getFirstOrString(stat.aliases) ] = { ...stat };
-      delete status[ getFirstOrString(stat.aliases) ].main;
+      status[getFirstOrString(stat.aliases)] = { ...stat };
+      delete status[getFirstOrString(stat.aliases)].main;
       continue;
     }
     for (let sec_file of fs.readdirSync(relPath)) {
       stat = handleAppend(commmand, path.join(relPath, sec_file), file);
-      status[ getFirstOrString(stat.aliases) ] = { ...stat };
-      delete status[ getFirstOrString(stat.aliases) ].main;
-      delete status[ getFirstOrString(stat.aliases) ].permissions;
+      status[getFirstOrString(stat.aliases)] = { ...stat };
+      delete status[getFirstOrString(stat.aliases)].main;
+      delete status[getFirstOrString(stat.aliases)].permissions;
     }
   }
 
   firstRun.hasCachedCommands = true;
-  firstRun.cachedCommands = [ commmand, status ];
+  firstRun.cachedCommands = [commmand, status];
   return firstRun.cachedCommands;
 }
 

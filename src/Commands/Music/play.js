@@ -23,7 +23,7 @@ async function main(message, basicInfo, searchString, queue) {
 
   /*----------------------- Get url for video -----------------------*/
   const [
-    param,, failed
+    param, , failed
   ] = await handleRequests.parseSearchString(message, searchString);
 
   if (typeof failed === "string") { return message.channel.send(failed); }
@@ -62,12 +62,12 @@ async function main(message, basicInfo, searchString, queue) {
   if (!message.member.voice.channel) { return; }
 
   /*--------- Add the playable stream to queue and play it ---------*/
-  const [ addedSong, songQueue ] = addSongsToQueue(message, songs, queue);
+  const [addedSong, songQueue] = addSongsToQueue(message, songs, queue);
 
   if (requested.type === "playlist") {
     requested.description = messageInfo.playlistAddedToQueue
     const addPlayList = createPlaylistObject(requested, message.author);
-    let [ container, embed ] = createAddPlaylistEmbed(addPlayList);
+    let [container, embed] = createAddPlaylistEmbed(addPlayList);
 
     return message.channel.send(container).catch(err => {
       console.log("Caught Error in playlist: ", err);
@@ -76,7 +76,7 @@ async function main(message, basicInfo, searchString, queue) {
 
   if (addedSong && songQueue?.length > 1) {
     addedSong.description = messageInfo.songAddedToQueue;
-    let [ container, embed ] = formatToEmbed(addedSong, false, songQueue);
+    let [container, embed] = formatToEmbed(addedSong, false, songQueue);
 
     return message.channel.send(container).catch(err => {
       console.log("Caught Error in play: ", err);
@@ -86,7 +86,8 @@ async function main(message, basicInfo, searchString, queue) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Play",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -97,3 +98,5 @@ module.exports = {
   aliases: ["play", "music", "p"],
   main: main
 }
+
+module.exports = command;

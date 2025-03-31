@@ -36,6 +36,7 @@ client.on(Events.MessageCreate, async (message) => {
   if (!validateCommand(args[0], guilds_settings.prefix)) { return; }
 
   const command = args[0].substring(guilds_settings.prefix.length);
+  /** @type {import("./src/BasicInfo.js").BasicInfo} */
   const data = {
     prefix: guilds_settings.prefix,
     guilds_settings: guilds_settings,
@@ -45,6 +46,7 @@ client.on(Events.MessageCreate, async (message) => {
       URL: `${server.location}:${server.port}`,
     },
     isDev: devs_id_list.includes(message.author.id),
+    // @ts-ignore
     cb: callbackFn
   }
 

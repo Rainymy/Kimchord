@@ -32,12 +32,13 @@ async function np(message, basicInfo, arg, queue) {
   const video = serverQueue.songs[0];
   video.description = makeTextBar(timePlayed, duration, progress);
 
-  const [ container, embed ] = formatToEmbed(video, true);
+  const [container, embed] = formatToEmbed(video, true);
 
   return message.channel.send(container);
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Now Playing",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -45,3 +46,5 @@ module.exports = {
   aliases: ["np", "now", "progress"],
   main: np
 }
+
+module.exports = command;

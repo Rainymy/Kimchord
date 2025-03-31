@@ -139,7 +139,8 @@ async function radio(message, basicInfo, searchString, queue) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Play FM Radio",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -150,3 +151,5 @@ module.exports = {
   aliases: ["radio", "fm"],
   main: radio
 }
+
+module.exports = command;

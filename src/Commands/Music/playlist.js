@@ -54,8 +54,8 @@ async function playPlayList(searchString, userId) {
   const data = await customReadStream(userFile);
   let playlistId;
 
-  if (!data?.titles?.[searchString]?.id) {playlistId = getPlaylistId(searchString);}
-  else { playlistId = data.titles[searchString].id;}
+  if (!data?.titles?.[searchString]?.id) { playlistId = getPlaylistId(searchString); }
+  else { playlistId = data.titles[searchString].id; }
 
   if (!playlistId) {
     return { error: true, comment: `${searchString} playlist not found.` }
@@ -134,7 +134,7 @@ async function playlist(message, basicInfo, arg, queue, client) {
   }
 
   if (result.list) {
-    const container = [ "Playlists" ];
+    const container = ["Playlists"];
 
     for (let list in result.list.titles) {
       const playlistID = result.list.titles[list].id;
@@ -147,7 +147,8 @@ async function playlist(message, basicInfo, arg, queue, client) {
   return message.channel.send(`${result.comment}`);
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Playlist",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -155,3 +156,5 @@ module.exports = {
   aliases: ["playlist"],
   main: playlist
 }
+
+module.exports = command;

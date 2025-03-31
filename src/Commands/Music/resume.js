@@ -24,7 +24,8 @@ function resume(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Resume",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -34,3 +35,5 @@ module.exports = {
   aliases: ["resume", "continue"],
   main: resume
 }
+
+module.exports = command;

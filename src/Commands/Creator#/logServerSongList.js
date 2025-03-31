@@ -23,7 +23,8 @@ function logServerSongList(message, basicInfo, arg, queue, client) {
   return message.channel.send(codeBlock(accum.join("\n").substring(0, 1993)));
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Log Server Song",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -32,3 +33,5 @@ module.exports = {
   main: logServerSongList,
   isHidden: true
 }
+
+module.exports = command;

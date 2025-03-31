@@ -27,7 +27,7 @@ async function queue(message, basicInfo, arg, queue) {
   const embed = createSongListEmbed(songQueue, index, itemsPerPage);
 
   if (songQueue.length - 1 <= itemsPerPage) {
-    return message.channel.send({ embeds: [ embed ] });
+    return message.channel.send({ embeds: [embed] });
   }
 
   const buttons = createQueueButtons([
@@ -36,7 +36,7 @@ async function queue(message, basicInfo, arg, queue) {
   ]);
 
   const embedMessage = await message.channel.send({
-    embeds: [ embed ], components: [ buttons ]
+    embeds: [embed], components: [buttons]
   });
 
   const collector = embedMessage.createMessageComponentCollector({
@@ -56,7 +56,7 @@ async function queue(message, basicInfo, arg, queue) {
     }
 
     if (songQueue.length - 1 <= itemsPerPage) {
-      interaction.update({ embeds: [ newEmbed ], components: [] });
+      interaction.update({ embeds: [newEmbed], components: [] });
       return collector.stop("Single page list");
     }
 
@@ -66,7 +66,7 @@ async function queue(message, basicInfo, arg, queue) {
       ...createPageIndicator(songQueue.length, index, itemsPerPage)
     ]);
 
-    interaction.update({ embeds: [ newEmbed ], components: [ newButtons ] });
+    interaction.update({ embeds: [newEmbed], components: [newButtons] });
 
     return;
   });
@@ -81,7 +81,8 @@ async function queue(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Song queue",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
@@ -89,3 +90,5 @@ module.exports = {
   aliases: ["q", "queue"],
   main: queue
 }
+
+module.exports = command;

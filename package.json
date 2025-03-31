@@ -30,6 +30,6 @@
     "ytsr": "^3.8.4"
   },
   "devDependencies": {
-    "eslint": "^9.23.0"
+    "@biomejs/biome": "^1.9.4"
   }
 }

@@ -26,8 +26,8 @@ async function ping(message, basicInfo, searchString, queue, client) {
 
   const messagesText = codeBlock(
     [
-      `${bot_username}'s ping: ${ messageEditedTime - messageSentTime }ms`,
-      `Discord ping: ${ Math.floor(client.ws.ping) }ms`,
+      `${bot_username}'s ping: ${messageEditedTime - messageSentTime}ms`,
+      `Discord ping: ${Math.floor(client.ws.ping)}ms`,
       `Backend processing time: ${isNaN(processTime) ? "❌" : `${processTime}ms`}`,
       `Response time: ${responseTime}ms`
     ].join("\n"),
@@ -37,11 +37,14 @@ async function ping(message, basicInfo, searchString, queue, client) {
   return resmessage.edit(messagesText);
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Ping",
   permissions: [
     PRESETS.PERMISSIONS.TEXT
   ],
-  aliases: [ "check", "ping"],
+  aliases: ["check", "ping"],
   main: ping
 }
+
+module.exports = command;

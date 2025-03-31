@@ -15,13 +15,16 @@ function skip(message, basicInfo, arg, queue) {
   return message.channel.send(messageInfo.skippingSong);
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Skip",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
     PRESETS.PERMISSIONS.CONNECT_REQUIRED,
     PRESETS.PERMISSIONS.ROLE_REQUIRED
   ],
-  aliases: [ "s", "skip" ],
+  aliases: ["s", "skip"],
   main: skip
-};
+}
+
+module.exports = command;

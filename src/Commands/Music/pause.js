@@ -21,7 +21,8 @@ function pause(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Pause",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -31,3 +32,5 @@ module.exports = {
   aliases: ["pause", "hold"],
   main: pause
 }
+
+module.exports = command;

@@ -16,7 +16,8 @@ function stop(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Stop",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -25,4 +26,6 @@ module.exports = {
   ],
   aliases: "stop",
   main: stop
-};
+}
+
+module.exports = command;

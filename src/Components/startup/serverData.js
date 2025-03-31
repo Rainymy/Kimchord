@@ -4,6 +4,13 @@ const fileHandler = require('../fs/fileHandler.js');
 const config = require('../../../config.json');
 const { guilds_settings } = require('./init.js').essentialFolders;
 
+const { Client } = require("discord.js");
+
+/**
+* @typedef {import("./guildData.js").GuildData} GuildData
+*/
+
+/** @type {Map<String, GuildData>} */
 const servers = new Map();
 
 function loadServerData() {
@@ -35,6 +42,10 @@ function loadServerData() {
   return servers;
 }
 
+/**
+* @param {Client} client
+* @returns
+*/
 async function removeAllNotConnectedServer(client) {
   const removedServers = [];
 
@@ -48,6 +59,10 @@ async function removeAllNotConnectedServer(client) {
   return removedServers;
 }
 
+/**
+* @param {String} guild_id
+* @returns
+*/
 async function removeServerData(guild_id) {
   const pathTo = path.join(__dirname, guilds_settings, `${guild_id}.json`);
 
@@ -58,7 +73,13 @@ async function removeServerData(guild_id) {
   return;
 }
 
+/**
+* @param {String} server_id
+* @param {String} server_name
+* @returns
+*/
 async function saveDefaultData(server_id, server_name) {
+  /** @type {GuildData} */
   const default_data = {
     prefix: config.prefix,
     moderation_users: [],
@@ -75,18 +96,31 @@ async function saveDefaultData(server_id, server_name) {
   return saved;
 }
 
+/**
+*
+* @param {String} id
+* @param {GuildData} data
+* @returns
+*/
 async function saveServerData(id, data) {
   if (!id || !data) { return; }
 
   const pathTo = path.join(__dirname, guilds_settings, `${id}.json`);
 
   const error = await fileHandler.customWriteStream(pathTo, data);
-  if (error) { console.log(error); }
+  if (error) {
+    console.log("[-saveServerData-]", error);
+  }
 
-  console.log("Saved.", error === undefined ? "" : error);
   return data;
 }
 
+/**
+*
+* @param {String} server_id
+* @param {String} server_name
+* @returns
+*/
 async function getServer(server_id, server_name) {
   let guilds_settings = servers.get(server_id);
   if (!guilds_settings) {

@@ -10,9 +10,9 @@ function skipTo(message, basicInfo, arg, queue) {
   if (!serverQueue) { return message.channel.send(messageInfo.queueIsEmpty); }
 
   const skippingTo = parseInt(arg);
-  if (Number.isNaN(skippingTo) || skippingTo < 1 ) {
+  if (Number.isNaN(skippingTo) || skippingTo < 1) {
     return message.channel.send(
-      `Please select number between 1-${ serverQueue.songs.length }`
+      `Please select number between 1-${serverQueue.songs.length}`
     );
   }
 
@@ -35,13 +35,16 @@ function skipTo(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Skip to",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
     PRESETS.PERMISSIONS.CONNECT_REQUIRED,
     PRESETS.PERMISSIONS.ROLE_REQUIRED
   ],
-  aliases: [ "st", "skipto" ],
+  aliases: ["st", "skipto"],
   main: skipTo
-};
+}
+
+module.exports = command;

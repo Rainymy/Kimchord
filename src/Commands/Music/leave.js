@@ -17,7 +17,8 @@ function leave(message, basicInfo, arg, queue) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Leave",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -26,4 +27,6 @@ module.exports = {
   ],
   aliases: "leave",
   main: leave
-};
+}
+
+module.exports = command;

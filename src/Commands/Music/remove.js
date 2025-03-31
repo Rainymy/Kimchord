@@ -19,20 +19,21 @@ function remove(message, basicInfo, searchString, queue) {
   const isOverMin = searchString >= minIndex;
   const isOverMax = searchString <= maxIndex;
 
-  if ( minIndex === maxIndex) {
+  if (minIndex === maxIndex) {
     return message.channel.send(messageInfo.queueIsEmpty);
   }
 
   if (!isNumber || (!isOverMin || !isOverMax)) {
-    return message.channel.send(`Please select number between 1-${ maxIndex }`);
+    return message.channel.send(`Please select number between 1-${maxIndex}`);
   }
 
-  const removed = serverQueue.songs.splice( number , 1 )[0];
+  const removed = serverQueue.songs.splice(number, 1)[0];
   message.channel.send(`😩 Remove: ***${removed.title}***`);
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Remove",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -42,3 +43,5 @@ module.exports = {
   aliases: "remove",
   main: remove
 }
+
+module.exports = command;

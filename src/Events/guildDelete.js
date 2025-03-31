@@ -1,9 +1,16 @@
 "use strict";
+
+const { Client, Guild } = require('discord.js');
 const chalk = require('chalk');
 
 const { updateActivity } = require('./activity.js');
 const { removeServerData } = require('../Components/startup/serverData.js');
 
+/**
+* @param {Guild} guild
+* @param {Client} client
+* @returns
+*/
 async function guildDelete(guild, client) {
   if (guild.name === undefined) { return; }
 

@@ -17,7 +17,8 @@ async function main(message, basicInfo, searchString, queue, client) {
   return;
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Rewind",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -28,3 +29,5 @@ module.exports = {
   aliases: ["rewind", "rw", "again"],
   main: main
 }
+
+module.exports = command;

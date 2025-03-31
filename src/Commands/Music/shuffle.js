@@ -18,7 +18,8 @@ async function shuffle(message, basicInfo, arg, queue) {
   return message.channel.send(codeBlock("⏯️ Shuffled your current queue ✔️"));
 }
 
-module.exports = {
+/** @type {import("../CommandModule.js").CommandModule} */
+const command = {
   name: "Shuffle queue",
   permissions: [
     PRESETS.PERMISSIONS.TEXT,
@@ -28,3 +29,5 @@ module.exports = {
   aliases: "shuffle",
   main: shuffle
 }
+
+module.exports = command;
