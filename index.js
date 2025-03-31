@@ -19,13 +19,13 @@ const { removeAllNotConnectedServer } = require("./src/Components/startup/server
 const { credential, server, devs_ids } = require("./config.json");
 
 const chalk = require('chalk');
-const { Client } = require('discord.js');
+const { Client, Events, ShardEvents } = require('discord.js');
 const client = new Client({ intents: PRESETS.intents });
 
 const queue = new Map();
 const devs_id_list = devs_ids ?? [];
 
-client.on("messageCreate", async (message) => {
+client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) { return; }
 
   const guilds_settings = await getServer(message.guild.id, message.guild.name);
@@ -57,7 +57,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
   return await voiceStateUpdate(oldState, newState, client, queue);
 });
 
-client.on("ready", async (event) => {
+client.on(Events.ClientReady, async (event) => {
   console.log("Loading server settings....");
   loadServerData();
 
@@ -75,9 +75,10 @@ client.on("ready", async (event) => {
 
   await onReady(event, client);
 });
-client.on('guildCreate', async (guild) => guildCreate(guild, client));
-client.on("guildDelete", async (guild) => guildDelete(guild, client))
-client.on('disconnect', async (erMsg, code) => disconnect(client, erMsg, code));
-client.on('error', console.log);
+
+client.on(Events.GuildCreate, async (guild) => guildCreate(guild, client));
+client.on(Events.GuildDelete, async (guild) => guildDelete(guild, client))
+client.on(ShardEvents.Disconnect, async (erMsg, code) => disconnect(client, erMsg, code));
+client.on(Events.Error, console.log);
 
 client.login(credential.token);

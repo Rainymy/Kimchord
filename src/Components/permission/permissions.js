@@ -2,26 +2,38 @@
 const { codeBlock } = require('../embed/markup.js');
 const messageInfo = require('../message/messageInfo.js');
 
+const { GatewayIntentBits, PermissionFlagsBits } = require("discord.js");
+
 const PRESETS = {
-  music: [ "Connect", "Speak" ],
-  channel: [ "SendMessages", "ViewChannel", "EmbedLinks", "AttachFiles" ],
-  server_mods: [ "ManageGuild" ],
+  music: [
+    PermissionFlagsBits.Connect,
+    PermissionFlagsBits.Speak
+  ],
+  channel: [
+    PermissionFlagsBits.SendMessages,
+    PermissionFlagsBits.ViewChannel,
+    PermissionFlagsBits.EmbedLinks,
+    PermissionFlagsBits.AttachFiles
+  ],
+  server_mods: [PermissionFlagsBits.ManageGuild],
   label: {
-    sendText: "SendMessages"
+    sendText: PermissionFlagsBits.SendMessages
   },
+  // this permission is for my own;
   PERMISSIONS: {
+    // Order of permission check: [1 = important], [10 = check later]
     MUSIC: 4,
     TEXT: 1,
     CONNECT_REQUIRED: 2,
     ROLE_REQUIRED: 3
   },
   intents: [
-    "Guilds",
-    "GuildVoiceStates",
-    "GuildMessages",
-    "GuildMessageReactions",
-    "DirectMessages",
-    "MessageContent"
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.MessageContent
   ]
 }
 
@@ -92,7 +104,7 @@ function checkServerMusicRole(guilds_settings, member) {
 
 function getVoicePermission(message, bot_id) {
   const voiceChannel = getConnectedVoice(message);
-  if (!voiceChannel) { return [ messageInfo.notInVoiceChannel ]; }
+  if (!voiceChannel) { return [messageInfo.notInVoiceChannel]; }
 
   return checkPermissions(voiceChannel, bot_id, PRESETS.music);
 }
@@ -107,7 +119,7 @@ function validateCommandPersmissions(message, client, permissions, metadata) {
   // [ 3, 1, 2, 4 ] => [ 1, 2, 3, 4 ]: small to big.
   for (let permission of permissions.sort((a, b) => a - b)) {
     if (permission === PRESETS.PERMISSIONS.CONNECT_REQUIRED) {
-      if (!getConnectedVoice(message)) { return [ messageInfo.notInVoiceChannel ]; }
+      if (!getConnectedVoice(message)) { return [messageInfo.notInVoiceChannel]; }
       continue;
     }
 
@@ -115,7 +127,7 @@ function validateCommandPersmissions(message, client, permissions, metadata) {
       const perms = getVoicePermission(message, client.user.id);
 
       if (perms.length) {
-        return [ messageInfo.permissionNeeded(perms.join(", ")) ];
+        return [messageInfo.permissionNeeded(perms.join(", "))];
       }
 
       continue;
@@ -149,7 +161,7 @@ function validateCommandPersmissions(message, client, permissions, metadata) {
         message.channel, client.user.id, PRESETS.channel
       );
 
-      if (res.stop || res.error) { return res.stop ? null : [ res.comment ]; }
+      if (res.stop || res.error) { return res.stop ? null : [res.comment]; }
     }
 
     continue;
