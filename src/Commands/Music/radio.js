@@ -2,7 +2,6 @@
 const { handleVideo } = require('../../Components/handler/handleVideo.js');
 const { createAudioPlayer } = require('@discordjs/voice');
 const { PRESETS } = require('../../Components/permission/permissions.js');
-const request = require('../../Components/handler/request.js');
 const radioInfo = require('../../Components/handler/radioStations.js');
 const { createEmptyReadableStream } = require('../../Components/handler/handleRequests.js');
 

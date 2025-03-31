@@ -29,5 +29,8 @@
     "yt-dlp-wrap": "^2.3.11",
     "ytpl": "^2.3.0",
     "ytsr": "^3.8.4"
+  },
+  "devDependencies": {
+    "eslint": "^9.23.0"
   }
 }

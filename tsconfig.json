@@ -4,19 +4,11 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationMap": false,
+    "resolveJsonModule": true,
     "outDir": "dist",
     "allowJs": true,
     "checkJs": true
   },
-  "typeAcquisition": {
-    "include": [
-      "jest"
-    ]
-  },
-  "include": [
-    "index.js",
-    "src/*",
-  ],
   "exclude": [
     "node_modules",
     "dist"

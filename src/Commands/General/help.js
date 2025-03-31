@@ -76,9 +76,9 @@ async function help(message, basicInfo, arg, commands) {
     interaction.update(makeEmbed(newEmbed, options));
   });
 
-  collector.on('end', async collected => {
+  collector.on('end', async () => {
     try { await sentMessage.edit("Time out"); }
-    catch (e) { console.log("Message deleted before collector timeout."); }
+    catch { console.log("Message deleted before collector timeout."); }
   });
 }
 

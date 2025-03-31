@@ -75,7 +75,7 @@ async function queue(message, basicInfo, arg, queue) {
     if (reason === "Single page list") { return; }
 
     try { await embedMessage.edit(messageInfo.songQueueCollectorEnd); }
-    catch (e) { console.log("Message deleted before collector timeout."); }
+    catch { console.log("Message deleted before collector timeout."); }
   });
 
   return;

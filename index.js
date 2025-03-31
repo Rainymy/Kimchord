@@ -66,7 +66,7 @@ client.on("ready", async (event) => {
     const removedServersIDs = await removeAllNotConnectedServer(client);
 
     for (let removedServersID of removedServersIDs) {
-      if (!removedServersID == "string") { console.log(removedServersID); }
+      if (!(removedServersID === "string")) { console.log(removedServersID); }
       else { console.log(chalk.redBright(`${removedServersID} DELETED`)); }
     }
   }
