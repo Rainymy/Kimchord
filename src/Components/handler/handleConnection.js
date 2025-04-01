@@ -4,8 +4,8 @@ const { joinVoiceChannel } = require('@discordjs/voice');
 function createConnection(voiceChannel) {
   return joinVoiceChannel({
     channelId: voiceChannel.id,
-  	guildId: voiceChannel.guild.id,
-  	adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+    guildId: voiceChannel.guild.id,
+    adapterCreator: voiceChannel.guild.voiceAdapterCreator,
   });
 }
 

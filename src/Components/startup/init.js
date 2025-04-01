@@ -4,18 +4,29 @@ const path = require('node:path');
 
 /**
 * @typedef {import("../../Commands/CommandModule").CommandModule} CommandModule
+* @typedef {import("./folder").IMPORTANT_FOLDER} IMPORTANT_FOLDER
 */
 
 const firstRun = {
-  hasInited: false,
   hasCachedCommands: false,
   cachedCommands: []
 }
 
-const essentialFolders = {
-  playlistFolder: "../../playlistFolder",
-  guilds_settings: "../../guilds_settings"
-};
+
+/** @type {Record<IMPORTANT_FOLDER, IMPORTANT_FOLDER>} */
+const EssentialFolder = {
+  PLAYLIST_FOLDER: "PLAYLIST_FOLDER",
+  GUILDS_SETTINGS_FOLDER: "GUILDS_SETTINGS_FOLDER",
+  COMMANDS_FOLDER: "COMMANDS_FOLDER"
+}
+
+/** @type {Map<IMPORTANT_FOLDER, String>} */
+const essentialFolders = new Map([
+  [EssentialFolder.PLAYLIST_FOLDER, "./"],
+  [EssentialFolder.GUILDS_SETTINGS_FOLDER, "./"],
+  [EssentialFolder.COMMANDS_FOLDER, "./"]
+])
+
 
 /**
 * @param {String} filePath
@@ -68,7 +79,7 @@ function getFirstOrString(aliases) {
 function commands() {
   if (firstRun.hasCachedCommands) { return firstRun.cachedCommands; }
 
-  const commandPath = path.join(__dirname, "../../Commands");
+  const commandPath = essentialFolders.get(EssentialFolder.COMMANDS_FOLDER);
 
   const commmand = {};
   const status = {};
@@ -76,6 +87,7 @@ function commands() {
 
   for (const file of fs.readdirSync(commandPath)) {
     let relPath = path.join(commandPath, file);
+
     if (fs.statSync(relPath).isFile()) {
       stat = handleAppend(commmand, relPath);
       status[getFirstOrString(stat.aliases)] = { ...stat };
@@ -97,23 +109,40 @@ function commands() {
 
 function Start() {
   this.commands = commands;
-  this.init = () => {
-    if (firstRun.hasInited) { return this; }
+}
 
-    for (let folder of Object.values(essentialFolders)) {
-      const pathToFolder = path.join(__dirname, folder);
+function ensureEssentialFolders() {
+  for (let pathToFolder of essentialFolders.values()) {
 
-      if (fs.existsSync(pathToFolder)) { continue; };
-      const dirPath = fs.mkdirSync(pathToFolder, { recursive: true });
-      console.log(dirPath, 'directory created successfully!');
-    }
+    if (fs.existsSync(pathToFolder)) { continue; };
 
-    firstRun.hasInited = true;
-    return this;
+    const dirPath = fs.mkdirSync(pathToFolder, { recursive: true });
+
+    console.log(dirPath, 'directory created successfully!');
   }
 }
 
+/**
+* @param {IMPORTANT_FOLDER} folderEnum
+* @returns {String=}
+*/
+function getEssentialFolder(folderEnum) {
+  return essentialFolders.get(folderEnum);
+}
+
+/**
+* @param {IMPORTANT_FOLDER} folderEnum
+* @param {String} folderPath
+* @returns
+*/
+function setEssentialFolder(folderEnum, folderPath) {
+  return essentialFolders.set(folderEnum, folderPath);
+}
+
 module.exports = {
-  essentialFolders: essentialFolders,
+  EssentialFolder: EssentialFolder,
+  getEssentialFolder: getEssentialFolder,
+  setEssentialFolder: setEssentialFolder,
+  ensureEssentialFolders: ensureEssentialFolders,
   default: new Start()
 };

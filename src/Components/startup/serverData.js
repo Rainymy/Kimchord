@@ -18,7 +18,9 @@ function loadServerData() {
 
   for (let file of fileHandler.readdirSync(pathTo)) {
     let ext = path.extname(file);
-    if (ext !== ".json") { continue; }
+    if (path.extname(file) !== ".json") { continue; }
+
+    /** @type {GuildData} */
     let data = fileHandler.readJSONFile(path.join(pathTo, file));
     let shouldUpdate = false;
 
@@ -38,8 +40,6 @@ function loadServerData() {
 
     servers.set(path.basename(file, ext), data);
   }
-
-  return servers;
 }
 
 /**
@@ -52,8 +52,8 @@ async function removeAllNotConnectedServer(client) {
   for (let guild_id of getAllServerID()) {
     if (client.guilds.cache.has(guild_id)) { continue; }
 
-    const err = await removeServerData(guild_id);
-    removedServers.push(err ? err : guild_id);
+    await removeServerData(guild_id);
+    removedServers.push(guild_id);
   }
 
   return removedServers;
@@ -67,10 +67,12 @@ async function removeServerData(guild_id) {
   const pathTo = path.join(__dirname, guilds_settings, `${guild_id}.json`);
 
   const err = await fileHandler.deleteFile(pathTo);
-  if (err) { return err; }
+  if (err) {
+    console.log("{-removeServerData-}", err);
+    return;
+  }
 
   servers.delete(guild_id);
-  return;
 }
 
 /**

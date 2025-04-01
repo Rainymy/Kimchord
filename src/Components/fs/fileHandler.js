@@ -35,9 +35,7 @@ function customWriteFileSync(userFile, data) {
 * @returns
 */
 function deleteFile(filePath) {
-  return new Promise(
-    (resolve, reject) => fs.unlink(filePath, resolve)
-  );
+  return new Promise((resolve) => fs.unlink(filePath, resolve));
 }
 
 /**
